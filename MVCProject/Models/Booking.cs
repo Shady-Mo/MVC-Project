@@ -12,10 +12,9 @@ namespace MVCProject.Models {
         public int UserId { get; set; }
         public virtual AppUser AppUser { get; set; }
 
-
-        public  ICollection<Accomodation> Accomodations = new HashSet<Accomodation>();
-        public  ICollection<Activity> Activities = new HashSet<Activity>();
-        public  ICollection<Flight> Flights = new HashSet<Flight>();
+        public ICollection<Accomodation> Accomodations = new HashSet<Accomodation>();
+        public ICollection<Activity> Activities = new HashSet<Activity>();
+        public ICollection<Flight> Flights = new HashSet<Flight>();
     }
 
     public enum Status {
