@@ -7,6 +7,6 @@ namespace MVCProject.Models {
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
 
-        public IEnumerable<Booking>? Bookings { get; set; } = new HashSet<Booking>();
+        public ICollection<Booking>? Bookings { get; set; } = new HashSet<Booking>();
     }
 }
