@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MVCProject.Models
 {
@@ -26,6 +27,10 @@ namespace MVCProject.Models
         [Required]
         [Range(0, 500)]
         public int Capacity { get; set; }
+
+        [ForeignKey(nameof(Booking))]
+        public int BookingId { get; set; }
+        public virtual Booking Booking { get; set; }
 
     }
 }
