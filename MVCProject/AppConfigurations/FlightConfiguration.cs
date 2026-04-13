@@ -8,7 +8,7 @@ namespace MVCProject.AppConfigurations {
             /* Flight-Booking Relationship */
             builder.HasOne(f => f.Booking)
                 .WithMany(b => b.Flights)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

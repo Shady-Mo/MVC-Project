@@ -5,7 +5,7 @@ using MVCProject.Models;
 
 namespace MVCProject.Services {
     public class SeedService {
-        public async Task SeedDatabase(IServiceProvider serviceProvider) {
+        public static async Task SeedDatabase(IServiceProvider serviceProvider) {
             using (var scope = serviceProvider.CreateScope()) {
                 AppDbContext _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 RoleManager<IdentityRole> _roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -56,7 +56,7 @@ namespace MVCProject.Services {
             }
         }
 
-        public async Task AddRoleAsync(RoleManager<IdentityRole> roleManager, string roleName) {
+        public static async Task AddRoleAsync(RoleManager<IdentityRole> roleManager, string roleName) {
             bool isRoleExist = await roleManager.RoleExistsAsync(roleName);
 
             if (!isRoleExist) {

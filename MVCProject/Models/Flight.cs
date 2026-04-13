@@ -5,6 +5,7 @@ namespace MVCProject.Models
 {
     public class Flight
     {
+        [Key]
         public int Id { get; set; }
         public string Airline { get; set; }
         public string DepartureAirport { get; set; }

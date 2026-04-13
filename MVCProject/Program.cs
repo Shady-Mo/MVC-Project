@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCProject.Data;
 using MVCProject.Models;
+using MVCProject.Services;
 
 namespace MVCProject {
     public class Program {
-        public static void Main(string[] args) {
+        public static async Task Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -19,6 +20,8 @@ namespace MVCProject {
             );
 
             var app = builder.Build();
+
+            await SeedService.SeedDatabase(app.Services);
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment()) {
