@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MVCProject.Data;
+using MVCProject.Models;
+
 namespace MVCProject {
     public class Program {
         public static void Main(string[] args) {
@@ -5,6 +10,13 @@ namespace MVCProject {
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>();
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("mvccon"))
+            );
 
             var app = builder.Build();
 

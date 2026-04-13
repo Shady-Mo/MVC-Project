@@ -1,7 +1,18 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MVCProject.Models;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace MVCProject.Data {
     public class AppDbContext : IdentityDbContext<AppUser> {
+        public AppDbContext(DbContextOptions options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder builder) {
+            builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        }
+
+        public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
     }
 }
