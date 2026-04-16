@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCProject.Data;
 using MVCProject.Models;
+using MVCProject.Repositories;
 using MVCProject.Services;
 using System.Reflection;
 
@@ -22,6 +23,8 @@ namespace MVCProject {
             );
 
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
+
+            builder.Services.AddScoped<UnitOfWork>();
 
             var app = builder.Build();
 
