@@ -1,8 +1,10 @@
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCProject.Data;
 using MVCProject.Models;
 using MVCProject.Services;
+using System.Reflection;
 
 namespace MVCProject {
     public class Program {
@@ -18,6 +20,8 @@ namespace MVCProject {
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("mvccon"))
             );
+
+            TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
             var app = builder.Build();
 
