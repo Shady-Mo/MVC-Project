@@ -28,8 +28,6 @@ namespace MVCProject.Models
 
         public string? Img { get; set; }
 
-        [ForeignKey(nameof(Booking))]
-        public int? BookingId { get; set; }
-        public virtual Booking? Booking { get; set; }
+        public ICollection<BookingActivity> BookingActivities = new HashSet<BookingActivity>();
     }
 }

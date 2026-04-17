@@ -6,8 +6,8 @@ namespace MVCProject.AppConfigurations {
     public class ActivityConfiguration : IEntityTypeConfiguration<Activity> {
         public void Configure(EntityTypeBuilder<Activity> builder) {
             /* Activity-Booking Relationship */
-            builder.HasOne(a => a.Booking)
-                .WithMany(b => b.Activities)
+            builder.HasMany(a => a.BookingActivities)
+                .WithOne(b => b.Activity)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

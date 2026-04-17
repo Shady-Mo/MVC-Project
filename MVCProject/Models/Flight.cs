@@ -15,8 +15,7 @@ namespace MVCProject.Models
         public decimal Price { get; set; }
         public int AvailableSeats { get; set; }
 
-        [ForeignKey(nameof(Booking))]
-        public int BookingId { get; set; }
-        public virtual Booking Booking { get; set; }
+        public ICollection<BookingFlight> BookingFlights = new HashSet<BookingFlight>();
+
     }
 }

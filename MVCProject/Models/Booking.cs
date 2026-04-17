@@ -14,9 +14,10 @@ namespace MVCProject.Models {
         public string UserId { get; set; }
         public virtual AppUser AppUser { get; set; }
 
-        public ICollection<Accomodation> Accomodations = new HashSet<Accomodation>();
-        public ICollection<Activity> Activities = new HashSet<Activity>();
-        public ICollection<Flight> Flights = new HashSet<Flight>();
+        public ICollection<BookingAccomodation> bookingAccomodations = new HashSet<BookingAccomodation>();
+        public ICollection<BookingActivity> BookingActivities = new HashSet<BookingActivity>();
+        public ICollection<BookingFlight> BookingFlights = new HashSet<BookingFlight>();
+
     }
 
     public enum Status {

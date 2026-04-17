@@ -6,8 +6,8 @@ namespace MVCProject.AppConfigurations {
     public class AccomodationConfiguration : IEntityTypeConfiguration<Accomodation> {
         public void Configure(EntityTypeBuilder<Accomodation> builder) {
             /* Accomodation-Booking Relationship */
-            builder.HasOne(a => a.Booking)
-                .WithMany(b => b.Accomodations)
+            builder.HasMany(a => a.bookingAccomodations)
+                .WithOne(b => b.Accomodation)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

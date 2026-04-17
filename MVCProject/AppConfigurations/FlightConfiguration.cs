@@ -6,8 +6,8 @@ namespace MVCProject.AppConfigurations {
     public class FlightConfiguration : IEntityTypeConfiguration<Flight> {
         public void Configure(EntityTypeBuilder<Flight> builder) {
             /* Flight-Booking Relationship */
-            builder.HasOne(f => f.Booking)
-                .WithMany(b => b.Flights)
+            builder.HasMany(f => f.BookingFlights)
+                .WithOne(b => b.Flight)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
