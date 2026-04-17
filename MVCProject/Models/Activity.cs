@@ -26,6 +26,7 @@ namespace MVCProject.Models
         [Range(1, 500)]
         public int Capacity { get; set; }
 
+        public string? Img { get; set; }
 
         [ForeignKey(nameof(Booking))]
         public int? BookingId { get; set; }

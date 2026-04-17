@@ -5,6 +5,7 @@ using MVCProject.Data;
 using MVCProject.Models;
 using MVCProject.Repositories;
 using MVCProject.Services;
+using MVCProject.Services.ImgAddingService;
 using System.Reflection;
 
 namespace MVCProject {
@@ -25,6 +26,7 @@ namespace MVCProject {
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
             builder.Services.AddScoped<UnitOfWork>();
+            builder.Services.AddScoped<IFileService, FileService>();
 
             var app = builder.Build();
 

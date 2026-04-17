@@ -19,6 +19,8 @@ namespace MVCProject.ViewModels.ActivityViewModels
 
         public int Capacity { get; set; }
 
+        public string? Img { get; set; }
+
         [Display(Name = "Booking Status")]
         public string? BookingReference { get; set; }
     }

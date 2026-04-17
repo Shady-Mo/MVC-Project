@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MVCProject.Models;
 using MVCProject.Repositories;
+using MVCProject.Services.ImgAddingService;
 using MVCProject.ViewModels.ActivityViewModels;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -11,10 +12,12 @@ namespace MVCProject.Controllers
     public class ActivityController : Controller
     {
         private readonly UnitOfWork unitOfWork;
+        public IFileService FileService { get; }
 
-        public ActivityController(UnitOfWork unitOfWork)
+        public ActivityController(UnitOfWork unitOfWork, IFileService fileService)
         {
             this.unitOfWork = unitOfWork;
+            FileService = fileService;
         }
         [HttpGet]
         public IActionResult Index()
@@ -29,11 +32,18 @@ namespace MVCProject.Controllers
             return View("Create");
         }
         [HttpPost]
-        public IActionResult Create(AddActivityVM addActivityVM)
+        public async Task<IActionResult> Create(AddActivityVM addActivityVM)
         {
             if (ModelState.IsValid)
             {
                 var activity = addActivityVM.Adapt<Activity>();
+
+                if (addActivityVM.ImageFile != null)
+                {
+                    // Use the global service
+                    activity.Img = await FileService.SaveFileAsync(addActivityVM.ImageFile, "images");
+                }
+
                 unitOfWork.ActivityRepository.Add(activity);
                 unitOfWork.Save();
                 return RedirectToAction(nameof(Index));
@@ -59,12 +69,24 @@ namespace MVCProject.Controllers
             return View("Edit", activity);
         }
         [HttpPost]
-        public IActionResult Edit(UpdateActivityVM updateActivityVM)
+        public async Task<IActionResult> Edit(UpdateActivityVM updateActivityVM)
         {
             if (ModelState.IsValid)
             {
-                var activity = updateActivityVM.Adapt<Activity>();
-                unitOfWork.ActivityRepository.Update(activity);
+                var existingActivity = unitOfWork.ActivityRepository.GetById(updateActivityVM.Id);
+                if (existingActivity == null) return NotFound();
+
+                updateActivityVM.Adapt(existingActivity);
+
+                // 3. Handle image update
+                if (updateActivityVM.ImageFile != null)
+                {
+                    FileService.DeleteFile(existingActivity.Img, "images");
+
+                    existingActivity.Img = await FileService.SaveFileAsync(updateActivityVM.ImageFile, "images");
+                }
+
+                unitOfWork.ActivityRepository.Update(existingActivity);
                 unitOfWork.Save();
                 return RedirectToAction(nameof(Index));
             }

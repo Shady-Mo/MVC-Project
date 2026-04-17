@@ -27,5 +27,6 @@ namespace MVCProject.ViewModels.ActivityViewModels
         [Required]
         [Range(1, 500)]
         public int Capacity { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }
