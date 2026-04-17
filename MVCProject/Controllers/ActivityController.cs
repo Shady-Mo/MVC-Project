@@ -70,6 +70,15 @@ namespace MVCProject.Controllers
             }
             return View("Edit", updateActivityVM);
         }
+        public IActionResult Delete(int id)
+        {
+            var activityEntity = unitOfWork.ActivityRepository.GetById(id);
+            if (activityEntity == null) return NotFound();
+
+            unitOfWork.ActivityRepository.Delete(id);
+            unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
         [HttpGet]
         public IActionResult checkDate(DateTime Date)
         {
