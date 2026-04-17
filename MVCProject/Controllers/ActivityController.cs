@@ -97,6 +97,10 @@ namespace MVCProject.Controllers
             var activityEntity = unitOfWork.ActivityRepository.GetById(id);
             if (activityEntity == null) return NotFound();
 
+            if (!string.IsNullOrEmpty(activityEntity.Img))
+            {
+                FileService.DeleteFile(activityEntity.Img, "images");
+            }
             unitOfWork.ActivityRepository.Delete(id);
             unitOfWork.Save();
             return RedirectToAction(nameof(Index));
