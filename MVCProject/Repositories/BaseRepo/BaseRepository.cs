@@ -3,7 +3,7 @@
 namespace MVCProject.Repositories.BaseRepo {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        private readonly AppDbContext context;
+        public readonly AppDbContext context;
 
         public BaseRepository(AppDbContext context)
         {

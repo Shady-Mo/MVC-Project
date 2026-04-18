@@ -1,4 +1,5 @@
-﻿using MVCProject.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using MVCProject.Data;
 using MVCProject.Models;
 using MVCProject.Repositories.BaseRepo;
 
@@ -8,6 +9,31 @@ namespace MVCProject.Repositories.AccmodationRepo
     {
         public AccomodationRepositroy(AppDbContext context) : base(context)
         {
+        }
+
+        public (List<Accomodation> accomodations, int TotalCount) GetAllWithFilterBy(string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6)
+        {
+            var query = context.Accomodations.AsQueryable();
+            
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(a => a.Name.Contains(searchQuery) || a.Location.Contains(searchQuery));
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(a => a.PricePerNight <= maxPrice.Value);
+            }
+
+            if (minCapacity.HasValue)
+            {
+                query = query.Where(a => a.AvailableRooms >= minCapacity.Value);
+            }
+
+            var accomodations = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return (accomodations, query.Count());
         }
     }
 }

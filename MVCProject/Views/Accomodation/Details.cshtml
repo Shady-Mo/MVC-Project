@@ -1,0 +1,91 @@
+﻿@model MVCProject.ViewModels.AccomodationViewModels.DisplayAccomodationVM
+
+@{
+    ViewData["Title"] = "Accommodation Details";
+}
+
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
+    .btn-outline-primary-custom:hover { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-outline-secondary-custom { color: #6c757d; border-color: #6c757d; }
+    .btn-outline-secondary-custom:hover { background-color: #6c757d; color: white; }
+    
+    /* Custom styles for details layout */
+    .card-custom { border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden; }
+    .details-img { width: 100%; height: 100%; max-height: 450px; object-fit: cover; }
+    .info-label { font-weight: bold; color: #6c757d; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .info-value { font-size: 1.15rem; color: #333; font-weight: 500; }
+</style>
+
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-lg-10">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary-custom fw-bold m-0">
+                ℹ️ Accommodation Details
+            </h2>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom shadow-sm me-2">
+                    ✏️ Edit
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary-custom shadow-sm">
+                    ⬅️ Back to List
+                </a>
+            </div>
+        </div>
+
+        <div class="card card-custom">
+            <div class="row g-0 align-items-stretch">
+                
+                <div class="col-md-5">
+                    @if (!string.IsNullOrEmpty(Model.Image))
+                    {
+                        <img src="~/images/@Model.Image" class="details-img" alt="@Model.Name" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center h-100" style="font-size: 6rem; min-height: 350px;">
+                            🛏️
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-7 d-flex flex-column">
+                    <div class="card-body p-4 p-lg-5 flex-grow-1">
+                        <h3 class="card-title text-primary-custom fw-bold mb-4 border-bottom pb-3">
+                            @Model.Name
+                        </h3>
+
+                        <div class="row mb-4">
+                            <div class="col-12 mb-4">
+                                <div class="info-label">📍 Location</div>
+                                <div class="info-value">@Model.Location</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="info-label">💲 Price Per Night</div>
+                                <div class="info-value text-primary-custom fw-bold" style="font-size: 1.4rem;">
+                                    @Model.PricePerNight.ToString("C")
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="info-label">🚪 Available Rooms</div>
+                                <div class="info-value mt-1">
+                                    <span class="badge bg-light text-dark border px-3 py-2 fs-6 shadow-sm">
+                                        @Model.AvailableRooms Rooms
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>

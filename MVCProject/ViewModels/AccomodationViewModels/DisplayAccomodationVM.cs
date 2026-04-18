@@ -1,20 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MVCProject.Models
+namespace MVCProject.ViewModels.AccomodationViewModels
 {
-    public class Accomodation
+    public class DisplayAccomodationVM
     {
-        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
+
         public string Location { get; set; }
+
+        [DataType(DataType.Currency)]
         public decimal PricePerNight { get; set; }
         public int AvailableRooms { get; set; }
+
         public string? Image { get; set; }
-
-
-        public ICollection<BookingAccomodation> bookingAccomodations = new HashSet<BookingAccomodation>();
-
     }
 }
