@@ -20,10 +20,16 @@ namespace MVCProject.Controllers
             FileService = fileService;
         }
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index([FromQuery] string searchQuery = "", [FromQuery] decimal? maxPrice = null, [FromQuery] int? minCapacity = null, [FromQuery] int pageNumber = 1)
         {
-            var activities = unitOfWork.ActivityRepository.GetAll();
+            int pageSize = 6; // Show 6 cards per page
+            var (activities, totalCount) = unitOfWork.ActivityRepository.GetAllWithFilterBy(searchQuery, maxPrice, minCapacity, pageNumber, pageSize);
+
             var activitiesVM = activities.Adapt<List<DisplayActivityVM>>();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
             return View("Index", activitiesVM);
         }
         [HttpGet]

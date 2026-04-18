@@ -4,62 +4,138 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
+    .btn-outline-primary-custom:hover { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .card-img-top { height: 200px; object-fit: cover; }
+    .filter-sidebar { background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .activity-card { transition: transform 0.2s; }
+    .activity-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+</style>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Location)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Capacity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Img)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Capacity)
-            </td>
-            <td>
-                <img src="~/images/@item.Img" width="50" />
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="row mb-4 align-items-center mt-3">
+    <div class="col">
+        <h1 class="text-primary-custom m-0 fw-bold">Activities</h1>
+    </div>
+    <div class="col text-end">
+        <a asp-action="Create" class="btn btn-primary-custom shadow-sm">
+            Create New Activity
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Sidebar Filter -->
+    <div class="col-lg-3 col-md-4 mb-4">
+        <div class="filter-sidebar sticky-top" style="top: 20px;">
+            <h5 class="mb-3 text-primary-custom fw-bold">Filters</h5>
+            <form asp-action="Index" method="get">
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold">Search</label>
+                    <input type="text" name="searchQuery" class="form-control" placeholder="Name or location..." value="@Context.Request.Query["searchQuery"]" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="priceRange" class="form-label text-muted fw-bold d-flex justify-content-between">
+                        <span>Max Price</span>
+                        <span class="badge bg-primary-custom" id="priceOutput">@(Context.Request.Query["maxPrice"].Count > 0 ? Context.Request.Query["maxPrice"] : "500")</span>
+                    </label>
+                    <input type="range" class="form-range" min="0" max="1000" step="10" id="priceRange" name="maxPrice" value="@Context.Request.Query["maxPrice"]" oninput="document.getElementById('priceOutput').innerText = this.value">
+                </div>
+
+                <div class="mb-4">
+                    <label for="capacityRange" class="form-label text-muted fw-bold d-flex justify-content-between">
+                        <span>Min Capacity</span>
+                        <span class="badge bg-primary-custom" id="capacityOutput">@(Context.Request.Query["minCapacity"].Count > 0 ? Context.Request.Query["minCapacity"] : "250")</span>
+                    </label>
+                    <input type="range" class="form-range" min="1" max="500" step="5" id="capacityRange" name="minCapacity" value="@Context.Request.Query["minCapacity"]" oninput="document.getElementById('capacityOutput').innerText = this.value">
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary-custom" type="submit">Apply Filters</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cards Layout -->
+    <div class="col-lg-9 col-md-8">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center shadow-sm">
+                No activities found matching your criteria.
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                @foreach (var item in Model) {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 activity-card">
+                            @if (!string.IsNullOrEmpty(item.Img))
+                            {
+                                <img src="~/images/@item.Img" class="card-img-top rounded-top" alt="@item.Name" />
+                            }
+                            else
+                            {
+                                <div class="bg-light card-img-top rounded-top d-flex align-items-center justify-content-center text-secondary" style="font-size: 3rem;">
+                                    📝
+                                </div>
+                            }
+
+                            <div class="card-body">
+                                <h5 class="card-title text-primary-custom fw-bold mb-1">@item.Name</h5>
+                                <p class="card-text text-muted mb-3 small">
+                                    📍 @item.Location
+                                </p>
+
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="badge bg-light text-dark border px-2 py-1">
+                                        📅 @item.Date.ToString("MMM dd, yyyy")
+                                    </span>
+                                    <span class="badge bg-light text-dark border px-2 py-1">
+                                        👥 @item.Capacity
+                                    </span>
+                                </div>
+                                <h5 class="fw-bold mb-0" style="color: #28b5a4">@item.Price.ToString("C")</h5>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 pt-0 pb-3">
+                                <div class="btn-group w-100 shadow-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary-custom">Details</a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4 pt-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link text-primary-custom" href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@Context.Request.Query["searchQuery"]&maxPrice=@Context.Request.Query["maxPrice"]&minCapacity=@Context.Request.Query["minCapacity"]" tabindex="-1">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                <a class="page-link @(ViewBag.CurrentPage == i ? "bg-primary-custom border-primary-custom text-white" : "text-primary-custom")" href="?pageNumber=@i&searchQuery=@Context.Request.Query["searchQuery"]&maxPrice=@Context.Request.Query["maxPrice"]&minCapacity=@Context.Request.Query["minCapacity"]">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link text-primary-custom" href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@Context.Request.Query["searchQuery"]&maxPrice=@Context.Request.Query["maxPrice"]&minCapacity=@Context.Request.Query["minCapacity"]">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
