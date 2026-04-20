@@ -1,0 +1,79 @@
+﻿@using MVCProject.ViewModels.FlightViewModels
+@model AddFlightVM
+@{
+    ViewData["Title"] = "Add Flight";
+}
+
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+</style>
+
+<div class="container mt-4" style="max-width: 650px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary-custom py-3">
+            <h4 class="mb-0 fw-bold">✈️ Add New Flight</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="Airline" class="form-label fw-bold text-muted">Airline</label>
+                    <input asp-for="Airline" class="form-control" placeholder="e.g. Emirates" />
+                    <span asp-validation-for="Airline" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label asp-for="DepartureAirport" class="form-label fw-bold text-muted">Departure Airport</label>
+                        <input asp-for="DepartureAirport" class="form-control" placeholder="e.g. CAI" />
+                        <span asp-validation-for="DepartureAirport" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="DestinationAirport" class="form-label fw-bold text-muted">Destination Airport</label>
+                        <input asp-for="DestinationAirport" class="form-control" placeholder="e.g. DXB" />
+                        <span asp-validation-for="DestinationAirport" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label asp-for="DepartureDateTime" class="form-label fw-bold text-muted">Departure</label>
+                        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="DepartureDateTime" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="ArrivalDateTime" class="form-label fw-bold text-muted">Arrival</label>
+                        <input asp-for="ArrivalDateTime" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="ArrivalDateTime" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label asp-for="Price" class="form-label fw-bold text-muted">Price</label>
+                        <input asp-for="Price" class="form-control" placeholder="0.00" />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="AvailableSeats" class="form-label fw-bold text-muted">Available Seats</label>
+                        <input asp-for="AvailableSeats" class="form-control" placeholder="e.g. 150" />
+                        <span asp-validation-for="AvailableSeats" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary-custom">Save Flight</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

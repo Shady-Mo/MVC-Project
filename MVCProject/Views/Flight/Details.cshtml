@@ -1,0 +1,85 @@
+﻿@using MVCProject.ViewModels.FlightViewModels
+@model DisplayFlightVM
+@{
+    ViewData["Title"] = "Flight Details";
+}
+
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
+    .btn-outline-primary-custom:hover { background-color: #28b5a4; color: white; }
+</style>
+
+<div class="container mt-4" style="max-width: 700px;">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary-custom py-3">
+            <h4 class="mb-0 fw-bold">✈️ @Model.Airline</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-6">
+                    <p class="text-muted mb-1 small fw-bold">Departure Airport</p>
+                    <p class="fw-semibold">📍 @Model.DepartureAirport</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-muted mb-1 small fw-bold">Destination Airport</p>
+                    <p class="fw-semibold">📍 @Model.DestinationAirport</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-muted mb-1 small fw-bold">Departure</p>
+                    <p class="fw-semibold">🛫 @Model.DepartureDateTime.ToString("MMM dd, yyyy — HH:mm")</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-muted mb-1 small fw-bold">Arrival</p>
+                    <p class="fw-semibold">🛬 @Model.ArrivalDateTime.ToString("MMM dd, yyyy — HH:mm")</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-muted mb-1 small fw-bold">Price</p>
+                    <h5 class="fw-bold" style="color: #28b5a4">@Model.Price.ToString("C")</h5>
+                </div>
+                <div class="col-6">
+                    <p class="text-muted mb-1 small fw-bold">Available Seats</p>
+                    <p class="fw-semibold">💺 @Model.AvailableSeats</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top pt-3 pb-3">
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
+
+                @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id"
+                       class="btn btn-outline-secondary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id"
+                       class="btn btn-outline-danger">Delete</a>
+                }
+
+                @if (/*User.Identity.IsAuthenticated &&*/ Model.AvailableSeats > 0)
+                {
+                    <form asp-action="Book" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary-custom">Book Now</button>
+                    </form>
+                }
+                else if (Model.AvailableSeats <= 0)
+                {
+                    <button class="btn btn-secondary" disabled>Fully Booked</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,143 @@
+﻿@model IEnumerable<MVCProject.ViewModels.FlightViewModels.DisplayFlightVM>
+@{
+    ViewData["Title"] = "Flights";
+}
+
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
+    .btn-outline-primary-custom:hover { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .filter-sidebar { background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .flight-card { transition: transform 0.2s; }
+    .flight-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important; }
+</style>
+
+<div class="row mb-4 align-items-center mt-3">
+    <div class="col">
+        <h1 class="text-primary-custom m-0 fw-bold">Flights</h1>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+    {
+        <div class="col text-end">
+            <a asp-action="Create" class="btn btn-primary-custom shadow-sm">
+                + Add New Flight
+            </a>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <!-- Sidebar Filter -->
+    <div class="col-lg-3 col-md-4 mb-4">
+        <div class="filter-sidebar sticky-top" style="top: 20px;">
+            <h5 class="mb-3 text-primary-custom fw-bold">Filters</h5>
+            <form asp-action="Index" method="get">
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold">Airline / Departure</label>
+                    <input type="text" name="searchQuery" class="form-control"
+                           placeholder="e.g. Emirates, Cairo..."
+                           value="@Context.Request.Query["searchQuery"]" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold">Destination</label>
+                    <input type="text" name="destination" class="form-control"
+                           placeholder="e.g. Dubai, London..."
+                           value="@Context.Request.Query["destination"]" />
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-muted fw-bold">Date</label>
+                    <input type="date" name="date" class="form-control"
+                           value="@Context.Request.Query["date"]" />
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary-custom" type="submit">Apply Filters</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="col-lg-9 col-md-8">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center shadow-sm">
+                No flights found matching your criteria.
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                @foreach (var item in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 flight-card">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary-custom fw-bold mb-1">✈️ @item.Airline</h5>
+                                <p class="text-muted small mb-2">
+                                    📍 @item.DepartureAirport → @item.DestinationAirport
+                                </p>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-light text-dark border px-2 py-1">
+                                        🛫 @item.DepartureDateTime.ToString("MMM dd, yyyy HH:mm")
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="badge bg-light text-dark border px-2 py-1">
+                                        🛬 @item.ArrivalDateTime.ToString("MMM dd, yyyy HH:mm")
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0" style="color: #28b5a4">@item.Price.ToString("C")</h5>
+                                    <span class="badge bg-light text-dark border px-2 py-1">
+                                        💺 @item.AvailableSeats seats
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 pt-0 pb-3">
+                                <div class="btn-group w-100 shadow-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary-custom">Details</a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-danger">Delete</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4 pt-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link text-primary-custom"
+                               href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                <a class="page-link @(ViewBag.CurrentPage == i ? "bg-primary-custom border-primary-custom text-white" : "text-primary-custom")"
+                                   href="?pageNumber=@i&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link text-primary-custom"
+                               href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
