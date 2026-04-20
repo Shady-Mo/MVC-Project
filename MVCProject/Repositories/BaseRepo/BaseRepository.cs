@@ -1,39 +1,40 @@
-﻿using MVCProject.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using MVCProject.Data;
 
 namespace MVCProject.Repositories.BaseRepo {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class
-    {
-        public readonly AppDbContext context;
+    public class BaseRepository<T> : IBaseRepository<T> where T : class {
+        public readonly AppDbContext _context;
+        public readonly DbSet<T> _dbSet;
 
-        public BaseRepository(AppDbContext context)
-        {
-            this.context = context;
+        public BaseRepository(AppDbContext context) {
+            _context = context;
+            _dbSet = _context.Set<T>();
         }
-        public void Add(T item)
-        {
-            context.Set<T>().Add(item);
+        public void Add(T entity) {
+            _dbSet.Add(entity);
         }
 
-        public void Delete(int id)
-        {
+        public void Delete(int id) {
             var item = GetById(id);
+
             if (item != null)
-                context.Set<T>().Remove(item);
+                _dbSet.Remove(item);
         }
 
-        public List<T> GetAll()
-        {
-            return context.Set<T>().ToList();
+        public IQueryable<T> GetAll() {
+            return _dbSet.AsNoTracking().AsQueryable();
         }
 
-        public T GetById(int id)
-        {
-            return context.Set<T>().Find(id);
+        public T GetById(int id) {
+            return _dbSet.Find(id);
         }
 
-        public void Update(T item)
-        {
-            context.Set<T>().Update(item);
+        public void Save() {
+            _context.SaveChanges();
+        }
+
+        public void Update(T item) {
+            _dbSet.Update(item);
         }
     }
 }

@@ -18,7 +18,8 @@ namespace MVCProject.Services {
 
                     _logger.LogInformation("Seeding roles.");
                     await AddRoleAsync(_roleManager, "Admin");
-                    await AddRoleAsync(_roleManager, "User");
+                    await AddRoleAsync(_roleManager, "Vendor");
+                    await AddRoleAsync(_roleManager, "Customer");
 
                     _logger.LogInformation("Add admin email.");
                     string adminEmail = "admin@example.com";
@@ -34,6 +35,7 @@ namespace MVCProject.Services {
                             NormalizedEmail = adminEmail.ToUpper(),
                             SecurityStamp = Guid.NewGuid().ToString(),
                             UserName = "Shady_Mo",
+                            NormalizedUserName = "SHADY_MO",
                             PhoneNumber = "0123456789"
                         };
 

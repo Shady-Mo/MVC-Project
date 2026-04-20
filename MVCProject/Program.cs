@@ -7,6 +7,7 @@ using MVCProject.Repositories;
 using MVCProject.Services;
 using MVCProject.Services.ImgAddingService;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace MVCProject {
     public class Program {
@@ -28,6 +29,31 @@ namespace MVCProject {
             builder.Services.AddScoped<UnitOfWork>();
             builder.Services.AddScoped<IFileService, FileService>();
 
+            builder.Services.AddOutputCache(options => {
+                options.AddPolicy("GlobalExpiry", builder =>
+                    builder.Expire(TimeSpan.FromMinutes(60))
+                        .SetLocking(true)
+                        .Tag("Global")
+                );
+
+                options.AddPolicy("PrivateExpiry", builder =>
+                    builder.Expire(TimeSpan.FromMinutes(1))
+                        .VaryByValue(context =>
+                            new KeyValuePair<string, string>(
+                                "user_id", context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous"
+                            )
+                        )
+                );
+            });
+
+            builder.Services.Configure<IdentityOptions>(options => {
+                options.Lockout.MaxFailedAccessAttempts = 5;
+
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
+
+                options.Lockout.AllowedForNewUsers = true;
+            });
+
             var app = builder.Build();
 
             await SeedService.SeedDatabase(app.Services);
@@ -37,6 +63,10 @@ namespace MVCProject {
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseRouting();
+
+            app.UseOutputCache();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
