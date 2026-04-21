@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MVCProject.ViewModels.AuthViewModels {
+namespace MVCProject.ViewModels.AccountViewModels {
     public class LoginViewModel {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]
