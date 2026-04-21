@@ -69,10 +69,10 @@ namespace MVCProject.Controllers {
                     return View(registerViewModel);
                 }
 
-                if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerViewModel.PhoneNumber) != null) {
-                    ModelState.AddModelError("PhoneNumber", "This phone number already exist.");
-                    return View(registerViewModel);
-                }
+                //if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerViewModel.PhoneNumber) != null) {
+                //    ModelState.AddModelError("PhoneNumber", "This phone number already exist.");
+                //    return View(registerViewModel);
+                //}
 
                 var user = registerViewModel.Adapt<AppUser>();
 

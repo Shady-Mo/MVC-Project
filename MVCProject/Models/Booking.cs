@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,6 +7,7 @@ namespace MVCProject.Models {
     public class Booking {
         [Key]
         public int Id { get; set; }
+        public string Country { get; set; }
         public DateTime BookingDate { get; set; }
         public decimal TotalAmount { get; set; }
         public Status Status { get; set; }

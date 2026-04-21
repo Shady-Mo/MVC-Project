@@ -38,5 +38,11 @@ namespace MVCProject.Repositories.ActivityRepo
 
             return (activities, totalCount);
         }
+
+
+        public List<Activity> GetByLocation(string location)
+        {
+            return _context.Activities.Where(l => l.Location == location).ToList();
+        }
     }
 }

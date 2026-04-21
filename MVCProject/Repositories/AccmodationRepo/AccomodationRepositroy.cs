@@ -35,5 +35,10 @@ namespace MVCProject.Repositories.AccmodationRepo
 
             return (accomodations, query.Count());
         }
+
+        public List<Accomodation> GetByLocation(string location)
+        {
+            return _context.Accomodations.Where(l => l.Location == location).ToList();
+        }
     }
 }

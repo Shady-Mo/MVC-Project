@@ -1,0 +1,203 @@
+﻿@model MVCProject.ViewModels.BookingViewModel.AddBookingVM
+
+@{
+    ViewData["Title"] = "Create Booking";
+}
+
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    
+    /* ستايلات الكروت القابلة للاختيار */
+    .selectable-card {
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        border: 2px solid transparent;
+    }
+    .selectable-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+    /* لما الـ Checkbox يكون متعلم عليه، بنغير لون الكارت */
+    input[type="checkbox"]:checked + .selectable-card {
+        border-color: #28b5a4;
+        background-color: #f0fbf9;
+    }
+    /* إخفاء الـ Checkbox الأصلي عشان الشكل يكون أنظف */
+    .hidden-checkbox {
+        display: none;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <h2 class="text-primary-custom fw-bold border-bottom pb-3 mb-4">
+        🌍 Plan Your Trip
+    </h2>
+
+    <form asp-action="Book" method="post" id="bookingForm">
+        
+        <input type="hidden" asp-for="UserId" value="current_user_id" />
+
+        <div class="card shadow-sm border-0 mb-4 p-4">
+            <h5 class="fw-bold text-muted mb-3">1. Where are you traveling?</h5>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">🛫 From (Source)</label>
+                    <input type="text" id="sourceCountry" class="form-control" placeholder="e.g. Egypt" required />
+                </div>
+                
+                <div class="col-md-4">
+                    <label asp-for="Country" class="form-label fw-bold">🛬 To (Destination)</label>
+                    <input asp-for="Country" id="destCountry" class="form-control" placeholder="e.g. France" required />
+                    <span asp-validation-for="Country" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-2">
+                    <label asp-for="BookingDate" class="form-label fw-bold">📅 Date</label>
+                    <input asp-for="BookingDate" type="date" class="form-control" required />
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button type="button" id="btnSearch" class="btn btn-dark fw-bold">
+                        🔍 Find Options
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsSection" style="display: none;">
+            
+            <h5 class="fw-bold text-primary-custom mt-4 mb-3">✈️ Select Flights (Round-trip allowed)</h5>
+            <div class="row g-3" id="flightsContainer">
+                </div>
+
+            <h5 class="fw-bold text-primary-custom mt-5 mb-3">🏨 Select Accommodations</h5>
+            <div class="row g-3" id="hotelsContainer">
+                 </div>
+
+            <h5 class="fw-bold text-primary-custom mt-5 mb-3">🏄 Select Activities</h5>
+            <div class="row g-3" id="activitiesContainer">
+                 </div>
+
+            <div class="text-end mt-5 pt-3 border-top">
+                <button type="submit" class="btn btn-primary-custom btn-lg px-5 fw-bold shadow">
+                    ✅ Confirm Booking
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+    @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            
+            $("#btnSearch").click(function () {
+                var source = $("#sourceCountry").val();
+                var dest = $("#destCountry").val(); 
+                var bookingDate = $("#BookingDate").val();
+
+                if (!source || !dest || !bookingDate) {
+                    alert("Please enter Source, Destination, and Booking Date!");
+                    return;
+                }
+
+                var btn = $(this);
+                btn.html("⏳ Searching...").prop("disabled", true);
+
+                $.ajax({
+                    url: '@Url.Action("GetTravelData", "Booking")',
+                    type: 'GET',
+                    data: { source: source, dest: dest, date: bookingDate }, 
+                    success: function (data) {
+                        renderFlights(data.flights);
+                        renderHotels(data.hotels);
+                        renderActivities(data.activities);
+            
+                        $("#resultsSection").fadeIn();
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr.responseText); // ده هيطبعلك الإيرور في الكونسول لو حصل
+                        alert("Error loading data. Please try again.");
+                    },
+                    complete: function () {
+                        btn.html("🔍 Find Options").prop("disabled", false);
+                    }
+                });
+            }); // نهاية حدث الكليك
+
+            // تعريف الدوال جوه نفس الـ Document Ready
+            function renderFlights(flights) {
+                var html = '';
+                if(!flights || flights.length === 0) html = '<div class="col-12 text-muted">No flights found.</div>';
+                else {
+                    flights.forEach(function(f) {
+                        html += `
+                            <div class="col-md-4">
+                                <label class="w-100">
+                                    <input type="checkbox" name="FlightsId" value="${f.id}" class="hidden-checkbox" />
+                                    <div class="card selectable-card p-3 shadow-sm">
+                                        <div class="fw-bold text-dark">${f.airline || 'Flight'} - ${f.flightNumber || ''}</div>
+                                        <div class="text-muted small">From: ${f.departureCountry || ''} ➡️ To: ${f.arrivalCountry || ''}</div>
+                                        <div class="text-primary-custom fw-bold mt-2">$${f.price || 0}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
+                $("#flightsContainer").html(html);
+            }
+
+            function renderHotels(hotels) {
+                var html = '';
+                if(!hotels || hotels.length === 0) html = '<div class="col-12 text-muted">No accommodations found.</div>';
+                else {
+                    hotels.forEach(function(h) {
+                        html += `
+                            <div class="col-md-4">
+                                <label class="w-100">
+                                    <input type="checkbox" name="AccomodationsId" value="${h.id}" class="hidden-checkbox" />
+                                    <div class="card selectable-card p-3 shadow-sm">
+                                        <div class="fw-bold text-dark">🏨 ${h.name}</div>
+                                        <div class="text-muted small">${h.location}</div>
+                                        <div class="text-primary-custom fw-bold mt-2">$${h.pricePerNight || 0} / night</div>
+                                    </div>
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
+                $("#hotelsContainer").html(html);
+            }
+
+            function renderActivities(activities) {
+                var html = '';
+                if(!activities || activities.length === 0) html = '<div class="col-12 text-muted">No activities found.</div>';
+                else {
+                    activities.forEach(function(a) {
+                        html += `
+                            <div class="col-md-4">
+                                <label class="w-100">
+                                    <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox" />
+                                    <div class="card selectable-card p-3 shadow-sm">
+                                        <div class="fw-bold text-dark">🎯 ${a.name}</div>
+                                        <div class="text-muted small">${a.location}</div>
+                                        <div class="text-primary-custom fw-bold mt-2">$${a.price || 0}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
+                $("#activitiesContainer").html(html);
+            }
+
+        }); // دي النهاية الصحيحة للـ document.ready
+    </script>
+}

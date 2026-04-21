@@ -39,5 +39,10 @@ namespace MVCProject.Repositories.FlightRepo
 
             return (flights, totalCount);
         }
+
+        public List<Flight> GetByLocation(string location, string location2, DateTime bookingDate)
+        {
+            return _context.Flights.Where(f => (f.DepartureAirport == location || f.DepartureAirport == location2) && (f.DestinationAirport == location2 || f.DestinationAirport == location) && f.DepartureDateTime >= bookingDate).ToList();
+        }
     }
 }

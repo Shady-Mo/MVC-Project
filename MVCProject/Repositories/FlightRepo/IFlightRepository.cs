@@ -7,5 +7,8 @@ namespace MVCProject.Repositories.FlightRepo
     {
         (IEnumerable<Flight> flights, int totalCount) GetAllWithFilterBy(string searchQuery, string destination, DateTime? date,
                                                                                                    int pageNumber, int pageSize);
+
+        List<Flight> GetByLocation(string location, string location2, DateTime bookingDate);
+
     }
 }
