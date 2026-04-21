@@ -8,11 +8,19 @@ namespace MVCProject.ViewModels.BookingViewModel
         [Required]
         [ValidCountry]
         public string Country { get; set; }
+
+        [Required]
         public DateTime BookingDate { get; set; }
-        public string UserId { get; set; }
 
         public List<int> FlightsId { get; set; }
-        public List<int> AccomodationsId { get; set; }
+        public List<BookingAccomodationVM> Accomodations { get; set; }
         public List<int> ActivitiesId { get; set; }
+    }
+
+    public class BookingAccomodationVM
+    {
+        public int Id { get; set; }
+        public DateTime CheckInDate { get; set; }
+        public DateTime CheckOutDate { get; set; }
     }
 }
