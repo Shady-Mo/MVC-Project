@@ -25,5 +25,25 @@ namespace MVCProject.Repositories.BookingRepo
 
             return (accomodations, query.Count());
         }
+
+        public (List<Booking> bookings, int TotalCount) GetAllWithFilterByUserId(string userId, string searchQuery, int pageNumber = 1, int pageSize = 6)
+        {
+            var query = _context.Bookings.Where(b => b.UserId == userId).AsQueryable().Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities);
+
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(b => b.UserId == userId && b.Country.Contains(searchQuery) || b.AppUser.UserName.Contains(searchQuery)).Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities); ;
+            }
+
+            var accomodations = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return (accomodations, query.Count());
+        }
+
+        public Booking GetByIdIncluded(int id)
+        {
+            return _context.Bookings.Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities).FirstOrDefault(b => b.Id == id);
+        }
     }
 }
