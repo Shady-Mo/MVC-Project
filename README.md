@@ -1,608 +1,370 @@
-# Travel and Tourism Booking System
+# MVCProject - Travel & Tourism Booking System
 
-A modern ASP.NET Core MVC application for a Travel & Tourism booking system with professional authentication, user management, and booking capabilities using **User Secrets** for secure credential management.
+A modern ASP.NET Core MVC web application built with .NET 10, designed for managing travel and tourism bookings with entity framework integration, dependency injection, and a clean architecture structure.
 
-**Version**: 1.0.0 | **Built with**: .NET 10, C# 14.0, Bootstrap 5 | **Last Updated**: December 2024
+## Table of Contents
 
----
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Architecture](#architecture)
+- [Available Routes](#available-routes)
+- [Services](#services)
+- [Dependencies](#dependencies)
 
-## 🚀 Quick Start (5 Minutes)
+## Overview
 
-```bash
-# 1. Clone Repository
-git clone https://github.com/Shady-Mo/MVC-Project.git
-cd MVCProject
+MVCProject is an ASP.NET Core MVC application designed for managing travel and tourism bookings. It demonstrates:
+- Clean architecture patterns with separated concerns
+- Entity Framework Core integration with SQL Server for data persistence
+- ASP.NET Core Identity for user authentication and authorization
+- Object mapping using Mapster for DTOs and domain models
+- Responsive UI with Bootstrap for mobile-friendly design
+- Travel booking workflow management
+- User profile and booking history management
 
-# 2. Initialize User Secrets
-dotnet user-secrets init
+## Features
 
-# 3. Set Credentials (Replace with your actual values)
-dotnet user-secrets set "ConnectionStrings:mvccon" "data source=YOUR_SERVER; initial catalog=YOUR_DB; User ID=YOUR_USER; Password=YOUR_PASSWORD; trust server certificate=true;"
-dotnet user-secrets set "Authentication:Google:ClientId" "YOUR_CLIENT_ID"
-dotnet user-secrets set "Authentication:Google:ClientSecret" "YOUR_CLIENT_SECRET"
-dotnet user-secrets set "EmailSettings:From" "your-email@gmail.com"
-dotnet user-secrets set "EmailSettings:Username" "your-email@gmail.com"
-dotnet user-secrets set "EmailSettings:Password" "YOUR_APP_PASSWORD"
+- **User Authentication** - Secure login and registration for travelers
+- **Destination Browsing** - Search and explore travel destinations
+- **Booking Management** - Create, view, and manage travel bookings
+- **Itinerary Planning** - Organize tours and activities
+- **Payment Processing** - Secure booking confirmations
+- **User Profiles** - Manage personal travel information and preferences
+- **Booking History** - Access past and upcoming reservations
+- **Admin Dashboard** - Manage destinations, tours, and user bookings (future implementation)
 
-# 4. Create Database
-dotnet ef database update
+## Tech Stack
 
-# 5. Run Application
-dotnet run
-```
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| **.NET** | 10.0 | Runtime platform |
+| **ASP.NET Core MVC** | 10.0 | Web framework |
+| **Entity Framework Core** | 10.0.5 | ORM and data access |
+| **ASP.NET Core Identity** | 10.0.5 | Authentication & Authorization |
+| **Mapster** | 10.0.7 | Object mapping |
+| **SQL Server** | 10.0.5 | Database |
 
-Visit: `https://localhost:7000`
+## Prerequisites
 
----
+Before running this project, ensure you have:
 
-## ✨ Features
+- **.NET 10 SDK** or later - [Download](https://dotnet.microsoft.com/download/dotnet/10.0)
+- **Visual Studio 2026** (Community, Professional, or Enterprise) with ASP.NET workload
+  - OR **Visual Studio Code** with C# DevKit extension
+- **SQL Server** (LocalDB, Express, or full version)
+- **PowerShell** or **Command Prompt** for terminal commands
 
-### 🔐 Authentication & Authorization
-- ✅ **Email/Password Login** - Secure user authentication with validation
-- ✅ **User Registration** - Complete signup with duplicate checking
-- ✅ **Google OAuth 2.0** - One-click Sign-In/Sign-Up
-- ✅ **Password Recovery** - Email-based token reset
-- ✅ **Account Lockout** - 5 failed attempts → 30 seconds lockout
-- ✅ **Role-Based Access** - Customer and Admin roles
-- ✅ **Remember Me** - Persistent login sessions
-
-### 📧 Email & Communication
-- SMTP Email Service with Gmail integration
-- Password reset with secure tokens (24-hour expiry)
-- Email verification and confirmations
-
-### 👤 User Management
-- Complete user profiles (name, email, phone, address)
-- Secure password storage with PBKDF2 + salt
-- External login integration (Google)
-- User Secrets for credential management
-
-### 🎨 UI/UX
-- Professional branding (Orange #fd7e14, Teal #20c997)
-- Responsive design (360px to 1400px+)
-- WCAG accessibility compliance
-- Bootstrap 5 framework
-- Font Awesome 6 icons
-- Smooth animations and transitions
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technologies |
-|-------|--------------|
-| **Frontend** | Bootstrap 5, jQuery, Font Awesome 6 |
-| **Backend** | ASP.NET Core (.NET 10), C# 14.0 |
-| **Database** | SQL Server, Entity Framework Core |
-| **Auth** | ASP.NET Core Identity, Google OAuth 2.0 |
-| **Email** | SMTP (Gmail) |
-| **Mapping** | Mapster 10.0.7 |
-| **Secrets** | User Secrets (Local), Environment Variables (Production) |
-
----
-
-## 📋 Prerequisites
-
-- **.NET SDK 10.0+** - [Download](https://dotnet.microsoft.com/download)
-- **Visual Studio 2022+** or VS Code
-- **SQL Server** - LocalDB or Express
-- **Gmail Account** - For email service
-- **Google OAuth Credentials** - For Sign-In
-
----
-
-## 🔑 User Secrets Setup
-
-### Why User Secrets?
-
-✅ **Secure** - Credentials stored locally, not in files  
-✅ **Protected** - Never committed to Git  
-✅ **Per-Developer** - Each developer has own secrets  
-✅ **Best Practice** - Recommended by Microsoft  
-
-### Initialize (First Time Only)
-
-```bash
-cd MVCProject
-dotnet user-secrets init
-```
-
-### Set All Required Secrets
-
-#### Database Connection
-```bash
-dotnet user-secrets set "ConnectionStrings:mvccon" "data source=YOUR_SERVER; initial catalog=YOUR_DB; User ID=YOUR_USER; Password=YOUR_PASSWORD; trust server certificate=true;"
-```
-
-**Examples:**
-```
-LocalDB: data source=(LocalDB)\mssqllocaldb; initial catalog=TravelMonsterDb; Integrated Security=true;
-Remote: data source=yourserver.com; initial catalog=YourDb; User ID=user; Password=pwd; trust server certificate=true;
-```
-
-#### Google OAuth
-```bash
-dotnet user-secrets set "Authentication:Google:ClientId" "YOUR_CLIENT_ID"
-dotnet user-secrets set "Authentication:Google:ClientSecret" "YOUR_CLIENT_SECRET"
-```
-
-#### Gmail SMTP
-```bash
-dotnet user-secrets set "EmailSettings:From" "your-email@gmail.com"
-dotnet user-secrets set "EmailSettings:Username" "your-email@gmail.com"
-dotnet user-secrets set "EmailSettings:Password" "YOUR_APP_PASSWORD"
-```
-
-### Verify All Secrets Are Set
-
-```bash
-dotnet user-secrets list
-```
-
-### Storage Location
-
-- **Windows**: `%APPDATA%\Microsoft\UserSecrets\<id>\secrets.json`
-- **Linux**: `~/.microsoft/usersecrets/<id>/secrets.json`
-- **macOS**: `~/.microsoft/usersecrets/<id>/secrets.json`
-
-### Common Commands
-
-| Command | Purpose |
-|---------|---------|
-| `dotnet user-secrets init` | Initialize secrets storage |
-| `dotnet user-secrets list` | Show all secrets (values hidden) |
-| `dotnet user-secrets set "key" "value"` | Set a secret |
-| `dotnet user-secrets remove "key"` | Delete a secret |
-| `dotnet user-secrets clear` | Delete all secrets |
-
----
-
-## 📚 Getting Your Credentials
-
-### 🗄️ Database Connection String
-
-**SQL Server LocalDB:**
-```
-data source=(LocalDB)\mssqllocaldb; initial catalog=TravelMonsterDb; Integrated Security=true;
-```
-
-**Remote SQL Server:**
-```
-data source=YOUR_SERVER; initial catalog=YOUR_DATABASE; User ID=YOUR_USER; Password=YOUR_PASSWORD; trust server certificate=true;
-```
-
-### 🔐 Google OAuth Credentials
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create new project
-3. Enable **Google+ API**
-4. Create OAuth 2.0 **Web Application** credentials
-5. Add authorized redirect URIs:
-   - `https://localhost:7000/signin-google`
-   - `https://yourdomain.com/signin-google`
-6. Copy **Client ID** and **Client Secret**
-
-### 📧 Gmail App Password
-
-1. Go to [myaccount.google.com](https://myaccount.google.com/security)
-2. Enable **2-Factor Authentication**
-3. Go to **App passwords**
-4. Select **Mail** and **Windows Computer**
-5. Copy the **16-character app password**
-6. Use as `EmailSettings:Password`
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 MVCProject/
-├── Controllers/
-│   ├── AccountController.cs          # Authentication logic
-│   └── HomeController.cs
-├── Models/
-│   ├── AppUser.cs                    # Identity model
-│   ├── Booking.cs                    # Booking model
-│   └── ...
-├── Views/
-│   ├── Account/
-│   │   ├── Login.cshtml              # Login page
-│   │   ├── Register.cshtml           # Registration
-│   │   ├── ExternalLoginConfirmation.cshtml
-│   │   ├── VerifyEmail.cshtml        # Email verification
-│   │   ├── EmailSent.cshtml          # Confirmation
-│   │   └── ForgetPassword.cshtml     # Password reset
-│   └── Shared/
-│       ├── _Layout.cshtml
-│       └── _LoginLayout.cshtml
-├── Services/
-│   └── EmailService/
-│       ├── IEmailService.cs
-│       └── EmailService.cs
-├── ViewModels/
-│   └── AccountViewModels/
-│       ├── LoginViewModel.cs
-│       ├── RegisterViewModel.cs
-│       └── ...
-├── Data/
-│   └── AppDbContext.cs
-├── appsettings.json                  # App configuration
-├── appsettings.example.json          # Example template
-├── Program.cs                        # DI & Configuration
-└── README.md                         # This file
+├─ AppConfigurations/          # Application configuration classes
+├─ Controllers/                # MVC Controllers
+│  └─ HomeController.cs        # Home page controller
+├─ Data/                       # Database context and migrations
+├─ MappingRegisters/           # Mapster mapping profiles
+├─ Models/                     # Domain models
+│  └─ ErrorViewModel.cs        # Error page model
+├─ Repositories/               # Data access layer (DAL)
+├─ Services/                   # Business logic and application services
+├─ ViewModels/                 # View-specific models (DTOs)
+├─ Views/                      # Razor views (.cshtml)
+│  ├─ Home/
+│  │  ├─ Index.cshtml         # Home page
+│  │  └─ Privacy.cshtml        # Privacy policy page
+│  ├─ Shared/
+│  │  ├─ Error.cshtml         # Error page template
+│  │  ├─ _Layout.cshtml        # Master layout
+│  │  ├─ _Layout.cshtml.css    # Layout styles
+│  │  └─ _ValidationScriptsPartial.cshtml
+│  ├─ _ViewImports.cshtml      # Global imports for views
+│  └─ _ViewStart.cshtml        # View startup script
+├─ wwwroot/                    # Static files (CSS, JS, images)
+├─ Properties/                 # Project properties and launch settings
+├─ appsettings.json            # Application settings
+├─ appsettings.Development.json # Development-specific settings
+├─ MVCProject.csproj           # Project file
+└─ Program.cs                  # Application startup and configuration
 ```
 
----
+### Folder Descriptions
 
-## 🔄 Authentication Flows
+| Folder | Purpose |
+|--------|---------|
+| `AppConfigurations/` | Stores application-wide configuration classes |
+| `Controllers/` | Contains MVC controller classes handling HTTP requests |
+| `Data/` | Database context, models, and Entity Framework migrations |
+| `MappingRegisters/` | Mapster configuration for object-to-object mapping |
+| `Models/` | Domain models representing core business entities |
+| `Repositories/` | Data access abstraction layer |
+| `Services/` | Business logic, application services, and domain operations |
+| `ViewModels/` | Data transfer objects for view rendering |
+| `Views/` | Razor markup templates (.cshtml files) |
+| `wwwroot/` | Static web assets (CSS, JavaScript, images) |
 
-### 1️⃣ Standard Email/Password Login
+## Getting Started
 
-```
-User enters email & password
-    ↓
-Validate input
-    ├─ Invalid → Show error
-    ↓
-Check if user exists
-    ├─ Not found → Show error
-    ↓
-Verify password
-    ├─ Wrong → Check lockout (5 attempts = 30 sec lock)
-    ↓
-Sign in & create session
-    ↓
-Redirect to Home
-```
-
-### 2️⃣ Google OAuth Sign-In
-
-```
-Click "Sign in with Google"
-    ↓
-Redirect to Google OAuth
-    ↓
-User authenticates with Google
-    ↓
-Return with authorization code
-    ├─ New user → ExternalLoginConfirmation → Complete profile → Create account
-    ├─ Existing user → Sign in immediately
-    └─ Error → Redirect to Login
-```
-
-### 3️⃣ Password Recovery
-
-```
-Click "Forgot Password"
-    ↓
-Enter email (VerifyEmail)
-    ↓
-Check if email exists
-    ├─ Not found → Show error
-    ↓
-Generate reset token (24-hour expiry)
-    ↓
-Send email with reset link
-    ↓
-Show confirmation (EmailSent)
-    ↓
-User opens email & clicks link
-    ↓
-Enter new password (ForgetPassword)
-    ↓
-Validate & update password
-    ↓
-Success → Redirect to Login
-```
-
----
-
-## 📝 API Endpoints
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/Account/Login` | Login page |
-| POST | `/Account/Login` | Process login |
-| GET | `/Account/Register` | Registration page |
-| POST | `/Account/Register` | Process registration |
-| POST | `/Account/ExternalLogin` | Initiate Google OAuth |
-| GET | `/Account/ExternalLoginCallback` | Handle OAuth callback |
-| POST | `/Account/ExternalLoginConfirmation` | Complete Google profile |
-| GET | `/Account/VerifyEmail` | Email verification page |
-| POST | `/Account/VerifyEmail` | Send password reset email |
-| GET | `/Account/EmailSent` | Confirmation message |
-| GET | `/Account/ForgetPassword` | Password reset page |
-| POST | `/Account/ForgetPassword` | Process password reset |
-| POST | `/Account/Logout` | Logout user |
-
----
-
-## 🚀 Database Setup
-
-### Apply Migrations
+### 1. Clone or Download the Repository
 
 ```bash
-# Using CLI
+# If cloning from Git
+git clone https://github.com/Shady-Mo/MVC-Project.git
+cd MVCProject
+```
+
+### 2. Restore NuGet Packages
+
+```powershell
+dotnet restore
+```
+
+### 3. Update Database (if using EF Core migrations)
+
+```powershell
+cd MVCProject
 dotnet ef database update
-
-# Or in Visual Studio Package Manager Console
-Update-Database
 ```
 
-### Database Schema (Key Tables)
+### 4. Run the Application
 
-**AppUser** (ASP.NET Identity Extended)
-- Id, UserName, Email
-- PhoneNumber, FullName, Address
-- PasswordHash, SecurityStamp
-- LockoutEnabled, AccessFailedCount
-- ... (other Identity fields)
-
----
-
-## 🚀 Deployment
-
-### Azure App Service
-
-#### 1. Create Resources
-
-```bash
-az login
-az group create --name travel-monster --location eastus
-az appservice plan create --name travel-monster-plan --resource-group travel-monster --sku B1
-az webapp create --name travel-monster-app --resource-group travel-monster --plan travel-monster-plan
+```powershell
+cd MVCProject
+dotnet run
 ```
 
-#### 2. Configure Application Settings
-
-**Do NOT use User Secrets in production!** Use environment variables instead:
-
-```bash
-az webapp config appsettings set \
-  --name travel-monster-app \
-  --resource-group travel-monster \
-  --settings \
-  ConnectionStrings__mvccon="your_production_connection_string" \
-  Authentication__Google__ClientId="your_prod_client_id" \
-  Authentication__Google__ClientSecret="your_prod_client_secret" \
-  EmailSettings__Username="your-email@gmail.com" \
-  EmailSettings__Password="your_app_password"
-```
-
-#### 3. Deploy from GitHub
-
-```bash
-az webapp deployment github-actions add \
-  --repo-url https://github.com/Shady-Mo/MVC-Project \
-  --branch main \
-  --resource-group travel-monster \
-  --name travel-monster-app
-```
-
-### Environment Variables Pattern
-
-**In Production, use this pattern for secrets:**
+The application will start and display the URL in the console:
 
 ```
-ConnectionStrings__mvccon = [your_connection_string]
-Authentication__Google__ClientId = [your_client_id]
-Authentication__Google__ClientSecret = [your_client_secret]
-EmailSettings__Username = [your_email]
-EmailSettings__Password = [your_app_password]
+Now listening on: https://localhost:5001
 ```
 
----
+Open your browser and navigate to `https://localhost:5001`
 
-## 🔐 Security Best Practices
+### 5. Using Visual Studio
 
-### ✅ Implemented in Project
+1. Open `MVCProject.sln` in Visual Studio
+2. Right-click the project → Set as Startup Project
+3. Press `F5` or click "Run"
 
-- ✅ Passwords hashed with **PBKDF2 + salt**
-- ✅ Account lockout after **5 failed attempts** (30 seconds)
-- ✅ **User Secrets** for local development
-- ✅ **HTTPS** enforced in production
-- ✅ **CSRF** protection on all forms
-- ✅ **SQL injection** prevention (EF Core parameterized queries)
-- ✅ **XSS** protection (Razor HTML encoding)
-- ✅ **Secure tokens** for password reset (24-hour expiry, one-time use)
-- ✅ **Google OAuth** server-side validation
-- ✅ **HSTS** headers configured
+## Configuration
 
-### 🔒 Credential Management Strategy
+### appsettings.json
 
-| Environment | Method | Use Case |
-|-------------|--------|----------|
-| **Local Development** | User Secrets | Safe, per-developer |
-| **Server/CI-CD** | Environment Variables | Simple, secure |
-| **Production Cloud** | Azure Key Vault | Enterprise-grade |
+Main application configuration file:
 
-### ❌ Never Do This
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+### appsettings.Development.json
+
+Development-specific overrides:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "Microsoft": "Information"
+    }
+  }
+}
+```
+
+### Database Connection
+
+Update the connection string in `appsettings.json`:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=MVCProjectDb;Trusted_Connection=true;"
+}
+```
+
+## Architecture
+
+### MVC Pattern
+
+- **Model**: Data structures in `Models/` and `ViewModels/`
+- **View**: Razor templates in `Views/`
+- **Controller**: Request handlers in `Controllers/`
+
+### Layered Architecture
+
+1. **Presentation Layer** (Controllers & Views)
+2. **Business Logic Layer** (Services & Repositories)
+3. **Data Access Layer** (EF Core, DbContext)
+4. **Database** (SQL Server)
+
+## Available Routes
+
+| Route | Controller | Action | Description |
+|-------|-----------|--------|-------------|
+| `/` | Home | Index | Home page |
+| `/Home/Privacy` | Home | Privacy | Privacy policy page |
+| `/Home/Error` | Home | Error | Error page |
+
+**Route Pattern**: `/{controller=Home}/{action=Index}/{id?}`
+
+### Static Assets
+
+Static files are served from the `wwwroot/` directory:
+
+- CSS: `/css/`
+- JavaScript: `/js/`
+- Images: `/images/`
+- Libraries: `/lib/`
+
+## Services
+
+### Currently Configured
+
+In `Program.cs`:
+
+- **ControllersWithViews** - Enables MVC controller and view support
+- **Authorization Middleware** - Enforces authorization policies
+
+### Available for Configuration
+
+- **Entity Framework Core** - Database operations
+- **ASP.NET Core Identity** - User authentication and role management
+- **Mapster** - Automatic object mapping between layers
+- **Dependency Injection** - Built-in IoC container
+
+### Example Service Registration
 
 ```csharp
-// ❌ WRONG - Hardcoded credentials
-var password = "mySecretPassword123";
-
-// ✅ RIGHT - Use configuration
-var password = configuration["EmailSettings:Password"];
+builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 ```
 
-### 🔐 Before Production Deployment
+## Dependencies
 
-- [ ] All secrets in environment variables (not files)
-- [ ] HTTPS enforced and certificates valid
-- [ ] HSTS headers configured
-- [ ] CORS policy restrictive
-- [ ] Password requirements enforced
-- [ ] Account lockout configured
-- [ ] All forms have CSRF protection
-- [ ] Database connection secure
-- [ ] Email credentials in environment
-- [ ] No secrets in source code
-- [ ] No debug mode in production
-- [ ] Security headers configured
+### NuGet Packages
 
----
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `Mapster` | 10.0.7 | Object mapping |
+| `Microsoft.AspNetCore.Identity.EntityFrameworkCore` | 10.0.5 | Identity integration with EF Core |
+| `Microsoft.EntityFrameworkCore.SqlServer` | 10.0.5 | SQL Server provider for EF Core |
+| `Microsoft.EntityFrameworkCore.Design` | 10.0.5 | EF Core design-time tools |
+| `Microsoft.EntityFrameworkCore.Tools` | 10.0.5 | EF Core command-line tools |
 
-## 🧪 Testing
+### Client-Side Libraries
 
-### Test Account
-Create via registration page or database
+Included in `wwwroot/lib/`:
 
-### Test Google Sign-In
-Use your personal Google account
+- **Bootstrap** - Responsive CSS framework
+- **jQuery** - JavaScript library
+- **jQuery Validation** - Form validation
+- **jQuery Validation Unobtrusive** - Unobtrusive validation
 
-### Test Password Reset
-1. Click "Forgot Password"
-2. Enter email address
-3. Check email for reset link
-4. Follow link and set new password
+## Database
 
----
+### Entity Framework Core
 
-## 🐛 Troubleshooting
+This project uses EF Core with SQL Server. 
 
-### Email Not Sending
-✓ Verify Gmail app password (16 characters, not regular password)  
-✓ Check 2-Factor Authentication enabled on Gmail  
-✓ Verify SMTP settings: smtp.gmail.com:587  
-✓ Check firewall allows port 587  
-✓ Review application logs for errors  
+#### Create a New Migration
 
-### Google Sign-In Not Working
-✓ Verify Client ID and Secret are correct  
-✓ Check redirect URIs exactly match Google Console  
-✓ Ensure Google+ API is enabled  
-✓ Check browser console for CORS/auth errors  
-
-### Database Connection Failed
-✓ Verify connection string format  
-✓ Check SQL Server is running  
-✓ Verify database exists  
-✓ Check user permissions on database  
-
-### User Secrets Not Working
-✓ Run `dotnet user-secrets list` to verify all secrets set  
-✓ Ensure running from MVCProject directory  
-✓ Restart application after setting secrets  
-✓ Check secrets file exists in OS storage location  
-
----
-
-## 💡 Common Tasks
-
-### Add New Secret
-```bash
-dotnet user-secrets set "Section:Key" "value"
+```powershell
+dotnet ef migrations add MigrationName
 ```
 
-### List All Secrets (No Values)
-```bash
-dotnet user-secrets list
+#### Update Database
+
+```powershell
+dotnet ef database update
 ```
 
-### Remove Secret
-```bash
-dotnet user-secrets remove "Section:Key"
+#### View Database Schema
+
+```powershell
+dotnet ef dbcontext info
 ```
 
-### Clear All Secrets
-```bash
-dotnet user-secrets clear
+## Logging
+
+Logging is configured via `appsettings.json`:
+
+```csharp
+var logger = HttpContext.RequestServices.GetRequiredService<ILogger<HomeController>>();
+logger.LogInformation("Information message");
+logger.LogWarning("Warning message");
+logger.LogError("Error message");
 ```
 
-### Search Specific Key
-```bash
-dotnet user-secrets list | findstr "KeyName"
+## Security
+
+- Use HTTPS in production
+- Enable CORS only for trusted origins
+- Validate all user input
+- Use parameterized queries (EF Core handles this)
+- Implement proper authentication and authorization
+- Keep NuGet packages updated
+
+## Troubleshooting
+
+### Port Already in Use
+
+```powershell
+# Change port in Properties/launchSettings.json
 ```
 
-### Delete All and Start Over
-```bash
-dotnet user-secrets clear
-dotnet user-secrets init
-# Re-add all secrets...
+### Database Connection Issues
+
+```powershell
+# Verify connection string in appsettings.json
+# Ensure SQL Server is running
+# Check firewall settings
 ```
 
----
+### NuGet Package Restore Fails
 
-## 📋 Setup Verification Checklist
+```powershell
+dotnet nuget locals all --clear
+dotnet restore
+```
 
-- [ ] .NET 10 SDK installed
-- [ ] Visual Studio 2022+ or VS Code
-- [ ] SQL Server running
-- [ ] Repository cloned
-- [ ] User Secrets initialized
-- [ ] All 7 secrets set correctly
-- [ ] Database migrations applied
-- [ ] Application runs without errors
-- [ ] Login page accessible
-- [ ] Can register new user
-- [ ] Email sending works
-- [ ] Google Sign-In configured
-- [ ] Password reset email works
+### Migrations Not Found
 
----
+```powershell
+# Ensure you're in the MVCProject directory
+cd MVCProject
+dotnet ef migrations add InitialCreate
+```
 
-## 🤝 Contributing
+## Resources
 
-1. Fork repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+- [Microsoft Learn - ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/)
+- [Entity Framework Core Documentation](https://learn.microsoft.com/en-us/ef/core/)
+- [ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity/)
+- [Mapster Documentation](https://mapperly.riok.app/)
+- [Bootstrap Documentation](https://getbootstrap.com/docs/)
 
-**Important**: Never commit credentials or secrets to GitHub!
+## License
 
----
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-## 📄 License
+## Author
 
-MIT License - see [LICENSE](LICENSE) for details
+Created as an educational project for ASP.NET Core MVC development - Travel & Tourism Booking System.
 
 ---
 
-## 👨‍💻 Author
-
-**Shady Mohamed**  
-- GitHub: [@Shady-Mo](https://github.com/Shady-Mo)
-- Email: shady.mohamed7899@gmail.com
-
----
-
-## 🙏 Acknowledgments
-
-- ASP.NET Core Identity team
-- Google OAuth documentation
-- Bootstrap 5 framework
-- Font Awesome icons
-- Entity Framework Core
-- Microsoft .NET team
-
----
-
-## 📞 Support
-
-- 📖 Check this README
-- 🐛 Report bugs on GitHub Issues
-- 💬 Include error messages and steps to reproduce
-- ❓ Check existing issues before creating new ones
-
----
-
-## ✅ Project Status
-
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Authentication | ✅ Complete | Email + Google OAuth |
-| Email Service | ✅ Complete | Gmail SMTP |
-| Password Recovery | ✅ Complete | Token-based reset |
-| User Secrets | ✅ Complete | Secure local credentials |
-| Database | ✅ Complete | SQL Server + EF Core |
-| UI/UX | ✅ Complete | Responsive design |
-| Security | ✅ Complete | Best practices |
-| Documentation | ✅ Complete | Comprehensive |
-
----
-
-**⭐ If you find this project helpful, please star it on GitHub!**
-
-**Ready to start?** Follow the Quick Start at the top! 🚀
+**Last Updated**: 2025

@@ -5,5 +5,6 @@ namespace MVCProject.ViewModels.AccountViewModels {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]
         public string Email { get; set; }
+        public string? RequestHost { get; set; }
     }
 }

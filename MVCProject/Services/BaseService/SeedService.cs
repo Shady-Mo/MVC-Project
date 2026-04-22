@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MVCProject.Data;
 using MVCProject.Models;
 
-namespace MVCProject.Services {
+namespace MVCProject.Services.BaseService {
     public class SeedService {
         public static async Task SeedDatabase(IServiceProvider serviceProvider) {
             using (var scope = serviceProvider.CreateScope()) {

@@ -3,22 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MVCProject.Models;
+using MVCProject.Services.AccountService;
 using MVCProject.Services.EmailService;
 using MVCProject.ViewModels.AccountViewModels;
 using System.Security.Claims;
 
 namespace MVCProject.Controllers {
     public class AccountController : Controller {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly IEmailService _emailService;
-
-        public AccountController(UserManager<AppUser> userManager, 
-                SignInManager<AppUser> signInManager,
-                IEmailService emailService) {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailService = emailService;
+        private readonly IAccountService _accountService;
+        public AccountController(IAccountService accountService) {
+            _accountService = accountService;
         }
 
         [HttpGet]
@@ -30,26 +24,13 @@ namespace MVCProject.Controllers {
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel) {
             if (ModelState.IsValid) {
-                var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
-
-                if (user == null) {
-                    ModelState.AddModelError("", "Email is incorrect.");
-                    return View(loginViewModel);
-                }
-
-                var result = await _signInManager
-                    .PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: true);
+                var result = await _accountService.LoginAsync(loginViewModel);
 
                 if (result.Succeeded) {
                     return RedirectToAction("Index", "Home");
                 }
 
-                if (result.IsLockedOut) {
-                    ModelState.AddModelError("", "Account is locked, please try again after 30 seconds.");
-                    return View(loginViewModel);
-                }
-
-                ModelState.AddModelError("", "Invalid login attempt.");
+                ModelState.AddModelError(result.TargetProperty, result.ErrorMessage);
             }
 
             return View(loginViewModel);
@@ -64,29 +45,19 @@ namespace MVCProject.Controllers {
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel registerViewModel) {
             if (ModelState.IsValid) {
-                if (await _userManager.FindByEmailAsync(registerViewModel.Email) != null) {
-                    ModelState.AddModelError("Email", "This email already exist.");
-                    return View(registerViewModel);
-                }
-
-                if (await _userManager.FindByNameAsync(registerViewModel.UserName) != null) {
-                    ModelState.AddModelError("UserName", "This username already exist.");
-                    return View(registerViewModel);
-                }
-
-                var user = registerViewModel.Adapt<AppUser>();
-
-                var result = await _userManager.CreateAsync(user, registerViewModel.Password);
+                var result = await _accountService.RegisterAsync(registerViewModel);
 
                 if (result.Succeeded) {
-                    await _userManager.AddToRoleAsync(user, "Customer");
-                    await _signInManager.SignInAsync(user, false);
-
                     return RedirectToAction("Login");
                 }
 
-                foreach (var error in result.Errors) {
-                    ModelState.AddModelError("", error.Description);
+                if (result.ErrorMessage != null) {
+                    ModelState.AddModelError(result.TargetProperty, result.ErrorMessage);
+                }
+                else {
+                    foreach (var error in result.Errors) {
+                        ModelState.AddModelError("", error);
+                    }
                 }
             }
 
@@ -96,41 +67,30 @@ namespace MVCProject.Controllers {
         [HttpPost]
         public IActionResult ExternalLogin(string provider, bool rememberMe, string returnUrl = null) {
             var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            properties.IsPersistent = rememberMe;
+            var properties = _accountService.ConfigureExternalLogin(provider, redirectUrl, rememberMe);
             return Challenge(properties, provider);
         }
 
         [HttpGet]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null) {
-            if (remoteError != null) {
-                ModelState.AddModelError("", $"Error from external provider: {remoteError}");
+            var result = await _accountService.ExternalLoginCallbackAsync(returnUrl, remoteError);
+
+            if (result.ErrorMessage != null) {
+                ModelState.AddModelError("", result.ErrorMessage);
                 return RedirectToAction("Login");
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null) {
+            if (result.IsLockedOut ?? false) {
                 return RedirectToAction("Login");
             }
 
-            bool isPersistent = info.AuthenticationProperties.IsPersistent;
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent);
             if (result.Succeeded) {
-                return RedirectToLocal(returnUrl);
+                return RedirectToLocal(result.ReturnUrl);
             }
 
-            if (result.IsLockedOut) {
-                return RedirectToAction("Login");
-            }
-
-            if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email)) {
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-
-                var externalLoginConfirmationViewModel = info.Adapt<ExternalLoginConfirmationViewModel>();
-
-                ViewData["ReturnUrl"] = returnUrl;
-
-                return View("ExternalLoginConfirmation", externalLoginConfirmationViewModel);
+            if (result.ExternalLoginConfirmationViewModel != null) {
+                ViewData["ReturnUrl"] = result.ReturnUrl;
+                return View("ExternalLoginConfirmation", result.ExternalLoginConfirmationViewModel);
             }
 
             return RedirectToAction("Login");
@@ -141,24 +101,18 @@ namespace MVCProject.Controllers {
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel externalLoginConfirmationViewModel,
                 string returnUrl = null) {
             if (ModelState.IsValid) {
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null) {
-                    return RedirectToAction("Login");
+                var result = await _accountService.ExternalLoginConfirmationAsync(externalLoginConfirmationViewModel, returnUrl);
+
+                if (result.Succeeded) {
+                    return RedirectToLocal(returnUrl);
                 }
 
-                var user = externalLoginConfirmationViewModel.Adapt<AppUser>();
-
-                var createResult = await _userManager.CreateAsync(user);
-                if (createResult.Succeeded) {
-                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
-                    if (addLoginResult.Succeeded) {
-                        await _userManager.AddToRoleAsync(user, "Customer");
-
-                        var loginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey,
-                                externalLoginConfirmationViewModel.RememberMe);
-                        if (loginResult.Succeeded) {
-                            return RedirectToLocal(returnUrl);
-                        }
+                if (result.ErrorMessage != null) {
+                    ModelState.AddModelError("", result.ErrorMessage);
+                }
+                else {
+                    foreach (var error in result.Errors) {
+                        ModelState.AddModelError("", error);
                     }
                 }
             }
@@ -174,27 +128,17 @@ namespace MVCProject.Controllers {
         [HttpPost]
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel verifyEmailViewModel) {
             if (ModelState.IsValid) {
-                var user = await _userManager.FindByEmailAsync(verifyEmailViewModel.Email);
+                verifyEmailViewModel.RequestHost = Request.Host.Host;
+                var result = await _accountService.VerifyEmailAsync(verifyEmailViewModel, Request.Scheme);
 
-                if (user == null) {
-                    ModelState.AddModelError("Email", "This email does not exist.");
-                    return View(verifyEmailViewModel);
+                if (result.Succeeded) {
+                    return RedirectToAction("EmailSent", new { email = verifyEmailViewModel.Email });
                 }
 
-                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var resetLink = Url.Action("ForgetPassword", "Account",
-                    new { email = verifyEmailViewModel.Email, token = resetToken },
-                    Request.Scheme);
-
-                var subject = "Reset Password";
-                var body = $"Please reset your password by clicking here: <a href='{resetLink}'>{subject}</a>";
-
-                await _emailService.SendEmailAsync(user.Email, subject, body);
-
-                return RedirectToAction("EmailSent", new { email = verifyEmailViewModel.Email });
+                ModelState.AddModelError(result.TargetProperty, result.ErrorMessage);
             }
 
-            return RedirectToAction("Login");
+            return View(verifyEmailViewModel);
         }
 
         [HttpGet]
@@ -224,21 +168,19 @@ namespace MVCProject.Controllers {
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel forgetPasswordViewModel) {
             if (ModelState.IsValid) {
-                var user = await _userManager.FindByEmailAsync(forgetPasswordViewModel.Email);
-                if (user == null) {
-                    ModelState.AddModelError("Email", "This email does not exist.");
+                var result = await _accountService.ForgetPasswordAsync(forgetPasswordViewModel);
 
-                    return View(forgetPasswordViewModel);
-                }
-
-                var result = await _userManager
-                    .ResetPasswordAsync(user, forgetPasswordViewModel.Token,forgetPasswordViewModel.NewPassword);
                 if (result.Succeeded) {
                     return RedirectToAction("Login");
                 }
 
-                foreach (var error in result.Errors) {
-                    ModelState.AddModelError("", error.Description);
+                if (result.ErrorMessage != null) {
+                    ModelState.AddModelError(result.TargetProperty, result.ErrorMessage);
+                }
+                else {
+                    foreach (var error in result.Errors) {
+                        ModelState.AddModelError("", error);
+                    }
                 }
             }
 
@@ -248,7 +190,7 @@ namespace MVCProject.Controllers {
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout() {
-            await _signInManager.SignOutAsync();
+            await _accountService.LogoutAsync();
 
             return RedirectToAction("Index", "Home");
         }
