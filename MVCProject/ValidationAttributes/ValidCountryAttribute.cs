@@ -15,9 +15,19 @@ namespace MVCProject.ValidationAttributes
 
             foreach (var culture in cultures)
             {
-                var region = new RegionInfo(culture.LCID);
-                countries.Add(region.EnglishName);
+                try
+                {
+                    // التعديل هنا: استخدمنا Name بدل LCID
+                    var region = new RegionInfo(culture.Name);
+                    countries.Add(region.EnglishName);
+                }
+                catch (ArgumentException)
+                {
+                    // لو في أي Culture غريبة ملهاش Region، هنتجاهلها عشان السيرفر ميقعش
+                    continue;
+                }
             }
+
             return countries;
         }
 

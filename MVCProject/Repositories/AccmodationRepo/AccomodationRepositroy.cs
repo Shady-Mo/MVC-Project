@@ -38,7 +38,7 @@ namespace MVCProject.Repositories.AccmodationRepo
 
         public List<Accomodation> GetByLocation(string location)
         {
-            return _context.Accomodations.Where(l => l.Location == location).ToList();
+            return _context.Accomodations.Where(l => l.Location == location && l.AvailableRooms > 0).ToList();
         }
     }
 }

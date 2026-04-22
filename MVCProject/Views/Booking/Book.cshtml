@@ -15,19 +15,33 @@
         cursor: pointer;
         transition: all 0.2s ease-in-out;
         border: 2px solid transparent;
+        height: 100%;
     }
     .selectable-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
     }
-    /* لما الـ Checkbox يكون متعلم عليه، بنغير لون الكارت */
-    input[type="checkbox"]:checked + .selectable-card {
+    
+    /* تأثير لما الكارت يتحدد */
+    input[type="checkbox"].item-selector:checked + .card-content {
         border-color: #28b5a4;
         background-color: #f0fbf9;
     }
-    /* إخفاء الـ Checkbox الأصلي عشان الشكل يكون أنظف */
+    .card-content {
+        border: 2px solid transparent;
+        border-radius: 0.375rem;
+        height: 100%;
+    }
     .hidden-checkbox {
         display: none;
+    }
+    
+    /* تنسيق مخصوص لجزء التواريخ جوه كارت الفندق */
+    .hotel-dates {
+        display: none; /* مخفي في البداية */
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px dashed #ccc;
     }
 </style>
 
@@ -38,8 +52,6 @@
 
     <form asp-action="Book" method="post" id="bookingForm">
         
-        <input type="hidden" asp-for="UserId" value="current_user_id" />
-
         <div class="card shadow-sm border-0 mb-4 p-4">
             <h5 class="fw-bold text-muted mb-3">1. Where are you traveling?</h5>
             <div class="row g-3 align-items-end">
@@ -55,7 +67,7 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label asp-for="BookingDate" class="form-label fw-bold">📅 Date</label>
+                    <label asp-for="BookingDate" class="form-label fw-bold">📅 Flight Date</label>
                     <input asp-for="BookingDate" type="date" class="form-control" required />
                 </div>
 
@@ -69,17 +81,15 @@
 
         <div id="resultsSection" style="display: none;">
             
-            <h5 class="fw-bold text-primary-custom mt-4 mb-3">✈️ Select Flights (Round-trip allowed)</h5>
-            <div class="row g-3" id="flightsContainer">
-                </div>
+            <h5 class="fw-bold text-primary-custom mt-4 mb-3">✈️ Select Flights</h5>
+            <div class="row g-3" id="flightsContainer"></div>
 
             <h5 class="fw-bold text-primary-custom mt-5 mb-3">🏨 Select Accommodations</h5>
-            <div class="row g-3" id="hotelsContainer">
-                 </div>
+            <p class="text-muted small mb-3">Check the box to select a hotel, then choose your Check-in and Check-out dates.</p>
+            <div class="row g-3" id="hotelsContainer"></div>
 
             <h5 class="fw-bold text-primary-custom mt-5 mb-3">🏄 Select Activities</h5>
-            <div class="row g-3" id="activitiesContainer">
-                 </div>
+            <div class="row g-3" id="activitiesContainer"></div>
 
             <div class="text-end mt-5 pt-3 border-top">
                 <button type="submit" class="btn btn-primary-custom btn-lg px-5 fw-bold shadow">
@@ -90,13 +100,13 @@
     </form>
 </div>
 
-
-    @section Scripts {
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
         $(document).ready(function () {
             
+            // Search Button Click Event
             $("#btnSearch").click(function () {
                 var source = $("#sourceCountry").val();
                 var dest = $("#destCountry").val(); 
@@ -122,16 +132,17 @@
                         $("#resultsSection").fadeIn();
                     },
                     error: function (xhr, status, error) {
-                        console.log(xhr.responseText); // ده هيطبعلك الإيرور في الكونسول لو حصل
+                        console.log(xhr.responseText);
                         alert("Error loading data. Please try again.");
                     },
                     complete: function () {
                         btn.html("🔍 Find Options").prop("disabled", false);
                     }
                 });
-            }); // نهاية حدث الكليك
+            });
 
-            // تعريف الدوال جوه نفس الـ Document Ready
+            // --- دوال الرسم --- //
+
             function renderFlights(flights) {
                 var html = '';
                 if(!flights || flights.length === 0) html = '<div class="col-12 text-muted">No flights found.</div>';
@@ -139,11 +150,11 @@
                     flights.forEach(function(f) {
                         html += `
                             <div class="col-md-4">
-                                <label class="w-100">
-                                    <input type="checkbox" name="FlightsId" value="${f.id}" class="hidden-checkbox" />
-                                    <div class="card selectable-card p-3 shadow-sm">
+                                <label class="w-100 selectable-card">
+                                    <input type="checkbox" name="FlightsId" value="${f.id}" class="hidden-checkbox item-selector" />
+                                    <div class="card-content p-3 shadow-sm card">
                                         <div class="fw-bold text-dark">${f.airline || 'Flight'} - ${f.flightNumber || ''}</div>
-                                        <div class="text-muted small">From: ${f.departureCountry || ''} ➡️ To: ${f.arrivalCountry || ''}</div>
+                                        <div class="text-muted small">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
                                         <div class="text-primary-custom fw-bold mt-2">$${f.price || 0}</div>
                                     </div>
                                 </label>
@@ -156,24 +167,57 @@
 
             function renderHotels(hotels) {
                 var html = '';
-                if(!hotels || hotels.length === 0) html = '<div class="col-12 text-muted">No accommodations found.</div>';
+                if(!hotels || hotels.length === 0) {
+                    html = '<div class="col-12 text-muted">No accommodations found.</div>';
+                }
                 else {
-                    hotels.forEach(function(h) {
+                    // استخدام الـ Index (i) لربط المودل (Model Binding) للتواريخ
+                    hotels.forEach(function(h, i) {
                         html += `
-                            <div class="col-md-4">
-                                <label class="w-100">
-                                    <input type="checkbox" name="AccomodationsId" value="${h.id}" class="hidden-checkbox" />
-                                    <div class="card selectable-card p-3 shadow-sm">
-                                        <div class="fw-bold text-dark">🏨 ${h.name}</div>
-                                        <div class="text-muted small">${h.location}</div>
-                                        <div class="text-primary-custom fw-bold mt-2">$${h.pricePerNight || 0} / night</div>
+                            <div class="col-md-6"> 
+                                <div class="card shadow-sm p-3 card-content hotel-wrapper">
+                                    <label class="w-100 mb-0" style="cursor:pointer;">
+                                        <input type="checkbox" name="Accomodations[${i}].Id" value="${h.id}" class="hotel-checkbox me-2" />
+                                        <span class="fw-bold text-dark fs-5">🏨 ${h.name}</span>
+                                        <div class="text-muted small ms-4">${h.location}</div>
+                                        <div class="text-primary-custom fw-bold mt-1 ms-4">$${h.pricePerNight || 0} / night</div>
+                                    </label>
+
+                                    <div class="hotel-dates ms-4">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="small text-muted fw-bold">Check-in</label>
+                                                <input type="date" name="Accomodations[${i}].CheckInDate" class="form-control form-control-sm date-input" disabled />
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="small text-muted fw-bold">Check-out</label>
+                                                <input type="date" name="Accomodations[${i}].CheckOutDate" class="form-control form-control-sm date-input" disabled />
+                                            </div>
+                                        </div>
                                     </div>
-                                </label>
+                                </div>
                             </div>
                         `;
                     });
                 }
                 $("#hotelsContainer").html(html);
+
+                // Event Listener لإظهار التواريخ لما يختار فندق
+                $(".hotel-checkbox").change(function() {
+                    var wrapper = $(this).closest('.hotel-wrapper');
+                    var dateInputs = wrapper.find('.date-input');
+                    var dateSection = wrapper.find('.hotel-dates');
+
+                    if(this.checked) {
+                        dateSection.slideDown();
+                        dateInputs.prop('disabled', false).prop('required', true);
+                        wrapper.css('border-color', '#28b5a4'); // تلوين الإطار
+                    } else {
+                        dateSection.slideUp();
+                        dateInputs.prop('disabled', true).prop('required', false).val('');
+                        wrapper.css('border-color', 'transparent'); // إزالة الإطار
+                    }
+                });
             }
 
             function renderActivities(activities) {
@@ -183,9 +227,9 @@
                     activities.forEach(function(a) {
                         html += `
                             <div class="col-md-4">
-                                <label class="w-100">
-                                    <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox" />
-                                    <div class="card selectable-card p-3 shadow-sm">
+                                <label class="w-100 selectable-card">
+                                    <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox item-selector" />
+                                    <div class="card-content p-3 shadow-sm card">
                                         <div class="fw-bold text-dark">🎯 ${a.name}</div>
                                         <div class="text-muted small">${a.location}</div>
                                         <div class="text-primary-custom fw-bold mt-2">$${a.price || 0}</div>
@@ -198,6 +242,6 @@
                 $("#activitiesContainer").html(html);
             }
 
-        }); // دي النهاية الصحيحة للـ document.ready
+        }); // End of Document Ready
     </script>
 }

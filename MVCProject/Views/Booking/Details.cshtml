@@ -1,0 +1,101 @@
+﻿@model MVCProject.ViewModels.BookingViewModel.DisplayBookingVM
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
+    .btn-outline-primary-custom:hover { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .card-custom { border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden; }
+    .info-label { font-weight: bold; color: #6c757d; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .info-value { font-size: 1.15rem; color: #333; font-weight: 500; }
+    .status-badge { font-weight: 600; padding: 0.5em 1em; border-radius: 8px; font-size: 0.95rem; }
+</style>
+
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-lg-8">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary-custom fw-bold m-0">
+                ℹ️ Booking Details
+            </h2>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom shadow-sm me-2 fw-bold">
+                    ✏️ Edit
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary shadow-sm fw-bold">
+                    ⬅️ Back to List
+                </a>
+            </div>
+        </div>
+
+        <div class="card card-custom">
+            <div class="card-header bg-light py-3 border-bottom-0 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-bold text-muted">Booking Reference: <span class="text-dark">#@Model.Id</span></h5>
+                @{
+                    var badgeClass = Model.Status switch
+                    {
+                        "Confirmed" => "bg-success text-white",
+                        "Pending" => "bg-warning text-dark",
+                        "Cancelled" => "bg-danger text-white",
+                        _ => "bg-secondary text-white"
+                    };
+                }
+                <span class="badge status-badge @badgeClass shadow-sm">
+                    @Model.Status
+                </span>
+            </div>
+            
+            <div class="card-body p-4 p-lg-5">
+                <h3 class="card-title text-primary-custom fw-bold mb-4 border-bottom pb-3">
+                    Trip to @Model.Country
+                </h3>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-label">📅 Flight Date</div>
+                        <div class="info-value">@Model.BookingDate.ToString("MMMM dd, yyyy")</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="info-label">💲 Total Amount</div>
+                        <div class="info-value text-primary-custom fw-bold fs-4">
+                            @Model.TotalAmount.ToString("C")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-label mb-3 border-bottom pb-2">📦 Included in this booking</div>
+                <div class="row text-center g-3">
+                    <div class="col-4">
+                        <div class="p-3 bg-light rounded-3 shadow-sm border">
+                            <div class="fs-1 mb-2">✈️</div>
+                            <div class="fw-bold fs-5">@Model.FlightsCount</div>
+                            <div class="text-muted small text-uppercase fw-bold">Flights</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-light rounded-3 shadow-sm border">
+                            <div class="fs-1 mb-2">🏨</div>
+                            <div class="fw-bold fs-5">@Model.AccommodationsCount</div>
+                            <div class="text-muted small text-uppercase fw-bold">Hotels</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-light rounded-3 shadow-sm border">
+                            <div class="fs-1 mb-2">🎯</div>
+                            <div class="fw-bold fs-5">@Model.ActivitiesCount</div>
+                            <div class="text-muted small text-uppercase fw-bold">Activities</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
