@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MVCProject.ViewModels.AuthViewModels {
+namespace MVCProject.ViewModels.AccountViewModels {
     public class RegisterViewModel {
         [Required(ErrorMessage = "First name is required.")]
         [Display(Name = "First Name")]

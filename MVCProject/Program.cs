@@ -54,6 +54,22 @@ namespace MVCProject {
                 options.Lockout.AllowedForNewUsers = true;
             });
 
+            builder.Services.AddAuthentication()
+                .AddGoogle(options => {
+                    IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+
+                    options.ClientId = googleAuthSection["ClientId"];
+                    options.ClientSecret = googleAuthSection["ClientSecret"];
+
+                    options.Events.OnRemoteFailure = context => {
+                        context.Response.Redirect("/Account/Login?remoteError=" + context.Failure.Message);
+                        context.HandleResponse();
+
+                        return Task.CompletedTask;
+                    };
+                }
+            );
+
             var app = builder.Build();
 
             await SeedService.SeedDatabase(app.Services);
