@@ -23,6 +23,7 @@ namespace MVCProject.Controllers
             this.unitOfWork = unitOfWork;
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         public IActionResult Index([FromQuery] string searchQuery = "", [FromQuery] int pageNumber = 1)
         {
@@ -37,7 +38,8 @@ namespace MVCProject.Controllers
             return View("Index", bookingVMs);
         }
 
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Details(int id)
         {
 
@@ -65,6 +67,7 @@ namespace MVCProject.Controllers
             return View("MyBooking", bookingVMs);
         }
 
+        [HttpGet]
         public IActionResult Book()
         {
             return View("Book");
@@ -82,7 +85,50 @@ namespace MVCProject.Controllers
                         ModelState.AddModelError("", "Check out date must be > Check in date");
                         return View("Book", addBookingVM);
                     }
+
+                    if (i.CheckInDate < addBookingVM.BookingDate)
+                    {
+                        ModelState.AddModelError("", "Check in date must be > Booking Date");
+                        return View("Book", addBookingVM);
+                    }
                 }
+
+                foreach (var i in addBookingVM.ActivitiesId)
+                {
+                    var activity = unitOfWork.ActivityRepository.GetById(i);
+                    if (activity.Date < addBookingVM.BookingDate)
+                    {
+                        ModelState.AddModelError("", "Activity date must be > Booking Date");
+                        return View("Book", addBookingVM);
+                    }
+                }
+
+                var flights = new List<Flight>();
+                foreach (var i in addBookingVM.FlightsId)
+                {
+                    flights.Add(unitOfWork.FlightRepository.GetById(i));
+                }
+
+                flights.Sort();
+
+
+                for (int i = 0; i < flights.Count - 1; i++)
+                {
+                    if (flights[i + 1].DepartureDateTime < flights[i].ArrivalDateTime)
+                    {
+                        ModelState.AddModelError("", "There is conflict between depature dates");
+                        return View("Book", addBookingVM);
+                    }
+
+                    if(flights[i + 1].DepartureAirport != flights[i].DestinationAirport)
+                    {
+                        ModelState.AddModelError("", "There is conflict between depature countries");
+                        return View("Book", addBookingVM);
+                    }
+                }
+
+
+
 
                 var booking = addBookingVM.Adapt<Models.Booking>();
                 string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -126,7 +172,6 @@ namespace MVCProject.Controllers
 
                 }
 
-
                 foreach (var i in addBookingVM.FlightsId)
                 {
 
@@ -146,7 +191,7 @@ namespace MVCProject.Controllers
                 booking.TotalAmount = totalAmount;
                 unitOfWork.Save();
 
-                return RedirectToAction("Index");
+                return RedirectToAction("MyBooking");
             }
             return View("Book", addBookingVM);
         }
