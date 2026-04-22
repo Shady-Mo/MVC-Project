@@ -1,7 +1,7 @@
-@model MVCProject.ViewModels.AccountViewModels.LoginViewModel
+@model MVCProject.ViewModels.AccountViewModels.VerifyEmailViewModel
 
 @{
-    ViewData["Title"] = "LogIn";
+    ViewData["Title"] = "Verify Email";
     Layout = "_LoginLayout";
 }
 
@@ -11,20 +11,24 @@
             <div class="col-12 col-sm-11 col-md-8 col-lg-5">
                 <div class="card tm-login-card border-light shadow-sm">
                     <div class="card-body p-4 p-md-5">
+                        <!-- Header -->
                         <div class="text-center mb-4 mb-md-5">
                             <div class="mb-3">
-                                <i class="fa fa-user-circle fa-3x tm-text-teal"></i>
+                                <i class="fa fa-envelope-circle-check fa-3x tm-text-teal"></i>
                             </div>
-                            <h2 class="h3 h2-md fw-bold text-dark mb-2">Welcome Back</h2>
-                            <p class="text-muted mb-0">Please enter your account details to log in.</p>
+                            <h2 class="h3 h2-md fw-bold text-dark mb-2">Verify Your Email</h2>
+                            <p class="text-muted mb-0">Enter your email address to reset your password.</p>
                         </div>
 
-                        <form asp-action="Login" method="post">
+                        <!-- Form -->
+                        <form asp-action="VerifyEmail" method="post">
+                            <!-- Validation Summary -->
                             <div asp-validation-summary="ModelOnly" class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
                                 <strong class="text-orange">Validation Error</strong>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
 
+                            <!-- Email Input -->
                             <div class="mb-3 mb-md-4">
                                 <label asp-for="Email" class="form-label fw-semibold">
                                     Email Address <span class="text-orange">*</span>
@@ -37,54 +41,28 @@
                                 <span asp-validation-for="Email" class="invalid-feedback d-block text-orange small mt-2"></span>
                             </div>
 
-                            <div class="mb-3 mb-md-4">
-                                <label asp-for="Password" class="form-label fw-semibold">
-                                    Password <span class="text-orange">*</span>
-                                </label>
-                                <input asp-for="Password" 
-                                       type="password" 
-                                       class="form-control tm-form-control" 
-                                       placeholder="••••••••" 
-                                       autocomplete="current-password" />
-                                <span asp-validation-for="Password" class="invalid-feedback d-block text-orange small mt-2"></span>
+                            <!-- Info Text -->
+                            <div class="alert alert-info mb-4" role="alert">
+                                <i class="fa fa-info-circle me-2"></i>
+                                <small>We'll send you a password reset link to this email address.</small>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center mb-4 mb-md-5 flex-wrap gap-2">
-                                <div class="form-check">
-                                    <input asp-for="RememberMe" type="checkbox" class="form-check-input tm-checkbox" id="rememberMe" />
-                                    <label asp-for="RememberMe" class="form-check-label small fw-medium">
-                                        Remember Me
-                                    </label>
-                                </div>
-                                <a asp-action="VerifyEmail" asp-controller="Account" class="tm-link-forgot small fw-medium text-decoration-none">
-                                    Forgot Password?
-                                </a>
-                            </div>
-
+                            <!-- Submit Button -->
                             <button type="submit" class="btn btn-orange w-100 fw-semibold py-2 py-md-3 mb-4">
-                                Log In
+                                <i class="fa fa-paper-plane me-2"></i>Send Reset Link
                             </button>
 
-                            <div class="d-flex align-items-center gap-3 my-4">
-                                <hr class="flex-grow-1 m-0">
-                                <span class="text-muted small">Or</span>
-                                <hr class="flex-grow-1 m-0">
+                            <!-- Links -->
+                            <hr class="my-3 my-md-4">
+                            <div class="d-flex flex-column gap-2 text-center">
+                                <p class="text-muted small mb-0">
+                                    Remember your password? <a asp-action="Login" class="tm-link-register fw-semibold text-decoration-none">Log in</a>
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    Don't have an account? <a asp-action="Register" class="tm-link-register fw-semibold text-decoration-none">Register now</a>
+                                </p>
                             </div>
-
                         </form>
-
-                        <form asp-action="ExternalLogin" asp-route-provider="Google" method="post" class="mb-4">
-                            <input type="hidden" name="rememberMe" id="externalRememberMe" value="false" />
-
-                            <button type="submit" class="btn btn-google w-100 fw-semibold py-2 py-md-3">
-                                <i class="fab fa-google me-2"></i>Sign in with Google
-                            </button>
-                        </form>
-
-                        <hr class="my-3 my-md-4">
-                        <p class="text-center text-muted small mb-0">
-                            Not a member yet? <a asp-action="Register" class="tm-link-register fw-semibold text-decoration-none">Register now</a>
-                        </p>
                     </div>
                 </div>
             </div>
@@ -158,19 +136,6 @@
         color: var(--tm-text-dark);
     }
 
-    .tm-checkbox {
-        width: 18px;
-        height: 18px;
-        margin-right: 8px;
-        cursor: pointer;
-        accent-color: var(--tm-teal);
-        transition: all 0.2s ease;
-    }
-
-    .tm-checkbox:focus {
-        box-shadow: 0 0 0 0.25rem rgba(32, 201, 151, 0.25);
-    }
-
     .btn-orange {
         background-color: var(--tm-orange);
         color: white;
@@ -196,41 +161,11 @@
         box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
     }
 
-    .btn-google {
-        background-color: white;
-        color: #1f2937;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        font-size: 16px;
-        transition: all 0.3s ease;
-        min-height: 44px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
-
-    .btn-google:hover {
-        background-color: #f9fafb;
-        border-color: #d1d5db;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-        color: #1f2937;
-    }
-
-    .btn-google:active {
-        transform: translateY(0);
-    }
-
-    .btn-google:focus {
-        box-shadow: 0 0 0 0.25rem rgba(31, 41, 55, 0.1);
-        outline: none;
-    }
-
-    .tm-link-forgot,
     .tm-link-register {
         color: var(--tm-teal);
         transition: all 0.3s ease;
     }
 
-    .tm-link-forgot:hover,
     .tm-link-register:hover {
         color: var(--tm-teal-dark);
         text-decoration: underline !important;
@@ -240,6 +175,12 @@
         background-color: #fff5e6;
         border-color: #fde4d6;
         color: var(--tm-orange);
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border-color: #b3d9ff;
+        color: #0056b3;
     }
 
     .text-orange {
@@ -292,10 +233,20 @@
             font-size: 14px;
             padding: 0.65rem 0.75rem;
         }
+    }
 
-        .btn-orange {
-            min-height: 44px;
-            font-size: 14px;
+    @@media (max-width: 600px) and (orientation: landscape) {
+        .tm-login-container {
+            padding: 2rem 0;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .mb-4,
+        .mb-md-5 {
+            margin-bottom: 0.75rem !important;
         }
     }
 
@@ -304,59 +255,18 @@
             font-size: 16px;
         }
 
-        .btn-orange {
-            min-height: 48px;
-            font-size: 16px;
-        }
-
-        .tm-checkbox {
-            width: 20px;
-            height: 20px;
-        }
-
-        .tm-link-forgot:active,
-        .tm-link-register:active {
-            opacity: 0.8;
-        }
-    }
-
-    @@media (max-height: 600px) {
-        .tm-login-container {
-            min-height: auto !important;
-            padding: 0.75rem 0 !important;
-        }
-
-        .card-body {
-            padding: 1.5rem !important;
-        }
-
-        .mb-4,
-        .mb-md-4 {
-            margin-bottom: 0.75rem !important;
-        }
-
-        .mb-5,
-        .mb-md-5 {
-            margin-bottom: 0.75rem !important;
-        }
-
-        .fa-3x {
-            font-size: 2rem;
+        .btn-orange:active {
+            transform: translateY(-1px);
         }
     }
 
     @@media print {
         .tm-login-container {
-            background: white;
-            padding: 0;
+            background: none;
         }
 
-        .tm-login-card {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-        }
-
-        .btn {
+        .btn-orange,
+        .btn-close {
             display: none;
         }
     }
@@ -364,12 +274,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        $(document).ready(function () {
-            $('#rememberMe').on('change', function () {
-                $('#externalRememberMe').val($(this).is(':checked'));
-            });
-        });
-    </script>
 }

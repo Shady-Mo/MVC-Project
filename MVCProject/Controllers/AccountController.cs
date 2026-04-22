@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MVCProject.Models;
+using MVCProject.Services.EmailService;
 using MVCProject.ViewModels.AccountViewModels;
 using System.Security.Claims;
 
@@ -10,11 +11,14 @@ namespace MVCProject.Controllers {
     public class AccountController : Controller {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailService _emailService;
 
         public AccountController(UserManager<AppUser> userManager, 
-                SignInManager<AppUser> signInManager) {
+                SignInManager<AppUser> signInManager,
+                IEmailService emailService) {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -160,6 +164,85 @@ namespace MVCProject.Controllers {
             }
 
             return View(externalLoginConfirmationViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult VerifyEmail() {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel verifyEmailViewModel) {
+            if (ModelState.IsValid) {
+                var user = await _userManager.FindByEmailAsync(verifyEmailViewModel.Email);
+
+                if (user == null) {
+                    ModelState.AddModelError("Email", "This email does not exist.");
+                    return View(verifyEmailViewModel);
+                }
+
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetLink = Url.Action("ForgetPassword", "Account",
+                    new { email = verifyEmailViewModel.Email, token = resetToken },
+                    Request.Scheme);
+
+                var subject = "Reset Password";
+                var body = $"Please reset your password by clicking here: <a href='{resetLink}'>{subject}</a>";
+
+                await _emailService.SendEmailAsync(user.Email, subject, body);
+
+                return RedirectToAction("EmailSent", new { email = verifyEmailViewModel.Email });
+            }
+
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult EmailSent(string email) {
+            if (string.IsNullOrEmpty(email)) {
+                return RedirectToAction("VerifyEmail");
+            }
+
+            return View(new VerifyEmailViewModel { Email = email });
+        }
+
+        [HttpGet]
+        public IActionResult ForgetPassword(string email, string token) {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token)) {
+                return RedirectToAction("VerifyEmail");
+            }
+
+            var forgetPasswordViewModel = new ForgetPasswordViewModel {
+                Email = email,
+                Token = token
+            };
+
+            return View(forgetPasswordViewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel forgetPasswordViewModel) {
+            if (ModelState.IsValid) {
+                var user = await _userManager.FindByEmailAsync(forgetPasswordViewModel.Email);
+                if (user == null) {
+                    ModelState.AddModelError("Email", "This email does not exist.");
+
+                    return View(forgetPasswordViewModel);
+                }
+
+                var result = await _userManager
+                    .ResetPasswordAsync(user, forgetPasswordViewModel.Token,forgetPasswordViewModel.NewPassword);
+                if (result.Succeeded) {
+                    return RedirectToAction("Login");
+                }
+
+                foreach (var error in result.Errors) {
+                    ModelState.AddModelError("", error.Description);
+                }
+            }
+
+            return View(forgetPasswordViewModel);
         }
 
         [HttpPost]

@@ -5,6 +5,7 @@ using MVCProject.Data;
 using MVCProject.Models;
 using MVCProject.Repositories;
 using MVCProject.Services;
+using MVCProject.Services.EmailService;
 using MVCProject.Services.ImgAddingService;
 using System.Reflection;
 using System.Security.Claims;
@@ -18,7 +19,8 @@ namespace MVCProject {
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddIdentity<AppUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("mvccon"))
@@ -69,6 +71,9 @@ namespace MVCProject {
                     };
                 }
             );
+
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddTransient<IEmailService, EmailService>();
 
             var app = builder.Build();
 
