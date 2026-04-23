@@ -13,7 +13,6 @@
     .selectable-card { cursor: pointer; transition: all 0.2s ease-in-out; border: 2px solid transparent; height: 100%; }
     .selectable-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
     
-    /* التعديل: دعم الـ radio */
     input[type="checkbox"].item-selector:checked + .card-content,
     input[type="radio"].item-selector:checked + .card-content {
         border-color: #28b5a4; background-color: #f0fbf9;
@@ -29,7 +28,7 @@
         🌍 Plan Your Trip
     </h2>
 
-    <form asp-action="Book" method="post" id="bookingForm">
+    <form asp-action="Book" method="post" id="bookingForm" novalidate>
         
         <div class="card shadow-sm border-0 mb-4 p-4">
             <h5 class="fw-bold text-muted mb-3">1. Where are you traveling?</h5>
@@ -42,12 +41,11 @@
                 <div class="col-md-4">
                     <label asp-for="Country" class="form-label fw-bold">🛬 To (Destination)</label>
                     <input asp-for="Country" id="destCountry" class="form-control" placeholder="e.g. France" required />
-                    <span asp-validation-for="Country" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-2">
                     <label asp-for="BookingDate" class="form-label fw-bold">📅 Flight Date</label>
-                    <input asp-for="BookingDate" type="date" class="form-control" required />
+                    <input asp-for="BookingDate" id="BookingDate" type="date" class="form-control" required />
                 </div>
 
                 <div class="col-md-2 d-grid">
@@ -80,18 +78,90 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function () {
             
+            $("#bookingForm").submit(function (e) {
+                var errors = [];
+
+                if (!$("#sourceCountry").val().trim()) errors.push("Please enter the Source country.");
+                if (!$("#destCountry").val().trim()) errors.push("Please enter the Destination country.");
+                if (!$("#BookingDate").val()) errors.push("Please select a Flight Date.");
+
+                if ($("#resultsSection").is(":visible")) {
+                    if ($('input[name="FlightId"]').length > 0 && !$('input[name="FlightId"]:checked').val()) {
+                        errors.push("You must select a Flight.");
+                    }
+
+                    if ($('.hotel-checkbox').length > 0 && $('.hotel-checkbox:checked').length === 0) {
+                        errors.push("You must select at least one Accommodation.");
+                    }
+
+                    if ($('input[name="ActivitiesId"]').length > 0 && $('input[name="ActivitiesId"]:checked').length === 0) {
+                        errors.push("You must select at least one Activity.");
+                    }
+
+                } 
+                else {
+                    errors.push("Please search and select travel options first.");
+                }
+
+
+                // 3. فحص الفنادق (لو اختار فندق لازم يدخل التواريخ وتكون منطقية)
+                var hotelDateMissing = false;
+                var invalidDateLogic = false;
+                var invalidDateLogic2 = false;
+
+                $(".hotel-checkbox:checked").each(function () {
+                    var wrapper = $(this).closest('.hotel-wrapper');
+                    var dateInputs = wrapper.find('.date-input');
+                    var checkIn = dateInputs.eq(0).val();
+                    var checkOut = dateInputs.eq(1).val();
+
+                    if (!checkIn || !checkOut) {
+                        hotelDateMissing = true;
+                    } else {
+                        if (new Date(checkIn) >= new Date(checkOut)) {
+                            invalidDateLogic = true;
+                        }
+                        if (new Date(checkIn) < new Date($("#BookingDate").val())) {
+                            invalidDateLogic2 = true;
+                        }
+                    }
+                });
+
+                if (hotelDateMissing) errors.push("Please provide Check-in and Check-out dates for all selected hotels.");
+                if (invalidDateLogic) errors.push("Check-out date must be AFTER Check-in date.");
+                if (invalidDateLogic2) errors.push("Check-in date must be AFTER Booking date.");
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    
+                    var errorHtml = "<ul style='text-align: left; margin-bottom: 0;'>";
+                    errors.forEach(function(err) {
+                        errorHtml += "<li>" + err + "</li>";
+                    });
+                    errorHtml += "</ul>";
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Missing Information!',
+                        html: errorHtml,
+                        confirmButtonColor: '#28b5a4'
+                    });
+                }
+            });
+            // ------------------------------------- //
+
             $("#btnSearch").click(function () {
                 var source = $("#sourceCountry").val();
                 var dest = $("#destCountry").val(); 
                 var bookingDate = $("#BookingDate").val();
 
                 if (!source || !dest || !bookingDate) {
-                    alert("Please enter Source, Destination, and Booking Date!");
+                    Swal.fire({ icon: 'warning', title: 'Wait!', text: 'Please enter Source, Destination, and Booking Date to search.', confirmButtonColor: '#28b5a4' });
                     return;
                 }
 
@@ -106,12 +176,10 @@
                         renderFlights(data.flights);
                         renderHotels(data.hotels);
                         renderActivities(data.activities);
-            
                         $("#resultsSection").fadeIn();
                     },
-                    error: function (xhr, status, error) {
-                        console.log(xhr.responseText);
-                        alert("Error loading data. Please try again.");
+                    error: function () {
+                        Swal.fire('Error', 'Error loading data. Please try again.', 'error');
                     },
                     complete: function () {
                         btn.html("🔍 Find Options").prop("disabled", false);
@@ -119,7 +187,6 @@
                 });
             });
 
-            // التعديل: استخدام radio بدل checkbox
             function renderFlights(flights) {
                 var html = '';
                 if(!flights || flights.length === 0) {
@@ -129,7 +196,7 @@
                         html += `
                             <div class="col-md-4">
                                 <label class="w-100 selectable-card">
-                                    <input type="radio" name="FlightId" value="${f.id}" class="hidden-radio item-selector" required />
+                                    <input type="radio" name="FlightId" value="${f.id}" class="hidden-radio item-selector" />
                                     <div class="card-content p-3 shadow-sm card flight-card">
                                         <div class="fw-bold text-dark">${f.airline || 'Flight'} - ${f.flightNumber || ''}</div>
                                         <div class="text-muted small">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
@@ -142,7 +209,6 @@
                 }
                 $("#flightsContainer").html(html);
 
-                // JQuery عشان ينضف الإطارات لما اليوزر يغير رأيه في الطيارة
                 $(document).on('change', 'input[name="FlightId"]', function() {
                     $('.flight-card').css({'border-color': 'transparent', 'background-color': 'white'});
                     if(this.checked) {
@@ -193,11 +259,11 @@
 
                     if(this.checked) {
                         dateSection.slideDown();
-                        dateInputs.prop('disabled', false).prop('required', true);
+                        dateInputs.prop('disabled', false);
                         wrapper.css('border-color', '#28b5a4');
                     } else {
                         dateSection.slideUp();
-                        dateInputs.prop('disabled', true).prop('required', false).val('');
+                        dateInputs.prop('disabled', true).val('');
                         wrapper.css('border-color', 'transparent');
                     }
                 });
@@ -212,7 +278,7 @@
                         html += `
                             <div class="col-md-4">
                                 <label class="w-100 selectable-card">
-                                    <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox item-selector" />
+                                    <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox item-selector"  />
                                     <div class="card-content p-3 shadow-sm card">
                                         <div class="fw-bold text-dark">🎯 ${a.name}</div>
                                         <div class="text-muted small">${a.location}</div>

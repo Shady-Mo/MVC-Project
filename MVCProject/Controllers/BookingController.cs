@@ -166,7 +166,7 @@ namespace MVCProject.Controllers
         {
             var booking = unitOfWork.BookingRepository.GetByIdIncluded(id);
 
-            
+
             var bookingVM = new EditBookingVM
             {
                 Id = booking.Id,
@@ -181,6 +181,7 @@ namespace MVCProject.Controllers
                     CheckInDate = a.CheckInDate,
                     CheckOutDate = a.CheckOutDate
                 }).ToList() ?? new List<BookingAccomodationVM>(),
+                src = booking.Flight.DepartureAirport
             };
 
             return View("Edit", bookingVM);
@@ -191,6 +192,32 @@ namespace MVCProject.Controllers
         public IActionResult Edit(EditBookingVM editBookingVM)
         {
             if (!ModelState.IsValid) return View("Edit", editBookingVM);
+
+            foreach (var i in editBookingVM.Accomodations)
+            {
+                if (i.CheckInDate >= i.CheckOutDate)
+                {
+                    ModelState.AddModelError("", "Check out date must be > Check in date");
+                    return View("Edit", editBookingVM);
+                }
+
+                if (i.CheckInDate < editBookingVM.BookingDate)
+                {
+                    ModelState.AddModelError("", "Check in date must be > Booking Date");
+                    return View("Edit", editBookingVM);
+                }
+            }
+
+            foreach (var i in editBookingVM.ActivitiesId)
+            {
+                var activity = unitOfWork.ActivityRepository.GetById(i);
+                if (activity.Date < editBookingVM.BookingDate)
+                {
+                    ModelState.AddModelError("", "Activity date must be > Booking Date");
+                    return View("Edit", editBookingVM);
+                }
+            }
+
 
             var existingBooking = unitOfWork.BookingRepository.GetByIdIncluded(editBookingVM.Id);
             if (existingBooking == null) return NotFound();
