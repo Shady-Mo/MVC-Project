@@ -151,16 +151,12 @@ namespace MVCProject.Services.AccountService {
             return ResultService.Failure("Failed to sign in after registration.", false);
         }
 
-        public async Task<ResultService> VerifyEmailAsync(VerifyEmailViewModel verifyEmailViewModel, string scheme) {
+        public async Task<ResultService> VerifyEmailAsync(VerifyEmailViewModel verifyEmailViewModel, string resetLink) {
             var user = await _userManager.FindByEmailAsync(verifyEmailViewModel.Email);
 
             if (user == null) {
                 return ResultService.Failure("This email does not exist.", false, "Email");
             }
-
-            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            var resetLink = $"{scheme}://{verifyEmailViewModel.RequestHost}/Account/ForgetPassword?email={user.Email}&token={resetToken}";
 
             var subject = "Reset Password";
             var body = $"Please reset your password by clicking here: <a href='{resetLink}'>{subject}</a>";
@@ -188,6 +184,15 @@ namespace MVCProject.Services.AccountService {
 
         public async Task LogoutAsync() {
             await _signInManager.SignOutAsync();
+        }
+
+        public async Task<string> GeneratePasswordTokenAsync(string email) {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) {
+                return null;
+            }
+
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
     }
 }
