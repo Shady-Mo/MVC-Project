@@ -23,7 +23,7 @@ namespace MVCProject.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        [Authorize(Roles ="Admin")]
+        //[Authorize(Roles ="Admin")]
         [HttpGet]
         public IActionResult Index([FromQuery] string searchQuery = "", [FromQuery] int pageNumber = 1)
         {
@@ -38,8 +38,8 @@ namespace MVCProject.Controllers
             return View("Index", bookingVMs);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
+        //[ValidateAntiForgeryToken]
         public IActionResult Details(int id)
         {
 
@@ -76,7 +76,7 @@ namespace MVCProject.Controllers
         [HttpPost]
         public IActionResult Book(AddBookingVM addBookingVM)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 foreach (var i in addBookingVM.Accomodations)
                 {
@@ -103,44 +103,19 @@ namespace MVCProject.Controllers
                     }
                 }
 
-                var flights = new List<Flight>();
-                foreach (var i in addBookingVM.FlightsId)
-                {
-                    flights.Add(unitOfWork.FlightRepository.GetById(i));
-                }
-
-                flights.Sort();
-
-
-                for (int i = 0; i < flights.Count - 1; i++)
-                {
-                    if (flights[i + 1].DepartureDateTime < flights[i].ArrivalDateTime)
-                    {
-                        ModelState.AddModelError("", "There is conflict between depature dates");
-                        return View("Book", addBookingVM);
-                    }
-
-                    if(flights[i + 1].DepartureAirport != flights[i].DestinationAirport)
-                    {
-                        ModelState.AddModelError("", "There is conflict between depature countries");
-                        return View("Book", addBookingVM);
-                    }
-                }
-
-
-
 
                 var booking = addBookingVM.Adapt<Models.Booking>();
                 string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 booking.UserId = currentUserId;
-                
+                booking.FlightId = addBookingVM.FlightId;
+
                 unitOfWork.BookingRepository.Add(booking);
                 unitOfWork.Save();
 
                 decimal totalAmount = 0.0m;
 
-                foreach(var i in addBookingVM.Accomodations)
+                foreach (var i in addBookingVM.Accomodations)
                 {
 
                     var accomodation = unitOfWork.AccomodationRepositroy.GetById(i.Id);
@@ -156,7 +131,7 @@ namespace MVCProject.Controllers
                     decimal days = (i.CheckOutDate.Date - i.CheckInDate.Date).Days;
                     totalAmount += accomodation.PricePerNight * days;
                 }
-                
+
 
                 foreach (var i in addBookingVM.ActivitiesId)
                 {
@@ -172,21 +147,10 @@ namespace MVCProject.Controllers
 
                 }
 
-                foreach (var i in addBookingVM.FlightsId)
-                {
+                var flight = unitOfWork.FlightRepository.GetById(addBookingVM.FlightId);
+                flight.AvailableSeats -= 1;
+                totalAmount += flight.Price;
 
-                    var flight = unitOfWork.FlightRepository.GetById(i);
-
-                    flight.AvailableSeats -= 1;
-
-                    unitOfWork.BookingFlightRepository.Add(new BookingFlight
-                    {
-                        BookingId = booking.Id,
-                        FlightId = i
-                    });
-
-                    totalAmount += flight.Price;
-                }
 
                 booking.TotalAmount = totalAmount;
                 unitOfWork.Save();
@@ -202,20 +166,21 @@ namespace MVCProject.Controllers
         {
             var booking = unitOfWork.BookingRepository.GetByIdIncluded(id);
 
+            
             var bookingVM = new EditBookingVM
             {
                 Id = booking.Id,
                 Country = booking.Country,
                 BookingDate = booking.BookingDate,
                 Status = booking.Status,
-                FlightsId = booking.BookingFlights?.Select(f => f.FlightId).ToList() ?? new List<int>(),
+                FlightId = booking.FlightId,
                 ActivitiesId = booking.BookingActivities?.Select(a => a.ActivityId).ToList() ?? new List<int>(),
                 Accomodations = booking.bookingAccomodations?.Select(a => new BookingAccomodationVM
                 {
                     Id = a.AccomodationId,
                     CheckInDate = a.CheckInDate,
                     CheckOutDate = a.CheckOutDate
-                }).ToList() ?? new List<BookingAccomodationVM>()
+                }).ToList() ?? new List<BookingAccomodationVM>(),
             };
 
             return View("Edit", bookingVM);
@@ -240,14 +205,11 @@ namespace MVCProject.Controllers
                 unitOfWork.ActivityRepository.GetById(i.ActivityId).Capacity += 1;
             }
 
-            foreach (var i in existingBooking.BookingFlights)
-            {
-                unitOfWork.FlightRepository.GetById(i.FlightId).AvailableSeats += 1;
-            }
+            unitOfWork.FlightRepository.GetById(existingBooking.FlightId).AvailableSeats += 1;
+            
 
             existingBooking.bookingAccomodations.Clear();
             existingBooking.BookingActivities.Clear();
-            existingBooking.BookingFlights.Clear();
             unitOfWork.Save();
 
             existingBooking.Country = editBookingVM.Country;
@@ -257,7 +219,7 @@ namespace MVCProject.Controllers
             decimal totalAmount = 0.0m;
 
             if (editBookingVM.Accomodations != null)
-            { 
+            {
                 foreach (var i in editBookingVM.Accomodations)
                 {
 
@@ -292,29 +254,17 @@ namespace MVCProject.Controllers
                 }
             }
 
-            if (editBookingVM.FlightsId != null)
-            {
-                foreach (var i in editBookingVM.FlightsId)
-                {
-                    var flight = unitOfWork.FlightRepository.GetById(i);
+            var flight = unitOfWork.FlightRepository.GetById(editBookingVM.FlightId);
 
-                    flight.AvailableSeats -= 1;
+            flight.AvailableSeats -= 1;
+            totalAmount += flight.Price;
 
-                    unitOfWork.BookingFlightRepository.Add(new BookingFlight
-                    {
-                        BookingId = editBookingVM.Id,
-                        FlightId = i
-                    });
-
-                    totalAmount += flight.Price;
-                }
-            }
 
             existingBooking.TotalAmount = totalAmount;
             unitOfWork.BookingRepository.Update(existingBooking);
             unitOfWork.Save();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("MyBooking"); ;
         }
 
 
@@ -337,11 +287,11 @@ namespace MVCProject.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            var booking = unitOfWork.BookingRepository.GetById(id);
+            var booking = unitOfWork.BookingRepository.GetByIdIncluded(id);
             if (booking == null) return NotFound();
 
             var bookingVM = booking.Adapt<DisplayBookingVM>();
-            return View("Delete",bookingVM);
+            return View("Delete", bookingVM);
         }
 
         [HttpPost, ActionName("Delete")]
@@ -370,14 +320,8 @@ namespace MVCProject.Controllers
                 }
             }
 
-            if (booking.BookingFlights != null)
-            {
-                foreach (var bf in booking.BookingFlights)
-                {
-                    var flight = unitOfWork.FlightRepository.GetById(bf.FlightId);
-                    if (flight != null) flight.AvailableSeats += 1;
-                }
-            }
+            var flight = unitOfWork.FlightRepository.GetById(booking.FlightId);
+            if (flight != null) flight.AvailableSeats += 1;
 
             unitOfWork.BookingRepository.Delete(id);
             unitOfWork.Save();

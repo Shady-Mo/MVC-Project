@@ -13,12 +13,12 @@ namespace MVCProject.Repositories.BookingRepo
 
         public (List<Booking> bookings, int TotalCount) GetAllWithFilterBy(string searchQuery, int pageNumber = 1, int pageSize = 6)
         {
-            var query = _context.Bookings.AsQueryable().Include(b => b.BookingFlights).Include(b=>b.bookingAccomodations).Include(b=> b.BookingActivities);
+            var query = _context.Bookings.AsQueryable().Include(b => b.Flight).Include(b=>b.bookingAccomodations).Include(b=> b.BookingActivities);
 
 
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                query = query.Where(a => a.Country.Contains(searchQuery) || a.AppUser.UserName.Contains(searchQuery)).Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities); ;
+                query = query.Where(a => a.Country.Contains(searchQuery) || a.AppUser.UserName.Contains(searchQuery)).Include(b => b.Flight).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities); ;
             }
 
             var accomodations = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
@@ -28,12 +28,12 @@ namespace MVCProject.Repositories.BookingRepo
 
         public (List<Booking> bookings, int TotalCount) GetAllWithFilterByUserId(string userId, string searchQuery, int pageNumber = 1, int pageSize = 6)
         {
-            var query = _context.Bookings.Where(b => b.UserId == userId).AsQueryable().Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities);
+            var query = _context.Bookings.Where(b => b.UserId == userId).AsQueryable().Include(b => b.Flight).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities);
 
 
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                query = query.Where(b => b.UserId == userId && b.Country.Contains(searchQuery) || b.AppUser.UserName.Contains(searchQuery)).Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities); ;
+                query = query.Where(b => b.UserId == userId && b.Country.Contains(searchQuery) || b.AppUser.UserName.Contains(searchQuery)).Include(b => b.Flight).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities); ;
             }
 
             var accomodations = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
@@ -43,7 +43,7 @@ namespace MVCProject.Repositories.BookingRepo
 
         public Booking GetByIdIncluded(int id)
         {
-            return _context.Bookings.Include(b => b.BookingFlights).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities).FirstOrDefault(b => b.Id == id);
+            return _context.Bookings.Include(b => b.Flight).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities).FirstOrDefault(b => b.Id == id);
         }
     }
 }

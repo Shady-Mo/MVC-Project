@@ -19,8 +19,8 @@ namespace MVCProject.AppConfigurations {
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-            builder.HasMany(b => b.BookingFlights)
-                .WithOne(ba => ba.Booking)
+            builder.HasOne(b => b.Flight)
+                .WithMany(f => f.Bookings)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

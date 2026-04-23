@@ -12,7 +12,7 @@ namespace MVCProject.ViewModels.BookingViewModel
         [Required]
         public DateTime BookingDate { get; set; }
 
-        public List<int> FlightsId { get; set; }
+        public int FlightId { get; set; }
         public List<BookingAccomodationVM> Accomodations { get; set; }
         public List<int> ActivitiesId { get; set; }
     }

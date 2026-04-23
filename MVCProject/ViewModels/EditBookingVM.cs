@@ -10,13 +10,15 @@ namespace MVCProject.ViewModels.BookingViewModel
         [Required]
         public string Country { get; set; }
 
+        public string src { get; set; }
+
         [Required]
         public DateTime BookingDate { get; set; }
 
         [Required]
         public Status Status { get; set; }
 
-        public List<int> FlightsId { get; set; } = new List<int>();
+        public int FlightId { get; set; }
         public List<BookingAccomodationVM> Accomodations { get; set; } = new List<BookingAccomodationVM>();
         public List<int> ActivitiesId { get; set; } = new List<int>();
     }

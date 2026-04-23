@@ -20,6 +20,6 @@ namespace MVCProject.Data {
         public DbSet<Activity> Activities { get; set; }
         public DbSet<BookingAccomodation> BookingAccomodations { get; set; }
         public DbSet<BookingActivity> BookingActivities { get; set; }
-        public DbSet<BookingFlight> BookingFlights { get; set; }
+        //public DbSet<BookingFlight> BookingFlights { get; set; }
     }
 }

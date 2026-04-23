@@ -3,7 +3,7 @@ using MVCProject.Repositories.AccmodationRepo;
 using MVCProject.Repositories.ActivityRepo;
 using MVCProject.Repositories.BookingAccomodationRepo;
 using MVCProject.Repositories.BookingActivityRepo;
-using MVCProject.Repositories.BookingFlightRepo;
+//using MVCProject.Repositories.BookingFlightRepo;
 using MVCProject.Repositories.BookingRepo;
 using MVCProject.Repositories.FlightRepo;
 
@@ -19,7 +19,7 @@ namespace MVCProject.Repositories
         private IBookingRepository bookingRepository;
         private IBookingAccomodationRepository bookingAccomodationRepository;
         private IBookingActivityRepository bookingActivityRepository;
-        private IBookingFlightRepository bookingFlightRepository;
+        //private IBookingFlightRepository bookingFlightRepository;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -82,15 +82,15 @@ namespace MVCProject.Repositories
             }
         }
 
-        public IBookingFlightRepository BookingFlightRepository
-        {
-            get
-            {
-                if (bookingFlightRepository == null)
-                    bookingFlightRepository = new BookingFlightRepository(context);
-                return bookingFlightRepository;
-            }
-        }
+        //public IBookingFlightRepository BookingFlightRepository
+        //{
+        //    get
+        //    {
+        //        if (bookingFlightRepository == null)
+        //            bookingFlightRepository = new BookingFlightRepository(context);
+        //        return bookingFlightRepository;
+        //    }
+        //}
 
         public void Save()
         {
