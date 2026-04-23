@@ -65,6 +65,7 @@ namespace MVCProject.Controllers {
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, bool rememberMe, string returnUrl = null) {
             var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { returnUrl });
             var properties = _accountService.ConfigureExternalLogin(provider, redirectUrl, rememberMe);
@@ -126,10 +127,18 @@ namespace MVCProject.Controllers {
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel verifyEmailViewModel) {
             if (ModelState.IsValid) {
-                verifyEmailViewModel.RequestHost = Request.Host.Host;
-                var result = await _accountService.VerifyEmailAsync(verifyEmailViewModel, Request.Scheme);
+                var resetToken = await _accountService.GeneratePasswordTokenAsync(verifyEmailViewModel.Email);
+                if (resetToken == null) {
+                    ModelState.AddModelError("Email", "This email does not exist.");
+                    return View(verifyEmailViewModel);
+                }
+                var resetLink = Url.Action("ForgetPassword", "Account",
+                    new { email = verifyEmailViewModel.Email, token = resetToken }, Request.Scheme);
+
+                var result = await _accountService.VerifyEmailAsync(verifyEmailViewModel, resetLink);
 
                 if (result.Succeeded) {
                     return RedirectToAction("EmailSent", new { email = verifyEmailViewModel.Email });

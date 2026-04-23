@@ -18,6 +18,8 @@ namespace MVCProject.Services.AccountService {
 
         Task<ResultService> ForgetPasswordAsync(ForgetPasswordViewModel forgetPasswordViewModel);
 
+        Task<string> GeneratePasswordTokenAsync(string email);
+
         Task LogoutAsync();
     }
 }
