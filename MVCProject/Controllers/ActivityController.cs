@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MVCProject.Models;
@@ -9,6 +10,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MVCProject.Controllers
 {
+    [Authorize]
     public class ActivityController : Controller
     {
         private readonly UnitOfWork unitOfWork;

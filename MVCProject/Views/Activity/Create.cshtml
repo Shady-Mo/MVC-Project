@@ -4,53 +4,79 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
+    .btn-outline-primary-custom:hover { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .form-control:focus { border-color: #28b5a4; box-shadow: 0 0 0 0.25rem rgba(40, 181, 164, 0.25); }
+    .card-custom { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; }
+</style>
 
-<h4>AddActivityVM</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card card-custom">
+                <div class="card-header bg-primary-custom text-white text-center py-3 rounded-top" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h3 class="mb-0 fw-bold">Create New Activity</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 form-group">
+                                <label asp-for="Name" class="form-label fw-bold text-muted"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Activity Name" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label asp-for="Location" class="form-label fw-bold text-muted"></label>
+                                <input asp-for="Location" class="form-control" placeholder="City or Venue" />
+                                <span asp-validation-for="Location" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-12 form-group">
+                                <label asp-for="Date" class="form-label fw-bold text-muted"></label>
+                                <input asp-for="Date" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="Date" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label asp-for="Price" class="form-label fw-bold text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="Price" class="form-control" placeholder="0.00" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label asp-for="Capacity" class="form-label fw-bold text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">👥</span>
+                                    <input asp-for="Capacity" class="form-control" placeholder="Max participants" />
+                                </div>
+                                <span asp-validation-for="Capacity" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-12 form-group">
+                                <label asp-for="ImageFile" class="form-label fw-bold text-muted">Cover Image</label>
+                                <input type="file" asp-for="ImageFile" class="form-control" accept="image/*">
+                                <span asp-validation-for="ImageFile" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary-custom px-4 fw-bold">Create Activity</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Location" class="control-label"></label>
-                <input asp-for="Location" class="form-control" />
-                <span asp-validation-for="Location" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Capacity" class="control-label"></label>
-                <input asp-for="Capacity" class="form-control" />
-                <span asp-validation-for="Capacity" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageFile">Profile Picture</label>
-                <input type="file" asp-for="ImageFile" class="form-control" accept="image/*">
-                <span asp-validation-for="ImageFile" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
