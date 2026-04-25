@@ -16,7 +16,6 @@ namespace MVCProject.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        // the next section is for all users, including guests, to view and search flights
 
         [HttpGet]
         public IActionResult Index([FromQuery] string searchQuery = "",

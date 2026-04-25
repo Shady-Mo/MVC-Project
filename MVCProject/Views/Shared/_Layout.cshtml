@@ -765,7 +765,15 @@
                                 <a asp-controller="Activity" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Activity" ? "selected" : "")">Activities</a>
                                 @if (User.Identity.IsAuthenticated)
                                 {
-                                    <a asp-controller="Booking" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
+                                    @if(User.IsInRole("Admin"))
+                                    {
+                                        <a asp-controller="Booking" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Booking" asp-action="MyBooking" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
+
+                                    }
                                 }
                                 <div class="search-icon">
                                     <i class="fas fa-search"></i>

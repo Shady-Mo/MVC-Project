@@ -23,7 +23,7 @@ namespace MVCProject.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        //[Authorize(Roles ="Admin")]
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         public IActionResult Index([FromQuery] string searchQuery = "", [FromQuery] int pageNumber = 1)
         {
@@ -78,6 +78,11 @@ namespace MVCProject.Controllers
         {
             if (ModelState.IsValid)
             {
+                if(addBookingVM.BookingDate < DateTime.Now)
+                {
+                    ModelState.AddModelError("", "Booking date must be >= Now Date");
+                    return View("Book", addBookingVM);
+                }
                 foreach (var i in addBookingVM.Accomodations)
                 {
                     if (i.CheckInDate >= i.CheckOutDate)
@@ -155,7 +160,7 @@ namespace MVCProject.Controllers
                 booking.TotalAmount = totalAmount;
                 unitOfWork.Save();
 
-                return RedirectToAction("MyBooking");
+                return User.IsInRole("Admin") ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(MyBooking));
             }
             return View("Book", addBookingVM);
         }
@@ -291,7 +296,7 @@ namespace MVCProject.Controllers
             unitOfWork.BookingRepository.Update(existingBooking);
             unitOfWork.Save();
 
-            return RedirectToAction("MyBooking"); ;
+            return User.IsInRole("Admin") ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(MyBooking));
         }
 
 
@@ -353,7 +358,7 @@ namespace MVCProject.Controllers
             unitOfWork.BookingRepository.Delete(id);
             unitOfWork.Save();
 
-            return RedirectToAction(nameof(Index));
+            return User.IsInRole("Admin") ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(MyBooking));
         }
 
     }

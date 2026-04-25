@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Accommodations";
 }
-
 <style>
     .text-primary-custom { color: #28b5a4 !important; }
     .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
@@ -22,9 +21,12 @@
         <h1 class="text-primary-custom m-0 fw-bold">Accommodations</h1>
     </div>
     <div class="col text-end">
-        <a asp-action="New" class="btn btn-primary-custom shadow-sm">
-            Create New Accommodation
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="New" class="btn btn-primary-custom shadow-sm">
+                Create New Accommodation
+            </a>
+        }
     </div>
 </div>
 
@@ -104,8 +106,11 @@
                             <div class="card-footer bg-white border-top-0 pt-0 pb-3">
                                 <div class="btn-group w-100 shadow-sm" role="group">
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary-custom">Details</a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                    }
                                 </div>
                             </div>
                         </div>

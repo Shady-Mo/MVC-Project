@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MVCProject.Models;
 using MVCProject.Repositories;
@@ -8,6 +9,7 @@ using MVCProject.ViewModels.ActivityViewModels;
 
 namespace MVCProject.Controllers
 {
+    [Authorize]
     public class AccomodationController : Controller
     {
         private readonly UnitOfWork unitOfWork;
@@ -30,7 +32,6 @@ namespace MVCProject.Controllers
             ViewBag.CurrentPage = pageNumber;
             ViewBag.TotalPages = (int)Math.Ceiling(count / (double)pageSize);
 
-            Console.WriteLine(accomodationesVM[0].Image);
 
             return View("Index", accomodationesVM);
         }
@@ -45,12 +46,15 @@ namespace MVCProject.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult New()
         {
             return View("New");
         }
 
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> New(AddAcccomodationVM acccomodationVM)
         {
@@ -71,6 +75,8 @@ namespace MVCProject.Controllers
             return View("New", acccomodationVM);
         }
 
+
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -79,6 +85,8 @@ namespace MVCProject.Controllers
             return View("Edit", accomodationVM);
         }
 
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Edit(EditAccomodationVM accomodationVM)
         {
@@ -104,6 +112,7 @@ namespace MVCProject.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Delete(int id)
         {
@@ -115,6 +124,8 @@ namespace MVCProject.Controllers
             return View("Delete",accomodationVM);
         }
 
+
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
