@@ -1,0 +1,491 @@
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f8fafc;
+                color: #0f172a;
+                line-height: 1.5;
+            }
+
+            /* container similar to modern travel layout */
+            .activities-container {
+                max-width: 1280px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem 4rem;
+            }
+
+            /* header area: title + fake category chip + sorting bar */
+            .page-header {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: flex-end;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                border-bottom: 2px solid #e2e8f0;
+                padding-bottom: 1.25rem;
+            }
+
+            .main-layout {
+                display: flex;
+                gap: 2rem;
+                align-items: flex-start;
+            }
+
+            /* sidebar filters */
+            .sidebar-filters {
+                flex: 0 0 250px;
+                background: transparent;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                position: sticky;
+                top: 2rem;
+            }
+
+            .filter-section {
+                border-bottom: 1px solid #e2e8f0;
+                padding-bottom: 1.5rem;
+            }
+            .filter-section:last-child {
+                border-bottom: none;
+            }
+
+            .filter-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #0f172a;
+                margin-bottom: 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* Content Area */
+            .content-area {
+                flex: 1;
+                min-width: 0;
+            }
+
+            /* Range Slider CSS */
+            .slider-container {
+                position: relative;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .slider-values {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.85rem;
+                color: #475569;
+                font-weight: 500;
+                margin-top: 10px;
+            }
+
+            .filter-btn {
+                background: #14b8a6;
+                color: white;
+                border: none;
+                width: 100%;
+                padding: 0.7rem;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.2s;
+                margin-top: 10px;
+            }
+            .filter-btn:hover {
+                background: #0d9488;
+            }
+
+            .title-section h1 {
+                font-size: 2.5rem;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                background: linear-gradient(135deg, #1e3c2c, #2b5e3b);
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                display: inline-block;
+            }
+
+            .category-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: #eef2ff;
+                padding: 0.3rem 1rem;
+                border-radius: 40px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: #1e3c2c;
+                margin-left: 1rem;
+                vertical-align: middle;
+            }
+
+                .category-badge i {
+                    font-size: 0.85rem;
+                }
+
+            .sorting-bar {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                flex-wrap: wrap;
+                background: white;
+                padding: 0.6rem 1.2rem;
+                border-radius: 80px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+
+            .sort-label {
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: #475569;
+            }
+
+            .sort-option, .view-option {
+                background: none;
+                border: none;
+                font-weight: 500;
+                font-size: 0.85rem;
+                padding: 0.3rem 0.7rem;
+                border-radius: 30px;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: inherit;
+                color: #334155;
+            }
+
+                .sort-option.active, .view-option.active {
+                    background: #1e3c2c;
+                    color: white;
+                }
+
+                .sort-option:hover, .view-option:hover {
+                    background: #e9ecef;
+                }
+
+            /* filter chips row: dynamic categories (hiking, adventure, camping, etc.) */
+            .categories-filter {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                margin-bottom: 2rem;
+                border-bottom: 1px solid #e2e8f0;
+                padding-bottom: 1rem;
+            }
+
+            .filter-chip {
+                background: white;
+                border: 1px solid #cbd5e1;
+                padding: 0.5rem 1.2rem;
+                border-radius: 40px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: #1e293b;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+                .filter-chip i {
+                    font-size: 0.8rem;
+                    color: #2b5e3b;
+                }
+
+                .filter-chip.active {
+                    background: #1e3c2c;
+                    border-color: #1e3c2c;
+                    color: white;
+                }
+
+                    .filter-chip.active i {
+                        color: white;
+                    }
+
+                .filter-chip:hover:not(.active) {
+                    background: #f1f5f9;
+                    border-color: #94a3b8;
+                }
+
+            /* activity grid */
+            .activities-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            /* card design inspired by Travel Monster */
+            .activity-card {
+                background: white;
+                border-radius: 1rem;
+                overflow: hidden;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+                transition: transform 0.2s, box-shadow 0.2s;
+                display: flex;
+                border: 1px solid #e2e8f0;
+            }
+
+                .activity-card:hover {
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                }
+
+            .card-img {
+                flex: 0 0 300px;
+                min-height: 250px;
+                background-size: cover;
+                background-position: center;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                padding: 1rem;
+            }
+
+            /* category label on image */
+            .img-cat-tag {
+                background: #ff4757;
+                color: white;
+                font-size: 0.75rem;
+                font-weight: 600;
+                padding: 0.25rem 0.75rem;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .card-content {
+                flex: 1;
+                padding: 1.5rem;
+                display: grid;
+                grid-template-columns: 1fr 200px;
+                gap: 1.5rem;
+            }
+
+            .card-main-info {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .card-price-action {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                text-align: right;
+                justify-content: space-between;
+                border-left: 1px solid #e2e8f0;
+                padding-left: 1.5rem;
+            }
+
+            .activity-title {
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: #0f172a;
+                margin-bottom: 0.25rem;
+            }
+
+            .activity-desc {
+                font-size: 0.9rem;
+                color: #475569;
+                line-height: 1.5;
+                margin-bottom: 1rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .meta-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                font-size: 0.85rem;
+                color: #64748b;
+            }
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .meta-item i {
+                color: #94a3b8;
+                width: 16px;
+                text-align: center;
+            }
+
+            .price-info {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 4px;
+            }
+
+            .duration {
+                background: #f1f5f9;
+                padding: 0.2rem 0.6rem;
+                border-radius: 20px;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+                .duration i {
+                    color: #2b5e3b;
+                }
+
+            .group-size i {
+                color: #64748b;
+            }
+
+            .price-block {
+                display: flex;
+                align-items: baseline;
+                gap: 0.6rem;
+                flex-wrap: wrap;
+                margin: 0.8rem 0;
+                border-top: 1px solid #eef2ff;
+                padding-top: 0.8rem;
+            }
+
+            .old-price {
+                font-size: 0.85rem;
+                color: #94a3b8;
+                text-decoration: line-through;
+            }
+
+            .new-price {
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: #0f172a;
+            }
+
+            .save-badge {
+                color: #10b981;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .departures {
+                background: none;
+                padding: 0;
+                margin: 0;
+                font-size: 0.8rem;
+                color: #64748b;
+            }
+            .departures p {
+                margin-bottom: 0.25rem;
+                color: #94a3b8;
+            }
+
+            .departure-dates {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                margin-top: 0;
+            }
+
+            .date-badge {
+                background: none;
+                border: none;
+                padding: 0;
+                font-size: 0.8rem;
+                font-weight: 500;
+            }
+
+                .date-badge.available {
+                    color: #475569;
+                }
+                .date-badge i {
+                    color: #10b981;
+                    margin-right: 4px;
+                }
+
+            .btn-details {
+                display: inline-block;
+                width: 100%;
+                background: #14b8a6;
+                border: none;
+                padding: 0.75rem 1.5rem;
+                text-align: center;
+                border-radius: 40px;
+                font-weight: 600;
+                color: white;
+                transition: all 0.2s;
+                cursor: pointer;
+                font-size: 0.95rem;
+            }
+
+                .btn-details:hover {
+                    background: #0d9488;
+                    color: white;
+                }
+
+            .pagination-container {
+                display: flex;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-top: 2rem;
+            }
+            .page-btn {
+                padding: 0.5rem 1rem;
+                border: 1px solid #cbd5e1;
+                background: white;
+                color: #334155;
+                font-weight: 500;
+                border-radius: 5px;
+                text-decoration: none;
+            }
+            .page-btn:hover {
+                background: #f1f5f9;
+            }
+            .page-btn.active {
+                background: #14b8a6;
+                color: white;
+                border-color: #14b8a6;
+            }
+
+            @media (max-width: 900px) {
+                .main-layout {
+                    flex-direction: column;
+                }
+                .sidebar-filters {
+                    width: 100%;
+                    flex: none;
+                    position: relative;
+                    top: 0;
+                }
+                .activity-card {
+                    flex-direction: column;
+                }
+                .card-img {
+                    flex: none;
+                    height: 200px;
+                    min-height: auto;
+                }
+                .card-content {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                }
+                .card-price-action {
+                    align-items: flex-start;
+                    text-align: left;
+                    border-left: none;
+                    border-top: 1px solid #e2e8f0;
+                    padding-left: 0;
+                    padding-top: 1rem;
+                    gap: 1rem;
+                }
+                .price-info {
+                    align-items: flex-start;
+                }
+            }
