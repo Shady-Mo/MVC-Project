@@ -5,25 +5,50 @@
     ViewData["Title"] = "Edit Booking";
 }
 
+<style>
+    .text-primary-custom { color: #28b5a4 !important; }
+    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
+    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
+    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
+    
+    .selectable-card { cursor: pointer; transition: all 0.2s ease-in-out; border: 2px solid transparent; height: 100%; }
+    .selectable-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
+    
+    /* الـ CSS ده هو اللي هيتولى التلوين لما الـ Checkbox يكون Checked */
+    input[type="checkbox"].item-selector:checked + .card-content,
+    input[type="radio"].item-selector:checked + .card-content {
+        border-color: #28b5a4 !important; 
+        background-color: #f0fbf9 !important;
+    }
+    .card-content { border: 2px solid transparent; border-radius: 0.375rem; height: 100%; transition: all 0.2s; }
+    .hidden-checkbox, .hidden-radio { display: none; }
+    
+    .hotel-dates { display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; }
+</style>
+
 <div class="container mt-4 mb-5">
     <h2 class="text-primary-custom fw-bold border-bottom pb-3 mb-4">
         ✏️ Edit Your Booking #@Model.Id
     </h2>
 
-    <form asp-action="Edit" method="post" id="bookingForm">
+    <form asp-action="Edit" method="post" id="bookingForm" novalidate>
         <input type="hidden" asp-for="Id" />
         
         <div class="card shadow-sm border-0 mb-4 p-4">
             <h5 class="fw-bold text-muted mb-3">Booking Details</h5>
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
+                    <label asp-for="src" class="form-label fw-bold">🛬 Source</label>
+                    <input asp-for="src" id="srcCountry" class="form-control" required />
+                </div>
+                <div class="col-md-3">
                     <label asp-for="Country" class="form-label fw-bold">🛬 Destination</label>
-                    <input asp-for="Country" id="destCountry" class="form-control" readonly />
+                    <input asp-for="Country" id="destCountry" class="form-control" required />
                 </div>
 
                 <div class="col-md-3">
                     <label asp-for="BookingDate" class="form-label fw-bold">📅 Flight Date</label>
-                    <input asp-for="BookingDate" id="BookingDate" type="date" class="form-control" readonly />
+                    <input asp-for="BookingDate" id="BookingDate" type="date" class="form-control" required />
                 </div>
 
                 <div class="col-md-3">
@@ -40,7 +65,7 @@
         </div>
 
         <div id="resultsSection" style="display: none;">
-            <h5 class="fw-bold text-primary-custom mt-4 mb-3">✈️ Flights</h5>
+            <h5 class="fw-bold text-primary-custom mt-4 mb-3">✈️ Select Flight (Choose one)</h5>
             <div class="row g-3" id="flightsContainer"></div>
 
             <h5 class="fw-bold text-primary-custom mt-5 mb-3">🏨 Accommodations</h5>
@@ -50,7 +75,7 @@
             <div class="row g-3" id="activitiesContainer"></div>
 
             <div class="text-end mt-5 pt-3 border-top">
-                <a asp-action="Index" class="btn btn-outline-secondary me-2 btn-lg fw-bold">Cancel</a>
+                <a asp-action="MyBooking" class="btn btn-outline-secondary me-2 btn-lg fw-bold">Cancel</a>
                 <button type="submit" class="btn btn-primary-custom btn-lg px-5 fw-bold shadow">
                     💾 Save Changes
                 </button>
@@ -60,113 +85,198 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // نقل الداتا القديمة من الـ C# للـ JavaScript
-        var existingFlights = @Html.Raw(JsonSerializer.Serialize(Model.FlightsId));
+        var existingFlightId = '@Model.FlightId'; 
         var existingActivities = @Html.Raw(JsonSerializer.Serialize(Model.ActivitiesId));
         var existingHotels = @Html.Raw(JsonSerializer.Serialize(Model.Accomodations));
 
         $(document).ready(function () {
             
-            // تحميل الداتا أوتوماتيك لما الصفحة تفتح
+            // --- Custom Client-Side Validation --- //
+            $("#bookingForm").submit(function (e) {
+                var errors = [];
+
+                if (!$("#srcCountry").val().trim()) errors.push("Please enter the Source country.");
+                if (!$("#destCountry").val().trim()) errors.push("Please enter the Destination country.");
+                if (!$("#BookingDate").val()) errors.push("Please select a Flight Date.");
+
+                if ($("#resultsSection").is(":visible")) {
+                    if ($('input[name="FlightId"]').length > 0 && !$('input[name="FlightId"]:checked').val()) {
+                        errors.push("You must select a Flight.");
+                    }
+
+                    if ($('.hotel-checkbox').length > 0 && $('.hotel-checkbox:checked').length === 0) {
+                        errors.push("You must select at least one Accommodation.");
+                    }
+
+                    if ($('input[name="ActivitiesId"]').length > 0 && $('input[name="ActivitiesId"]:checked').length === 0) {
+                        errors.push("You must select at least one Activity.");
+                    }
+                }
+
+                var hotelDateMissing = false;
+                var invalidDateLogic = false;
+                var invalidDateLogic2 = false;
+
+                $(".hotel-checkbox:checked").each(function () {
+                    var wrapper = $(this).closest('.hotel-wrapper');
+                    var dateInputs = wrapper.find('.date-input');
+                    var checkIn = dateInputs.eq(0).val();
+                    var checkOut = dateInputs.eq(1).val();
+
+                    if (!checkIn || !checkOut) {
+                        hotelDateMissing = true;
+                    } else {
+                        if (new Date(checkIn) >= new Date(checkOut)) {
+                            invalidDateLogic = true;
+                        }
+                        if (new Date(checkIn) < new Date($("#BookingDate").val())) {
+                            invalidDateLogic2 = true;
+                        }
+                    }
+                });
+
+                if (hotelDateMissing) errors.push("Please provide Check-in and Check-out dates for all selected hotels.");
+                if (invalidDateLogic) errors.push("Check-out date must be AFTER Check-in date.");
+                if (invalidDateLogic2) errors.push("Check-in date must be AFTER Booking date.");
+
+                if (errors.length > 0) {
+                    e.preventDefault(); 
+                    
+                    var errorHtml = "<ul style='text-align: left; margin-bottom: 0;'>";
+                    errors.forEach(function(err) { errorHtml += "<li>" + err + "</li>"; });
+                    errorHtml += "</ul>";
+
+                    Swal.fire({ icon: 'error', title: 'Invalid Input', html: errorHtml, confirmButtonColor: '#28b5a4' });
+                }
+            });
+
+
             loadTravelData();
 
             $("#btnLoadData").click(function () {
                 loadTravelData();
             });
 
+            $("#destCountry, #BookingDate, #srcCountry").change(function () {
+                var dest = $("#destCountry").val();
+                var src = $("#srcCountry").val();
+                var bookingDate = $("#BookingDate").val();
+                
+                if(dest && bookingDate && src) {
+                    loadTravelData();
+                }
+            });
+
             function loadTravelData() {
                 var dest = $("#destCountry").val();
+                var src = $("#srcCountry").val();
                 var bookingDate = $("#BookingDate").val();
+
+                if(!dest || !src || !bookingDate) return;
+
+                $("#btnLoadData").html("⏳ Loading...").prop("disabled", true);
 
                 $.ajax({
                     url: '@Url.Action("GetTravelData", "Booking")',
                     type: 'GET',
-                    data: { source: "", dest: dest, date: bookingDate }, // عدل Source لو عندك
+                    data: { source: src, dest: dest, date: bookingDate },
                     success: function (data) {
                         renderFlights(data.flights);
                         renderHotels(data.hotels);
                         renderActivities(data.activities);
                         $("#resultsSection").fadeIn();
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Error loading data. Please try again.', 'error');
+                    },
+                    complete: function() {
+                        $("#btnLoadData").html("🔄 Load Options").prop("disabled", false);
                     }
                 });
             }
 
             function renderFlights(flights) {
                 var html = '';
-                flights.forEach(function(f) {
-                    var isChecked = existingFlights.includes(f.id) ? 'checked' : '';
-                    var borderStyle = isChecked ? 'border-color: #28b5a4; background-color: #f0fbf9;' : '';
-
-                    html += `
-                        <div class="col-md-4">
-                            <label class="w-100 selectable-card">
-                                <input type="checkbox" name="FlightsId" value="${f.id}" class="hidden-checkbox item-selector" ${isChecked} />
-                                <div class="card-content p-3 shadow-sm card" style="${borderStyle}">
-                                    <div class="fw-bold text-dark">${f.airline || 'Flight'}</div>
-                                    <div class="text-primary-custom fw-bold mt-2">$${f.price || 0}</div>
-                                </div>
-                            </label>
-                        </div>
-                    `;
-                });
+                if(!flights || flights.length === 0) {
+                    html = '<div class="col-12 text-muted">No flights found for this destination and date.</div>';
+                } else {
+                    flights.forEach(function(f) {
+                        var isChecked = (existingFlightId == f.id) ? 'checked' : '';
+                        
+                        // تم إزالة Inline Style عشان الـ CSS يشتغل صح
+                        html += `
+                            <div class="col-md-4">
+                                <label class="w-100 selectable-card">
+                                    <input type="radio" name="FlightId" value="${f.id}" class="hidden-radio item-selector" ${isChecked} />
+                                    <div class="card-content p-3 shadow-sm card flight-card">
+                                        <div class="fw-bold text-dark">${f.airline || 'Flight'} - ${f.flightNumber || ''}</div>
+                                        <div class="text-muted small">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
+                                        <div class="text-primary-custom fw-bold mt-2">$${f.price || 0}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
                 $("#flightsContainer").html(html);
             }
 
             function renderHotels(hotels) {
                 var html = '';
-                hotels.forEach(function(h, i) {
-                    // البحث هل الفندق ده كان محجوز قبل كده؟
-                    var savedHotel = existingHotels.find(x => x.Id === h.id);
-                    var isChecked = savedHotel ? 'checked' : '';
-                    var borderStyle = isChecked ? 'border-color: #28b5a4;' : '';
-                    var displayDates = isChecked ? 'display: block;' : 'display: none;';
-                    
-                    // تظبيط التواريخ لو موجودة
-                    var checkInVal = savedHotel ? savedHotel.CheckInDate.split('T')[0] : '';
-                    var checkOutVal = savedHotel ? savedHotel.CheckOutDate.split('T')[0] : '';
-                    var disabledAttr = savedHotel ? '' : 'disabled';
+                if(!hotels || hotels.length === 0) {
+                    html = '<div class="col-12 text-muted">No accommodations found for this destination.</div>';
+                } else {
+                    hotels.forEach(function(h, i) {
+                        var savedHotel = existingHotels.find(x => x.Id === h.id);
+                        var isChecked = savedHotel ? 'checked' : '';
+                        var borderStyle = isChecked ? 'border-color: #28b5a4;' : '';
+                        var displayDates = isChecked ? 'display: block;' : 'display: none;';
+                        
+                        var checkInVal = savedHotel ? savedHotel.CheckInDate.split('T')[0] : '';
+                        var checkOutVal = savedHotel ? savedHotel.CheckOutDate.split('T')[0] : '';
+                        var disabledAttr = savedHotel ? '' : 'disabled';
 
-                    html += `
-                        <div class="col-md-6">
-                            <div class="card shadow-sm p-3 card-content hotel-wrapper" style="${borderStyle}">
-                                <label class="w-100 mb-0" style="cursor:pointer;">
-                                    <input type="checkbox" name="Accomodations[${i}].Id" value="${h.id}" class="hotel-checkbox me-2" ${isChecked} />
-                                    <span class="fw-bold text-dark fs-5">🏨 ${h.name}</span>
-                                    <div class="text-primary-custom fw-bold mt-1 ms-4">$${h.pricePerNight || 0} / night</div>
-                                </label>
-                                <div class="hotel-dates ms-4" style="${displayDates}">
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <label class="small fw-bold">Check-in</label>
-                                            <input type="date" name="Accomodations[${i}].CheckInDate" class="form-control form-control-sm date-input" value="${checkInVal}" ${disabledAttr} />
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small fw-bold">Check-out</label>
-                                            <input type="date" name="Accomodations[${i}].CheckOutDate" class="form-control form-control-sm date-input" value="${checkOutVal}" ${disabledAttr} />
+                        html += `
+                            <div class="col-md-6">
+                                <div class="card shadow-sm p-3 card-content hotel-wrapper" style="${borderStyle}">
+                                    <label class="w-100 mb-0" style="cursor:pointer;">
+                                        <input type="checkbox" name="Accomodations[${i}].Id" value="${h.id}" class="hotel-checkbox me-2" ${isChecked} />
+                                        <span class="fw-bold text-dark fs-5">🏨 ${h.name}</span>
+                                        <div class="text-primary-custom fw-bold mt-1 ms-4">$${h.pricePerNight || 0} / night</div>
+                                    </label>
+                                    <div class="hotel-dates ms-4" style="${displayDates}">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="small fw-bold">Check-in</label>
+                                                <input type="date" name="Accomodations[${i}].CheckInDate" class="form-control form-control-sm date-input" value="${checkInVal}" ${disabledAttr} />
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="small fw-bold">Check-out</label>
+                                                <input type="date" name="Accomodations[${i}].CheckOutDate" class="form-control form-control-sm date-input" value="${checkOutVal}" ${disabledAttr} />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
                 $("#hotelsContainer").html(html);
 
-                // Event listener لإظهار/إخفاء التواريخ عند التعديل
                 $(".hotel-checkbox").change(function() {
                     var wrapper = $(this).closest('.hotel-wrapper');
                     var dateInputs = wrapper.find('.date-input');
                     var dateSection = wrapper.find('.hotel-dates');
                     if(this.checked) {
                         dateSection.slideDown();
-                        dateInputs.prop('disabled', false).prop('required', true);
+                        dateInputs.prop('disabled', false);
                         wrapper.css('border-color', '#28b5a4');
                     } else {
                         dateSection.slideUp();
-                        dateInputs.prop('disabled', true).prop('required', false).val('');
+                        dateInputs.prop('disabled', true).val('');
                         wrapper.css('border-color', 'transparent');
                     }
                 });
@@ -174,22 +284,26 @@
 
             function renderActivities(activities) {
                 var html = '';
-                activities.forEach(function(a) {
-                    var isChecked = existingActivities.includes(a.id) ? 'checked' : '';
-                    var borderStyle = isChecked ? 'border-color: #28b5a4; background-color: #f0fbf9;' : '';
-
-                    html += `
-                        <div class="col-md-4">
-                            <label class="w-100 selectable-card">
-                                <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox item-selector" ${isChecked} />
-                                <div class="card-content p-3 shadow-sm card" style="${borderStyle}">
-                                    <div class="fw-bold text-dark">🎯 ${a.name}</div>
-                                    <div class="text-primary-custom fw-bold mt-2">$${a.price || 0}</div>
-                                </div>
-                            </label>
-                        </div>
-                    `;
-                });
+                if(!activities || activities.length === 0) {
+                    html = '<div class="col-12 text-muted">No activities found for this destination.</div>';
+                } else {
+                    activities.forEach(function(a) {
+                        var isChecked = existingActivities.includes(a.id) ? 'checked' : '';
+                        
+                        html += `
+                            <div class="col-md-4">
+                                <label class="w-100 selectable-card">
+                                    <input type="checkbox" name="ActivitiesId" value="${a.id}" class="hidden-checkbox item-selector" ${isChecked} />
+                                    <div class="card-content p-3 shadow-sm card">
+                                        <div class="fw-bold text-dark">🎯 ${a.name}</div>
+                                        <div class="text-muted small">${a.location}</div>
+                                        <div class="text-primary-custom fw-bold mt-2">$${a.price || 0}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
                 $("#activitiesContainer").html(html);
             }
         });

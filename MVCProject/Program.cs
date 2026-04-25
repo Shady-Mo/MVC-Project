@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using MVCProject.Data;
 using MVCProject.Models;
 using MVCProject.Repositories;
-using MVCProject.Services;
+using MVCProject.Services.AccountService;
+using MVCProject.Services.BaseService;
 using MVCProject.Services.EmailService;
 using MVCProject.Services.ImgAddingService;
 using System.Reflection;
@@ -30,6 +31,7 @@ namespace MVCProject {
 
             builder.Services.AddScoped<UnitOfWork>();
             builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
 
             builder.Services.AddOutputCache(options => {
                 options.AddPolicy("GlobalExpiry", builder =>

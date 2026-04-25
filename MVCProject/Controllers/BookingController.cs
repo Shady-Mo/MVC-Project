@@ -23,6 +23,7 @@ namespace MVCProject.Controllers
             this.unitOfWork = unitOfWork;
         }
 
+        //[Authorize(Roles ="Admin")]
         [HttpGet]
         public IActionResult Index([FromQuery] string searchQuery = "", [FromQuery] int pageNumber = 1)
         {
@@ -38,6 +39,7 @@ namespace MVCProject.Controllers
         }
 
         [HttpGet]
+        //[ValidateAntiForgeryToken]
         public IActionResult Details(int id)
         {
 
@@ -65,6 +67,7 @@ namespace MVCProject.Controllers
             return View("MyBooking", bookingVMs);
         }
 
+        [HttpGet]
         public IActionResult Book()
         {
             return View("Book");
@@ -73,7 +76,7 @@ namespace MVCProject.Controllers
         [HttpPost]
         public IActionResult Book(AddBookingVM addBookingVM)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 foreach (var i in addBookingVM.Accomodations)
                 {
@@ -82,19 +85,37 @@ namespace MVCProject.Controllers
                         ModelState.AddModelError("", "Check out date must be > Check in date");
                         return View("Book", addBookingVM);
                     }
+
+                    if (i.CheckInDate < addBookingVM.BookingDate)
+                    {
+                        ModelState.AddModelError("", "Check in date must be > Booking Date");
+                        return View("Book", addBookingVM);
+                    }
                 }
+
+                foreach (var i in addBookingVM.ActivitiesId)
+                {
+                    var activity = unitOfWork.ActivityRepository.GetById(i);
+                    if (activity.Date < addBookingVM.BookingDate)
+                    {
+                        ModelState.AddModelError("", "Activity date must be > Booking Date");
+                        return View("Book", addBookingVM);
+                    }
+                }
+
 
                 var booking = addBookingVM.Adapt<Models.Booking>();
                 string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 booking.UserId = currentUserId;
-                
+                booking.FlightId = addBookingVM.FlightId;
+
                 unitOfWork.BookingRepository.Add(booking);
                 unitOfWork.Save();
 
                 decimal totalAmount = 0.0m;
 
-                foreach(var i in addBookingVM.Accomodations)
+                foreach (var i in addBookingVM.Accomodations)
                 {
 
                     var accomodation = unitOfWork.AccomodationRepositroy.GetById(i.Id);
@@ -110,7 +131,7 @@ namespace MVCProject.Controllers
                     decimal days = (i.CheckOutDate.Date - i.CheckInDate.Date).Days;
                     totalAmount += accomodation.PricePerNight * days;
                 }
-                
+
 
                 foreach (var i in addBookingVM.ActivitiesId)
                 {
@@ -126,27 +147,15 @@ namespace MVCProject.Controllers
 
                 }
 
+                var flight = unitOfWork.FlightRepository.GetById(addBookingVM.FlightId);
+                flight.AvailableSeats -= 1;
+                totalAmount += flight.Price;
 
-                foreach (var i in addBookingVM.FlightsId)
-                {
-
-                    var flight = unitOfWork.FlightRepository.GetById(i);
-
-                    flight.AvailableSeats -= 1;
-
-                    unitOfWork.BookingFlightRepository.Add(new BookingFlight
-                    {
-                        BookingId = booking.Id,
-                        FlightId = i
-                    });
-
-                    totalAmount += flight.Price;
-                }
 
                 booking.TotalAmount = totalAmount;
                 unitOfWork.Save();
 
-                return RedirectToAction("Index");
+                return RedirectToAction("MyBooking");
             }
             return View("Book", addBookingVM);
         }
@@ -157,20 +166,22 @@ namespace MVCProject.Controllers
         {
             var booking = unitOfWork.BookingRepository.GetByIdIncluded(id);
 
+
             var bookingVM = new EditBookingVM
             {
                 Id = booking.Id,
                 Country = booking.Country,
                 BookingDate = booking.BookingDate,
                 Status = booking.Status,
-                FlightsId = booking.BookingFlights?.Select(f => f.FlightId).ToList() ?? new List<int>(),
+                FlightId = booking.FlightId,
                 ActivitiesId = booking.BookingActivities?.Select(a => a.ActivityId).ToList() ?? new List<int>(),
                 Accomodations = booking.bookingAccomodations?.Select(a => new BookingAccomodationVM
                 {
                     Id = a.AccomodationId,
                     CheckInDate = a.CheckInDate,
                     CheckOutDate = a.CheckOutDate
-                }).ToList() ?? new List<BookingAccomodationVM>()
+                }).ToList() ?? new List<BookingAccomodationVM>(),
+                src = booking.Flight.DepartureAirport
             };
 
             return View("Edit", bookingVM);
@@ -181,6 +192,32 @@ namespace MVCProject.Controllers
         public IActionResult Edit(EditBookingVM editBookingVM)
         {
             if (!ModelState.IsValid) return View("Edit", editBookingVM);
+
+            foreach (var i in editBookingVM.Accomodations)
+            {
+                if (i.CheckInDate >= i.CheckOutDate)
+                {
+                    ModelState.AddModelError("", "Check out date must be > Check in date");
+                    return View("Edit", editBookingVM);
+                }
+
+                if (i.CheckInDate < editBookingVM.BookingDate)
+                {
+                    ModelState.AddModelError("", "Check in date must be > Booking Date");
+                    return View("Edit", editBookingVM);
+                }
+            }
+
+            foreach (var i in editBookingVM.ActivitiesId)
+            {
+                var activity = unitOfWork.ActivityRepository.GetById(i);
+                if (activity.Date < editBookingVM.BookingDate)
+                {
+                    ModelState.AddModelError("", "Activity date must be > Booking Date");
+                    return View("Edit", editBookingVM);
+                }
+            }
+
 
             var existingBooking = unitOfWork.BookingRepository.GetByIdIncluded(editBookingVM.Id);
             if (existingBooking == null) return NotFound();
@@ -195,14 +232,11 @@ namespace MVCProject.Controllers
                 unitOfWork.ActivityRepository.GetById(i.ActivityId).Capacity += 1;
             }
 
-            foreach (var i in existingBooking.BookingFlights)
-            {
-                unitOfWork.FlightRepository.GetById(i.FlightId).AvailableSeats += 1;
-            }
+            unitOfWork.FlightRepository.GetById(existingBooking.FlightId).AvailableSeats += 1;
+            
 
             existingBooking.bookingAccomodations.Clear();
             existingBooking.BookingActivities.Clear();
-            existingBooking.BookingFlights.Clear();
             unitOfWork.Save();
 
             existingBooking.Country = editBookingVM.Country;
@@ -212,7 +246,7 @@ namespace MVCProject.Controllers
             decimal totalAmount = 0.0m;
 
             if (editBookingVM.Accomodations != null)
-            { 
+            {
                 foreach (var i in editBookingVM.Accomodations)
                 {
 
@@ -247,29 +281,17 @@ namespace MVCProject.Controllers
                 }
             }
 
-            if (editBookingVM.FlightsId != null)
-            {
-                foreach (var i in editBookingVM.FlightsId)
-                {
-                    var flight = unitOfWork.FlightRepository.GetById(i);
+            var flight = unitOfWork.FlightRepository.GetById(editBookingVM.FlightId);
 
-                    flight.AvailableSeats -= 1;
+            flight.AvailableSeats -= 1;
+            totalAmount += flight.Price;
 
-                    unitOfWork.BookingFlightRepository.Add(new BookingFlight
-                    {
-                        BookingId = editBookingVM.Id,
-                        FlightId = i
-                    });
-
-                    totalAmount += flight.Price;
-                }
-            }
 
             existingBooking.TotalAmount = totalAmount;
             unitOfWork.BookingRepository.Update(existingBooking);
             unitOfWork.Save();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("MyBooking"); ;
         }
 
 
@@ -292,11 +314,11 @@ namespace MVCProject.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            var booking = unitOfWork.BookingRepository.GetById(id);
+            var booking = unitOfWork.BookingRepository.GetByIdIncluded(id);
             if (booking == null) return NotFound();
 
             var bookingVM = booking.Adapt<DisplayBookingVM>();
-            return View("Delete",bookingVM);
+            return View("Delete", bookingVM);
         }
 
         [HttpPost, ActionName("Delete")]
@@ -325,14 +347,8 @@ namespace MVCProject.Controllers
                 }
             }
 
-            if (booking.BookingFlights != null)
-            {
-                foreach (var bf in booking.BookingFlights)
-                {
-                    var flight = unitOfWork.FlightRepository.GetById(bf.FlightId);
-                    if (flight != null) flight.AvailableSeats += 1;
-                }
-            }
+            var flight = unitOfWork.FlightRepository.GetById(booking.FlightId);
+            if (flight != null) flight.AvailableSeats += 1;
 
             unitOfWork.BookingRepository.Delete(id);
             unitOfWork.Save();

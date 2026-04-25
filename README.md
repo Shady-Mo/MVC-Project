@@ -1,8 +1,8 @@
-# Travel and Tourism Booking System
+# Travel Monster - Tourism Booking System
 
 A modern ASP.NET Core MVC application for a Travel & Tourism booking system with professional authentication, user management, and booking capabilities using **User Secrets** for secure credential management.
 
-**Version**: 1.0.0 | **Built with**: .NET 10, C# 14.0, Bootstrap 5 | **Last Updated**: December 2024
+**Version**: 1.0.0 | **Built with**: .NET 10, C# 14.0, Bootstrap 5
 
 ---
 
@@ -58,7 +58,7 @@ Visit: `https://localhost:7000`
 - User Secrets for credential management
 
 ### 🎨 UI/UX
-- Professional branding (Orange #fd7e14, Teal #20c997)
+- Professional Travel Monster branding (Orange #fd7e14, Teal #20c997)
 - Responsive design (360px to 1400px+)
 - WCAG accessibility compliance
 - Bootstrap 5 framework

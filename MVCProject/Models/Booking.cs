@@ -16,9 +16,14 @@ namespace MVCProject.Models {
         public string UserId { get; set; }
         public virtual AppUser AppUser { get; set; }
 
+        [ForeignKey(nameof(Flight))]
+        public int FlightId { get; set; }
+        public virtual Flight Flight { get; set; }
+
+
         public ICollection<BookingAccomodation> bookingAccomodations = new HashSet<BookingAccomodation>();
         public ICollection<BookingActivity> BookingActivities = new HashSet<BookingActivity>();
-        public ICollection<BookingFlight> BookingFlights = new HashSet<BookingFlight>();
+        //public ICollection<BookingFlight> BookingFlights = new HashSet<BookingFlight>();
 
     }
 

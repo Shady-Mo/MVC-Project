@@ -1,8 +1,751 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using MVCProject.ViewModels.HomeViewModels
+
+@model HomeIndexViewModel
+
+@{
+    ViewBag.Title = "Travel Monster - Escape Your Comfort Zone";
+    Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    /* Hero Section - Full Screen */
+    .hero-section {
+        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/images/Image_ea7aa3ea7aa3ea7a.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        color: white;
+        position: relative;
+        margin-top: 0;
+        padding: 0;
+    }
+
+    .hero-content h1 {
+        font-size: 5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        line-height: 1.1;
+    }
+
+    .hero-content p {
+        font-size: 1.5rem;
+        margin-bottom: 40px;
+        font-weight: 500;
+    }
+
+    .filter-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        width: 100%;
+    }
+
+    .filter-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #eaeaea;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .filter-item:hover {
+        padding-left: 5px;
+    }
+
+    .filter-item:last-child {
+        border-bottom: none;
+    }
+
+    .filter-value {
+        font-weight: 500;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .filter-value i {
+        width: 28px;
+        color: #ff6b35;
+        font-size: 16px;
+    }
+
+    .filter-arrow {
+        color: #999;
+        font-size: 12px;
+        transition: transform 0.3s;
+    }
+
+    .filter-item:hover .filter-arrow {
+        transform: rotate(180deg);
+        color: #ff6b35;
+    }
+
+    .search-btn {
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 18px;
+        transition: all 0.3s;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .search-btn:hover {
+        background: #e55a2b;
+        transform: translateY(-2px);
+    }
+
+    .feature-box {
+        text-align: center;
+        padding: 40px 30px;
+        transition: all 0.3s;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .feature-box i {
+        font-size: 52px;
+        color: #ff6b35;
+        margin-bottom: 20px;
+    }
+
+    .feature-box h4 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .feature-box p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .trip-card, .destination-card, .blog-card {
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+        transition: transform 0.3s;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .trip-card:hover, .destination-card:hover, .blog-card:hover {
+        transform: translateY(-8px);
+    }
+
+    .trip-card .card-body, .destination-card .card-body, .blog-card .card-body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .blog-card .card-text {
+        flex-grow: 1;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: #ff6b35;
+        color: white;
+        padding: 5px 14px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 1;
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #dc3545;
+        color: white;
+        padding: 5px 14px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 1;
+    }
+
+    .price {
+        color: #ff6b35;
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.9rem;
+        margin-left: 8px;
+    }
+
+    .stats-section {
+        background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
+        padding: 80px 0;
+        color: white;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #ff6b35;
+        margin-bottom: 10px;
+    }
+
+    .testimonial-card {
+        background: white;
+        padding: 35px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        margin: 20px 0;
+        height: 100%;
+    }
+
+    .rating i {
+        color: #ffc107;
+        margin-right: 3px;
+    }
+
+    .btn-orange {
+        background: #ff6b35;
+        color: white;
+        padding: 12px 35px;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.3s;
+        border: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .btn-orange:hover {
+        background: #e55a2b;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-orange {
+        border: 2px solid #ff6b35;
+        color: #ff6b35;
+        background: transparent;
+        border-radius: 25px;
+        padding: 6px 20px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-outline-orange:hover {
+        background: #ff6b35;
+        color: white;
+    }
+
+    section {
+        padding: 100px 0;
+    }
+
+    .section-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .section-title h2 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+        color: #1a2a3a;
+    }
+
+    .section-title p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .destination-card .card-img-top {
+        height: 280px;
+        object-fit: cover;
+    }
+
+    .trip-card .card-img-top {
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .blog-card .card-img-top {
+        height: 240px;
+        object-fit: cover;
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .card-title {
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .text-orange {
+        color: #ff6b35;
+    }
+
+    /* Responsive Styles */
+    @@media (max-width: 1200px) {
+        .hero-content h1 {
+            font-size: 4rem;
+        }
+        .hero-content p {
+            font-size: 1.3rem;
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .hero-content h1 {
+            font-size: 3rem;
+        }
+        .hero-content p {
+            font-size: 1.2rem;
+        }
+        .filter-bar {
+            margin-top: 30px;
+        }
+        section {
+            padding: 60px 0;
+        }
+        .section-title h2 {
+            font-size: 2rem;
+        }
+        .section-title p {
+            font-size: 1rem;
+        }
+        .feature-box {
+            padding: 30px 20px;
+        }
+        .feature-box i {
+            font-size: 40px;
+        }
+        .feature-box h4 {
+            font-size: 18px;
+        }
+        .stats-section {
+            padding: 50px 0;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-content {
+            text-align: center;
+        }
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+        .hero-content p {
+            font-size: 1.1rem;
+        }
+        .filter-bar {
+            padding: 20px;
+        }
+        .filter-value {
+            font-size: 14px;
+        }
+        .search-btn {
+            font-size: 16px;
+            padding: 12px;
+        }
+        .stat-number {
+            font-size: 2rem;
+        }
+        .stat-number + p {
+            font-size: 12px;
+        }
+        .testimonial-card {
+            padding: 25px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .price {
+            font-size: 1.2rem;
+        }
+        .section-title {
+            margin-bottom: 40px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+        .hero-content p {
+            font-size: 1rem;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        .stat-number + p {
+            font-size: 10px;
+        }
+        .feature-box {
+            padding: 20px 15px;
+        }
+        .feature-box i {
+            font-size: 32px;
+        }
+        .feature-box h4 {
+            font-size: 16px;
+        }
+        .feature-box p {
+            font-size: 12px;
+        }
+        .filter-item {
+            padding: 8px 0;
+        }
+        .filter-value {
+            font-size: 13px;
+        }
+        .trip-card .card-img-top {
+            height: 180px;
+        }
+        .card-title {
+            font-size: 1rem;
+        }
+        .btn-orange {
+            padding: 8px 20px;
+            font-size: 14px;
+        }
+        .btn-outline-orange {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        .stats-section {
+            padding: 40px 0;
+        }
+        .section-title h2 {
+            font-size: 1.5rem;
+        }
+        .section-title p {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<!-- Hero Section - Full Screen -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1>Escape Your<br>Comfort Zone.</h1>
+                <p>Grab your stuff and let's get lost.</p>
+            </div>
+            <div class="col-lg-5 offset-lg-1">
+                <div class="filter-bar">
+                    <div class="filter-item d-flex justify-content-between align-items-center">
+                        <div class="filter-value">
+                            <i class="fas fa-biking"></i> Activity
+                        </div>
+                        <i class="fas fa-chevron-down filter-arrow"></i>
+                    </div>
+                    <div class="filter-item d-flex justify-content-between align-items-center">
+                        <div class="filter-value">
+                            <i class="fas fa-dollar-sign"></i> $30 - $2,300
+                        </div>
+                        <i class="fas fa-chevron-down filter-arrow"></i>
+                    </div>
+                    <div class="filter-item d-flex justify-content-between align-items-center">
+                        <div class="filter-value">
+                            <i class="fas fa-map-marker-alt"></i> Destination
+                        </div>
+                        <i class="fas fa-chevron-down filter-arrow"></i>
+                    </div>
+                    <div class="filter-item d-flex justify-content-between align-items-center">
+                        <div class="filter-value">
+                            <i class="far fa-clock"></i> 0 Days - 11 Days
+                        </div>
+                        <i class="fas fa-chevron-down filter-arrow"></i>
+                    </div>
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Features Section -->
+<section style="padding-top: 80px;">
+    <div class="section-container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h4>Handpicked Destination</h4>
+                    <p>Our strict screening process means you're only seeing the best quality treks and destinations worldwide.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-tags"></i>
+                    <h4>Best Price Guaranteed</h4>
+                    <p>Our Best Price Guarantee means that you can be sure of booking at the best rate available anywhere.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-headset"></i>
+                    <h4>24/7 Customer Service</h4>
+                    <p>Our customer support team is standing by 24/7 to make your experience incredible and hassle-free.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Trips Section - Accommodations -->
+<section id="accommodations" style="background: #f8f9fc;">
+    <div class="section-container">
+        <div class="section-title">
+            <h2>Explore featured accommodations</h2>
+            <p>Find your perfect place to stay from our curated collection of premium hotels and resorts</p>
+        </div>
+        <div class="row g-4">
+            @if (Model.Accommodations.Any())
+            {
+                foreach (var acc in Model.Accommodations)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card trip-card position-relative">
+                            @if (acc.AvailableRooms > 0)
+                            {
+                                <span class="featured-badge">@acc.AvailableRooms Available</span>
+                            }
+                            else
+                            {
+                                <span class="discount-badge">Fully Booked</span>
+                            }
+
+                            @if (!string.IsNullOrEmpty(acc.Image))
+                            {
+                                <img src="~/images/accommodations/@acc.Image" class="card-img-top" alt="@acc.Name">
+                            }
+                            else
+                            {
+                                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" class="card-img-top" alt="Placeholder">
+                            }
+
+                            <div class="card-body">
+                                <h5 class="card-title">@acc.Name</h5>
+                                <p class="card-text text-muted"><i class="fas fa-map-marker-alt"></i> @acc.Location</p>
+                                <p class="card-text">Experience luxury and comfort in this stunning property. Perfect for your next getaway.</p>
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <div>
+                                        <span class="price">@acc.PricePerNight.ToString("C")</span>
+                                        <small class="text-muted d-block">per night</small>
+                                    </div>
+                                    <a href="/Accomodation/Details/@acc.Id" class="btn-outline-orange">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <h4>No Accommodations Found</h4>
+                    <p>Check back soon for exciting new stays.</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Popular Activities Section -->
+<section id="activities">
+    <div class="section-container">
+        <div class="section-title">
+            <h2>Popular Activities</h2>
+            <p>Experience unforgettable adventures with our hand-picked selection of activities</p>
+        </div>
+        <div class="row g-4">
+            @if (Model.Activities.Any())
+            {
+                foreach (var activity in Model.Activities)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card trip-card position-relative shadow-sm border-0">
+                            <span class="featured-badge" style="background:#ff6b35;">@activity.Capacity Spots</span>
+
+                            @if (!string.IsNullOrEmpty(activity.Img))
+                            {
+                                <img src="~/images/activities/@activity.Img" class="card-img-top" alt="@activity.Name">
+                            }
+                            else
+                            {
+                                <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400" class="card-img-top" alt="Placeholder">
+                            }
+
+                            <div class="card-body">
+                                <h5 class="card-title">@activity.Name</h5>
+                                <p class="card-text text-muted mb-1"><i class="fas fa-map-marker-alt" style="color:#ff6b35;"></i> @activity.Location</p>
+                                <p class="card-text text-muted small mb-3"><i class="far fa-calendar-alt"></i> @activity.Date.ToString("MMM dd, yyyy")</p>
+                                <p class="card-text">Join an unforgettable experience with expert guides and amazing adventure.</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                                        <span class="price font-weight-bold" style="font-size:1.4rem; color:#1a2a3a;">@activity.Price.ToString("C")</span>
+                                        <small class="text-muted">/person</small>
+                                    </div>
+                                    <a href="/Activity/Details/@activity.Id" class="btn-orange text-white px-4 py-2" style="font-size:0.9rem;">Book Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted">
+                    <i class="fas fa-skating fa-3x mb-3"></i>
+                    <h4>No Activities Found</h4>
+                    <p>Check back soon for new adventures.</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="section-container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-number">1,250+</div>
+                <p>TRIPS AND TOURS</p>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-number">85+</div>
+                <p>COUNTRIES</p>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-number">340+</div>
+                <p>OUTDOOR ACTIVITIES</p>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-number">15.8K+</div>
+                <p>HAPPY NOMADS</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<section style="background: #f8f9fc;">
+    <div class="section-container">
+        <div class="section-title">
+            <h2>Client testimonials</h2>
+            <p>Real travelers. Real stories. Real opinions to help you make the right choice.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="testimonial-card">
+                    <div class="rating mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"Inquietude simplicity terminated she compliment remarkably few her nay. The weeks are ham asked jokes. Neglected perceived shy nay concluded."</p>
+                    <h5 class="mb-0 mt-3">Selvetica Forez</h5>
+                    <small class="text-muted">Travel Blogger</small>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="testimonial-card">
+                    <div class="rating mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"Having fun with everyone. In as name to here them deny wise this. As rapid woody my he me which. Men but they fail shew just wish next put."</p>
+                    <h5 class="mb-0 mt-3">Madam Nozaia</h5>
+                    <small class="text-muted">Adventure Seeker</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section>
+    <div class="section-container">
+        <div class="section-title">
+            <h2>Travel tips and blog</h2>
+            <p>Latest travel tips and blog covering all travel experiences</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card blog-card">
+                    <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600" class="card-img-top" alt="Rocky Mountains">
+                    <div class="card-body">
+                        <small class="text-muted"><i class="far fa-calendar-alt"></i> December 10, 2024</small>
+                        <h5 class="card-title mt-2">A Guide to Rocky Mountain vacations</h5>
+                        <p class="card-text">The style guide provides you with a blueprint of Paperback's default post and page styles.</p>
+                        <a href="#" class="btn-link text-orange" style="text-decoration: none; font-weight: 600;">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card blog-card">
+                    <img src="https://images.unsplash.com/photo-1535498730771-e735b998cd64?w=600" class="card-img-top" alt="Everest">
+                    <div class="card-body">
+                        <small class="text-muted"><i class="far fa-calendar-alt"></i> November 25, 2024</small>
+                        <h5 class="card-title mt-2">Everest Base Camp Trekking in Nepal</h5>
+                        <p class="card-text">The style guide provides you with a blueprint of Paperback's default post and page styles.</p>
+                        <a href="#" class="btn-link text-orange" style="text-decoration: none; font-weight: 600;">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card blog-card">
+                    <img src="https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=600" class="card-img-top" alt="Puerto Rico">
+                    <div class="card-body">
+                        <small class="text-muted"><i class="far fa-calendar-alt"></i> November 10, 2024</small>
+                        <h5 class="card-title mt-2">Things to do in Puerto Rico</h5>
+                        <p class="card-text">The style guide provides you with a blueprint of Paperback's default post and page styles.</p>
+                        <a href="#" class="btn-link text-orange" style="text-decoration: none; font-weight: 600;">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="#" class="btn-orange" style="text-decoration: none;">View All Posts</a>
+        </div>
+    </div>
+</section>
