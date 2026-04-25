@@ -1,5 +1,6 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using MVCProject.Models;
 using MVCProject.Repositories;
 using MVCProject.ViewModels.AccomodationViewModels;
@@ -18,6 +19,7 @@ namespace MVCProject.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        //[OutputCache(PolicyName = "GlobalExpiry")]
         public IActionResult Index()
         {
             var accommodations = _unitOfWork.AccomodationRepositroy.GetAll().Take(6).ToList();

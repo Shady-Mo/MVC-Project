@@ -2,6 +2,7 @@ using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCProject.Data;
+using MVCProject.Helpers;
 using MVCProject.Models;
 using MVCProject.Repositories;
 using MVCProject.Services.AccountService;
@@ -29,9 +30,10 @@ namespace MVCProject {
 
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
-            builder.Services.AddScoped<UnitOfWork>();
-            builder.Services.AddScoped<IFileService, FileService>();
-            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<UnitOfWork>()
+                .AddScoped<IFileService, FileService>()
+                .AddScoped<IAccountService, AccountService>()
+                .AddScoped<IUserClaimsPrincipalFactory<AppUser>, MyUserClaimsPrincipalFactory>();
 
             builder.Services.AddOutputCache(options => {
                 options.AddPolicy("GlobalExpiry", builder =>
