@@ -531,7 +531,6 @@
             .footer-content {
                 flex-direction: column;
                 text-align: center;
-                gap: 15px;
             }
 
             .footer-links {
@@ -762,7 +761,7 @@
                             <div class="nav-menu ms-lg-auto w-100 w-lg-auto justify-content-end">
                                 <a asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "selected" : "")">Home</a>
                                 <a asp-controller="Flight" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Flight" ? "selected" : "")">Flights</a>
-                                <a asp-controller="Accomodation" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Accomodation" ? "selected" : "")">Accommodations</a>
+                                <a asp-controller="Accomodation" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Accommodation" ? "selected" : "")">Accommodations</a>
                                 <a asp-controller="Activity" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Activity" ? "selected" : "")">Activities</a>
                                 @if (User.Identity.IsAuthenticated)
                                 {
@@ -798,12 +797,10 @@
                     </div>
                 </div>
                 <div class="footer-links">
-                    <a href="#">Home</a>
-                    <a href="#">Flights</a>
-                    <a href="#">Accommodations</a>
-                    <a href="#">Activities</a>
-                    <a href="#">Privacy</a>
-                    <a href="#">Terms</a>
+                    <a asp-controller="Home" asp-action="index">Home</a>
+                    <a asp-controller="flight" asp-action="index">Flights</a>
+                    <a asp-controller="Accomodation" asp-action="index">Accommodations</a>
+                    <a asp-controller="activity" asp-action="index">Activities</a>
                 </div>
                 <div class="footer-social">
                     <a href="#"><i class="fab fa-facebook-f"></i></a>

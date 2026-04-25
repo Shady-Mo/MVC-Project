@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OutputCaching;
 using MVCProject.Models;
 using MVCProject.Services.BaseService;
 using MVCProject.Services.EmailService;
@@ -12,13 +13,16 @@ namespace MVCProject.Services.AccountService {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailService _emailService;
+        private readonly IOutputCacheStore _cacheStore;
 
         public AccountService(UserManager<AppUser> userManager,
                 SignInManager<AppUser> signInManager,
-                IEmailService emailService) {
+                IEmailService emailService,
+                IOutputCacheStore cacheStore) {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
+            _cacheStore = cacheStore;
         }
 
         public async Task<ResultService> LoginAsync(LoginViewModel loginViewModel) {
@@ -32,6 +36,8 @@ namespace MVCProject.Services.AccountService {
                 .PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded) {
+                await _cacheStore.EvictByTagAsync("GlobalExpiry", default);
+
                 return ResultService.Success();
             }
 
@@ -145,6 +151,7 @@ namespace MVCProject.Services.AccountService {
                     externalLoginConfirmationViewModel.RememberMe);
 
             if (loginResult.Succeeded) {
+                await _cacheStore.EvictByTagAsync("GlobalExpiry", default);
                 return ResultService.Success();
             }
 
@@ -183,6 +190,7 @@ namespace MVCProject.Services.AccountService {
         }
 
         public async Task LogoutAsync() {
+            await _cacheStore.EvictByTagAsync("GlobalExpiry", default);
             await _signInManager.SignOutAsync();
         }
 
