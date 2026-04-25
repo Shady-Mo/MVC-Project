@@ -37,9 +37,21 @@ namespace MVCProject {
 
             builder.Services.AddOutputCache(options => {
                 options.AddPolicy("GlobalExpiry", builder =>
-                    builder.Expire(TimeSpan.FromMinutes(60))
+                    builder.Expire(TimeSpan.FromMinutes(30))
                         .SetLocking(true)
-                        .Tag("Global")
+                        .Tag("GlobalExpiry")
+                );
+
+            options.AddPolicy("GlobalExpiryWithFilteration", builder =>
+                builder.Expire(TimeSpan.FromMinutes(30))
+                    .SetLocking(true)
+                    .Tag("GlobalWithFilteration")
+                    .SetVaryByQuery("location", "price")
+                    .VaryByValue(context =>
+                        new KeyValuePair<string, string>(
+                            "user_id", context.User.Identity?.IsAuthenticated == true ? "anonymous" : "Guest"
+                        )
+                    )
                 );
 
                 options.AddPolicy("PrivateExpiry", builder =>

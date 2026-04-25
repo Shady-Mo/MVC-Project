@@ -1,54 +1,370 @@
 ﻿@model MVCProject.ViewModels.ActivityViewModels.DisplayActivityVM
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Activity Details - " + Model.Name;
+    var imageUrl = string.IsNullOrEmpty(Model.Img) ? "https://picsum.photos/id/104/1200/600" : Url.Content("~/images/" + Model.Img);
 }
 
-<h1>Details</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        .details-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
 
-<div>
-    <h4>DisplayActivityVM</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Location)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Location)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Capacity)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Capacity)
-        </dd>
-        <dd class="col-sm-10">
-            <img src="~/images/@Model.Img" width="100" class="img-thumbnail"/>
-        </dd>
-    </dl>
-</div>
-<div>
-    @if (Model != null)
-    {
-        @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) <text>|</text>
-    }
-    <a asp-controller="Activity" asp-action="Index">Back to List</a>
-</div>
+        /* Hero Image Section */
+        .hero-section {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.8);
+        }
+        .hero-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 3rem 2rem 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .hero-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .hero-meta i {
+            color: #14b8a6;
+            margin-right: 0.5rem;
+        }
+
+        /* Main Content Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2.5rem;
+        }
+
+        /* Left Column: Description & Info */
+        .info-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-title i {
+            color: #14b8a6;
+        }
+        .description-text {
+            color: #475569;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .highlight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .highlight-icon {
+            background: #eef2ff;
+            color: #1e3c2c;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .highlight-text h5 {
+            margin: 0 0 0.2rem 0;
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+        .highlight-text p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* Right Column: Booking Widget */
+        .booking-widget {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            position: sticky;
+            top: 2rem;
+        }
+        .price-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .price-header .label {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .price-header .amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+        .price-header .amount span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .booking-details {
+            margin-bottom: 2rem;
+        }
+        .booking-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.95rem;
+        }
+        .booking-row:last-child {
+            border-bottom: none;
+        }
+        .booking-row span:first-child {
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .booking-row span:last-child {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: #14b8a6;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .btn-primary:hover {
+            background: #0d9488;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+        }
+        .btn-secondary {
+            background: white;
+            color: #334155;
+            border: 2px solid #cbd5e1;
+        }
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: #14b8a6;
+        }
+
+        media (max-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-section {
+                height: 350px;
+            }
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="details-container">
+
+        <a href="@Url.Action("Index", "Activity")" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to all activities
+        </a>
+
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <img src="@imageUrl" alt="@Model.Name" class="hero-img" />
+            <div class="hero-content">
+                <div>
+                    <h1 class="hero-title">@Model.Name</h1>
+                    <div class="hero-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> @Model.Location</span>
+                        <span><i class="fas fa-users"></i> Up to @Model.Capacity participants</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div class="main-info">
+                <div class="info-card">
+                    <h3 class="section-title"><i class="fas fa-info-circle"></i> About This Activity</h3>
+                    <p class="description-text">
+                        Experience the ultimate adventure with our "@Model.Name" package. 
+                        Located in the beautiful region of @Model.Location, this activity is perfectly designed
+                        for individuals and groups looking to explore the great outdoors. 
+                        Whether you are a beginner or a seasoned adventurer, this experience offers unforgettable views and thrilling moments.
+                    </p>
+
+                    <h3 class="section-title" style="margin-top: 3rem;"><i class="fas fa-list-ul"></i> Quick Highlights</h3>
+                    <div class="highlights-grid">
+                        <div class="highlight-item">
+                            <div class="highlight-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="highlight-text">
+                                <h5>Date</h5>
+                                <p>@Model.Date.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon"><i class="fas fa-users"></i></div>
+                            <div class="highlight-text">
+                                <h5>Group Size</h5>
+                                <p>Max @Model.Capacity People</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon"><i class="fas fa-clock"></i></div>
+                            <div class="highlight-text">
+                                <h5>Duration</h5>
+                                <p>1 Day</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon"><i class="fas fa-leaf"></i></div>
+                            <div class="highlight-text">
+                                <h5>Category</h5>
+                                <p>Outdoor Adventure</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="sidebar">
+                <div class="booking-widget">
+                    <div class="price-header">
+                        <div class="label">Price per person</div>
+                        <div class="amount">$@Model.Price.ToString("0.00") <span>USD</span></div>
+                    </div>
+
+                    <div class="booking-details">
+                        <div class="booking-row">
+                            <span><i class="fas fa-map-pin"></i> Location</span>
+                            <span>@Model.Location</span>
+                        </div>
+                        <div class="booking-row">
+                            <span><i class="fas fa-calendar"></i> Departure</span>
+                            <span>@Model.Date.ToString("MMM dd, yyyy")</span>
+                        </div>
+                        <div class="booking-row">
+                            <span><i class="fas fa-user-friends"></i> Available Spots</span>
+                            <span>@Model.Capacity</span>
+                        </div>
+                    </div>
+
+                    @if (Model != null)
+                    {
+                        <a href="@Url.Action("Edit", "Activity", new { id = Model.Id })" class="btn-action btn-secondary">
+                            <i class="fas fa-edit"></i> Edit Activity
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

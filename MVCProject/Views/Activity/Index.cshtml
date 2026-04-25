@@ -1,141 +1,232 @@
 ﻿@model IEnumerable<DisplayActivityVM>
 
-@{
-    ViewData["Title"] = "Index";
-}
-
-<style>
-    .text-primary-custom { color: #28b5a4 !important; }
-    .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
-    .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
-    .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
-    .btn-outline-primary-custom { color: #28b5a4; border-color: #28b5a4; }
-    .btn-outline-primary-custom:hover { background-color: #28b5a4; border-color: #28b5a4; color: white; }
-    .card-img-top { height: 200px; object-fit: cover; }
-    .filter-sidebar { background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .activity-card { transition: transform 0.2s; }
-    .activity-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
-</style>
-
-<div class="row mb-4 align-items-center mt-3">
-    <div class="col">
-        <h1 class="text-primary-custom m-0 fw-bold">Activities</h1>
-    </div>
-    <div class="col text-end">
-        <a asp-action="Create" class="btn btn-primary-custom shadow-sm">
-            Create New Activity
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Sidebar Filter -->
-    <div class="col-lg-3 col-md-4 mb-4">
-        <div class="filter-sidebar sticky-top" style="top: 20px;">
-            <h5 class="mb-3 text-primary-custom fw-bold">Filters</h5>
-            <form asp-action="Index" method="get">
-                <div class="mb-3">
-                    <label class="form-label text-muted fw-bold">Search</label>
-                    <input type="text" name="searchQuery" class="form-control" placeholder="Name or location..." value="@Context.Request.Query["searchQuery"]" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Outdoor Adventures | Hiking & Trekking Activities</title>
+    <!-- Google Fonts & simple reset for clean base -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (free icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="~/css/activities-list.css">
+</head>
+<body>
+    <div class="activities-container">
+        <!-- update header and wrap main content -->
+        <div class="page-header" style="border-bottom: none; margin-bottom: 1rem;">
+            <div class="title-section" style="display: flex; gap: 1rem; flex: 1;">
+                <div style="flex: 0 0 250px;">
+                    <h2 class="filter-title" style="margin-bottom: 0;">Filter By</h2>
                 </div>
-
-                <div class="mb-3">
-                    <label for="priceRange" class="form-label text-muted fw-bold d-flex justify-content-between">
-                        <span>Max Price</span>
-                        <span class="badge bg-primary-custom" id="priceOutput">@(Context.Request.Query["maxPrice"].Count > 0 ? Context.Request.Query["maxPrice"] : "500")</span>
-                    </label>
-                    <input type="range" class="form-range" min="0" max="1000" step="10" id="priceRange" name="maxPrice" value="@Context.Request.Query["maxPrice"]" oninput="document.getElementById('priceOutput').innerText = this.value">
+                <div style="flex: 1; display:flex; gap: 1rem; align-items:center;">
+                    <div style="display:flex; align-items:center; background:#f1f5f9; padding: 0.5rem 1rem; border-radius: 8px; flex:1;">
+                        <i class="fas fa-search" style="color: #94a3b8; margin-right: 0.5rem;"></i>
+                        <input type="text" form="filterForm" name="searchQuery" value="@Context.Request.Query["searchQuery"]" placeholder="Search" style="border: none; background: transparent; outline: none; width: 100%; color: #334155; font-size: 0.9rem;" />
+                    </div>
+                    <a href="@Url.Action("Create", "Activity")" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-plus"></i> Add Activity</a>
                 </div>
-
-                <div class="mb-4">
-                    <label for="capacityRange" class="form-label text-muted fw-bold d-flex justify-content-between">
-                        <span>Min Capacity</span>
-                        <span class="badge bg-primary-custom" id="capacityOutput">@(Context.Request.Query["minCapacity"].Count > 0 ? Context.Request.Query["minCapacity"] : "250")</span>
-                    </label>
-                    <input type="range" class="form-range" min="1" max="500" step="5" id="capacityRange" name="minCapacity" value="@Context.Request.Query["minCapacity"]" oninput="document.getElementById('capacityOutput').innerText = this.value">
-                </div>
-
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary-custom" type="submit">Apply Filters</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Cards Layout -->
-    <div class="col-lg-9 col-md-8">
-        @if (!Model.Any())
-        {
-            <div class="alert alert-info text-center shadow-sm">
-                No activities found matching your criteria.
             </div>
-        }
-        else
-        {
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                @foreach (var item in Model) {
-                    <div class="col">
-                        <div class="card h-100 shadow-sm border-0 activity-card">
-                            @if (!string.IsNullOrEmpty(item.Img))
-                            {
-                                <img src="~/images/@item.Img" class="card-img-top rounded-top" alt="@item.Name" />
-                            }
-                            else
-                            {
-                                <div class="bg-light card-img-top rounded-top d-flex align-items-center justify-content-center text-secondary" style="font-size: 3rem;">
-                                    📝
-                                </div>
-                            }
+            <div class="sorting-bar">
+                <span class="sort-label"><i class="fas fa-arrow-down-wide-short"></i> Sort</span>
+                <button class="sort-option active" data-sort="recent">Recently Added</button>
+                <button class="sort-option" data-sort="price-low">Price: Low to High</button>
+                <button class="sort-option" data-sort="price-high">Price: High to Low</button>
+            </div>
+        </div>
 
-                            <div class="card-body">
-                                <h5 class="card-title text-primary-custom fw-bold mb-1">@item.Name</h5>
-                                <p class="card-text text-muted mb-3 small">
-                                    📍 @item.Location
-                                </p>
+        <form id="filterForm" method="get" action="@Url.Action("Index", "Activity")">
+            <div class="main-layout">
+                <!-- Sidebar -->
+                <div class="sidebar-filters">
 
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="badge bg-light text-dark border px-2 py-1">
-                                        📅 @item.Date.ToString("MMM dd, yyyy")
-                                    </span>
-                                    <span class="badge bg-light text-dark border px-2 py-1">
-                                        👥 @item.Capacity
-                                    </span>
-                                </div>
-                                <h5 class="fw-bold mb-0" style="color: #28b5a4">@item.Price.ToString("C")</h5>
+                    <div class="filter-section">
+                        <div class="filter-title">Price <i class="fas fa-chevron-up" style="color:#94a3b8; font-size:0.8rem;"></i></div>
+                        <div class="slider-container">
+                            <input type="range" name="maxPrice" min="0" max="5000" step="10" value="@(Context.Request.Query["maxPrice"].ToString() == "" ? "5000" : Context.Request.Query["maxPrice"])" style="width: 100%; accent-color: #14b8a6;" oninput="document.getElementById('priceVal').innerText = '$' + this.value">
+                        </div>
+                        <div class="slider-values">
+                            <span>$0</span>
+                            <span id="priceVal">$@(Context.Request.Query["maxPrice"].ToString() == "" ? "5000" : Context.Request.Query["maxPrice"])</span>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="filter-title">Capacity (Min) <i class="fas fa-chevron-up" style="color:#94a3b8; font-size:0.8rem;"></i></div>
+                        <div class="slider-container">
+                            <input type="range" name="minCapacity" min="1" max="50" step="1" value="@(Context.Request.Query["minCapacity"].ToString() == "" ? "1" : Context.Request.Query["minCapacity"])" style="width: 100%; accent-color: #14b8a6;" oninput="document.getElementById('capVal').innerText = this.value + ' Persons'">
+                        </div>
+                        <div class="slider-values">
+                            <span>1</span>
+                            <span id="capVal">@(Context.Request.Query["minCapacity"].ToString() == "" ? "1" : Context.Request.Query["minCapacity"]) Persons</span>
+                        </div>
+                        <button type="submit" class="filter-btn">Apply Filters</button>
+                    </div>
+
+                </div>
+
+                <!-- Content -->
+                <div class="content-area">
+                    <div id="activitiesGrid" class="activities-grid"></div>
+
+                    <!-- Pagination -->
+                    @if (ViewBag.TotalPages > 1)
+                    {
+                        <div class="pagination-container">
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <a href="@Url.Action("Index", new { 
+                                        searchQuery = Context.Request.Query["searchQuery"], 
+                                        maxPrice = Context.Request.Query["maxPrice"], 
+                                        minCapacity = Context.Request.Query["minCapacity"], 
+                                        pageNumber = i 
+                                    })" class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    @i
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </form>
+
+        <footer>
+            <i class="fas fa-map-marked-alt"></i> Explore real wilderness — dummy demo inspired by travel monster design
+        </footer>
+    </div>
+
+    <script>
+            // ---------- DYNAMIC ACTIVITIES DATA ----------
+            const activitiesData = [
+            @foreach (var activity in Model)
+            {
+                <text>
+                {
+                    id: @activity.Id,
+                    title: "@Html.Raw(activity.Name.Replace("\"", "\\\""))",
+                    description: "@Html.Raw(activity.Location.Replace("\"", "\\\""))",
+                    duration: "1 Day(s)", // Placeholder as the view model doesn't have duration
+                    oldPrice: @activity.Price, // Assuming no old price in VM, using current price
+                    newPrice: @activity.Price,
+                    saving: 0,
+                    departures: ["@(activity.Date.ToString("MMMM dd, yyyy"))"],
+                    // category placeholder since no real category property exists right now
+                            category: "all",
+                    image: "@(string.IsNullOrEmpty(activity.Img) ? "https://picsum.photos/id/104/400/250" : Url.Content("~/images/" + activity.Img))",
+                    group: "@activity.Capacity persons",
+                    addedDate: "@(activity.Date.ToString("yyyy-MM-dd"))"
+                },
+                </text>
+            }
+            ];
+
+            // helper: render cards based on filtered + sorted array
+            let currentSort = "recent";   // recent, price-low, price-high
+
+            function filterAndSortActivities() {
+                let filtered = [...activitiesData];
+                // remove category filter logic
+                // sort logic
+                if (currentSort === "recent") {
+                    filtered.sort((a,b) => new Date(b.addedDate) - new Date(a.addedDate));
+                } else if (currentSort === "price-low") {
+                    filtered.sort((a,b) => a.newPrice - b.newPrice);
+                } else if (currentSort === "price-high") {
+                    filtered.sort((a,b) => b.newPrice - a.newPrice);
+                }
+                return filtered;
+            }
+
+            function renderActivities() {
+                const grid = document.getElementById("activitiesGrid");
+                const filteredList = filterAndSortActivities();
+
+                if (filteredList.length === 0) {
+                    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;"><i class="fas fa-mountain"></i> No activities match this category. <br> Try other filters!</div>`;
+                    return;
+                }
+
+                grid.innerHTML = filteredList.map(activity => {
+                    // format price nicely
+                    const oldPriceFmt = `$${activity.oldPrice.toLocaleString()}`;
+                    const newPriceFmt = `$${activity.newPrice.toLocaleString()}`;
+                    const savingHtml = activity.saving > 0 ? `<span class="save-badge">You save $${activity.saving}</span>` : '';
+                    const oldPriceHtml = activity.saving > 0 ? `<span class="old-price">${oldPriceFmt}</span>` : '';
+
+                    // category label display on image
+                    const catDisplay = activity.category.charAt(0).toUpperCase() + activity.category.slice(1);
+                    // departures html
+                    const departuresHtml = activity.departures.map(d => `<span class="date-badge available"><i class="fas fa-check"></i>${d} (Available)</span>`).join('');
+                    // optional group size icon
+                    const groupIcon = `<i class="far fa-user"></i> ${activity.group}`;
+
+                    const detailsUrl = '@Url.Action("Details", "Activity")/' + activity.id;
+
+                    return `
+                        <div class="activity-card">
+                            <div class="card-img" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2)), url('${activity.image}');">
+                                <span class="img-cat-tag"><i class="fas fa-star"></i> Featured</span>
                             </div>
-                            <div class="card-footer bg-white border-top-0 pt-0 pb-3">
-                                <div class="btn-group w-100 shadow-sm" role="group">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary-custom">Details</a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            <div class="card-content">
+                                <div class="card-main-info">
+                                    <h3 class="activity-title">${activity.title}</h3>
+                                    <p class="activity-desc">${activity.description}</p>
+                                    <div class="meta-list">
+                                        <span class="meta-item">${groupIcon}</span>
+                                    </div>
+                                </div>
+                                <div class="card-price-action">
+                                    <div style="width: 100%;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="color: #64748b; font-size: 0.85rem;">Duration<br><strong style="color: #0f172a;">${activity.duration}</strong></span>
+                                            <div class="price-info">
+                                                <span style="color: #64748b; font-size: 0.85rem; display: flex; align-items:center; gap: 4px;">From ${oldPriceHtml}</span>
+                                                <span class="new-price">${newPriceFmt}</span>
+                                                ${savingHtml}
+                                            </div>
+                                        </div>
+                                        <a href="${detailsUrl}" class="btn-details" style="text-decoration:none;">View Details</a>
+                                        <div class="departures" style="margin-top: 1rem;">
+                                            <p>Next Departures</p>
+                                            <div class="departure-dates">
+                                                ${departuresHtml}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                }
-            </div>
-
-            <!-- Pagination -->
-            @if (ViewBag.TotalPages > 1)
-            {
-                <nav aria-label="Page navigation" class="mt-4 pt-3">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                            <a class="page-link text-primary-custom" href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@Context.Request.Query["searchQuery"]&maxPrice=@Context.Request.Query["maxPrice"]&minCapacity=@Context.Request.Query["minCapacity"]" tabindex="-1">Previous</a>
-                        </li>
-                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                        {
-                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
-                                <a class="page-link @(ViewBag.CurrentPage == i ? "bg-primary-custom border-primary-custom text-white" : "text-primary-custom")" href="?pageNumber=@i&searchQuery=@Context.Request.Query["searchQuery"]&maxPrice=@Context.Request.Query["maxPrice"]&minCapacity=@Context.Request.Query["minCapacity"]">@i</a>
-                            </li>
-                        }
-                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                            <a class="page-link text-primary-custom" href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@Context.Request.Query["searchQuery"]&maxPrice=@Context.Request.Query["maxPrice"]&minCapacity=@Context.Request.Query["minCapacity"]">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                    `;
+                }).join('');
             }
-        }
-    </div>
-</div>
+
+            // set up event listeners for category filter chips
+            function initFilters() {
+                const sortBtns = document.querySelectorAll('.sort-option');
+                sortBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const sortValue = btn.getAttribute('data-sort');
+                        if (!sortValue) return;
+                        sortBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentSort = sortValue;
+                        renderActivities();
+                    });
+                });
+            }
+
+            // optional: give fake placeholder for view details (just alert to simulate MVC dummy)
+            // document.addEventListener('click', (e) => {
+            //     if (e.target.classList.contains('btn-details') || e.target.closest('.btn-details')) {
+            //         const cardTitle = e.target.closest('.activity-card')?.querySelector('.activity-title')?.innerText || 'activity';
+            //         alert(`✨ MVC demo: view details for "${cardTitle}"\n(Full integration would redirect to activity controller)`);
+            //     }
+            // });
+
+            // initial render & setup
+            renderActivities();
+            initFilters();
+    </script>
+</body>
+</html>

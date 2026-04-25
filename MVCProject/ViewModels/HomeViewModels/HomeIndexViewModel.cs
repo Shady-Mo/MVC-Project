@@ -5,10 +5,8 @@ namespace MVCProject.ViewModels.HomeViewModels
 {
     public class HomeIndexViewModel
     {
-        public int TotalAccommodations { get; set; }
-        public int TotalActivities { get; set; }
-
-        public List<DisplayAccomodationVM> Accommodations { get; set; } = [];
-        public List<DisplayActivityVM> Activities { get; set; } = [];
+        public IEnumerable<MostBookedAccommodationsViewModel> Accommodations { get; set; } = [];
+        public IEnumerable<MostBookedActivitiesViewModel> Activities { get; set; } = [];
+        public IEnumerable<UpcomingFlightsViewModel> Flights { get; set; } = [];
     }
 }

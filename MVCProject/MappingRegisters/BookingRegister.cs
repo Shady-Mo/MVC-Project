@@ -4,7 +4,7 @@ using MVCProject.ViewModels.BookingViewModel;
 
 namespace MVCProject.MappingRegisters
 {
-    public class Booking : IRegister
+    public class BookingRegister : IRegister
     {
         public void Register(TypeAdapterConfig config)
         {

@@ -1,4 +1,5 @@
 ﻿@using MVCProject.ViewModels.HomeViewModels
+@using Microsoft.AspNetCore.Http
 
 @model HomeIndexViewModel
 
@@ -43,6 +44,9 @@
         padding: 30px;
         box-shadow: 0 15px 40px rgba(0,0,0,0.2);
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
     }
 
     .filter-item {
@@ -50,6 +54,7 @@
         border-bottom: 1px solid #eaeaea;
         cursor: pointer;
         transition: all 0.3s;
+        position: relative;
     }
 
     .filter-item:hover {
@@ -83,6 +88,72 @@
         color: #ff6b35;
     }
 
+    /* Dropdown for country selection */
+    .country-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #eaeaea;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 250px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .filter-item.active .country-dropdown {
+        display: block;
+    }
+
+    .country-option {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background 0.3s;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .country-option:hover {
+        background: #f5f5f5;
+        color: #ff6b35;
+    }
+
+    .country-option img {
+        width: 24px;
+        height: 16px;
+        object-fit: cover;
+        border-radius: 2px;
+    }
+
+    .country-option-divider {
+        height: 1px;
+        background: #eaeaea;
+        margin: 5px 0;
+    }
+
+    .selected-country {
+        font-weight: 600;
+        color: #ff6b35;
+    }
+
+    .loading-countries {
+        padding: 10px 15px;
+        text-align: center;
+        color: #999;
+    }
+
+    /* Button Group */
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
     .search-btn {
         background: #ff6b35;
         color: white;
@@ -92,13 +163,72 @@
         font-weight: 700;
         font-size: 18px;
         transition: all 0.3s;
-        width: 100%;
-        margin-top: 10px;
+        flex: 1;
+        cursor: pointer;
     }
 
     .search-btn:hover {
         background: #e55a2b;
         transform: translateY(-2px);
+    }
+
+    .search-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .clear-filters-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 18px;
+        transition: all 0.3s;
+        flex: 1;
+        cursor: pointer;
+    }
+
+    .clear-filters-btn:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    /* Search Results Section */
+    .search-results-section {
+        background: #f8f9fc;
+        padding: 60px 0;
+    }
+
+    .search-results-title {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .search-results-title h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a2a3a;
+    }
+
+    .search-results-title p {
+        color: #ff6b35;
+        font-size: 1.1rem;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .no-results i {
+        font-size: 64px;
+        color: #ccc;
+        margin-bottom: 20px;
     }
 
     .feature-box {
@@ -127,7 +257,7 @@
         line-height: 1.6;
     }
 
-    .trip-card, .destination-card, .blog-card {
+    .trip-card, .destination-card, .blog-card, .flight-card {
         border: none;
         box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         margin-bottom: 30px;
@@ -139,11 +269,11 @@
         flex-direction: column;
     }
 
-    .trip-card:hover, .destination-card:hover, .blog-card:hover {
+    .trip-card:hover, .destination-card:hover, .blog-card:hover, .flight-card:hover {
         transform: translateY(-8px);
     }
 
-    .trip-card .card-body, .destination-card .card-body, .blog-card .card-body {
+    .trip-card .card-body, .destination-card .card-body, .blog-card .card-body, .flight-card .card-body {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
@@ -166,11 +296,37 @@
         z-index: 1;
     }
 
-    .featured-badge {
+    .discount-badge-right {
         position: absolute;
         top: 15px;
         right: 15px;
+        background: #ff6b35;
+        color: white;
+        padding: 5px 14px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 1;
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
         background: #dc3545;
+        color: white;
+        padding: 5px 14px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 1;
+    }
+
+    .available-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #28a745;
         color: white;
         padding: 5px 14px;
         border-radius: 25px;
@@ -296,6 +452,11 @@
         object-fit: cover;
     }
 
+    .flight-card .card-img-top {
+        height: 180px;
+        object-fit: cover;
+    }
+
     .card-body {
         padding: 25px;
     }
@@ -307,6 +468,33 @@
 
     .text-orange {
         color: #ff6b35;
+    }
+
+    /* Flight Card Specific Styles */
+    .flight-route {
+        background: #f8f9fc;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .flight-times {
+        font-size: 13px;
+        background: #f8f9fc;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .flight-times i {
+        width: 20px;
+        color: #ff6b35;
+    }
+
+    .flight-duration {
+        font-size: 12px;
+        text-align: center;
+        margin-bottom: 10px;
     }
 
     /* Responsive Styles */
@@ -371,7 +559,11 @@
         .filter-value {
             font-size: 14px;
         }
-        .search-btn {
+        .button-group {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .search-btn, .clear-filters-btn {
             font-size: 16px;
             padding: 12px;
         }
@@ -462,41 +654,98 @@
             </div>
             <div class="col-lg-5 offset-lg-1">
                 <div class="filter-bar">
-                    <div class="filter-item d-flex justify-content-between align-items-center">
+                    <div class="filter-item d-flex justify-content-between align-items-center" id="countryFilter">
                         <div class="filter-value">
-                            <i class="fas fa-biking"></i> Activity
+                            <i class="fas fa-map-marker-alt"></i> 
+                            <span id="selectedCountryText">Select Destination</span>
                         </div>
                         <i class="fas fa-chevron-down filter-arrow"></i>
+                        <div class="country-dropdown" id="countryDropdown">
+                            <div class="loading-countries">
+                                <i class="fas fa-spinner fa-spin"></i> Loading countries...
+                            </div>
+                        </div>
+                        <input type="hidden" name="country" id="selectedCountryInput" value="" />
                     </div>
-                    <div class="filter-item d-flex justify-content-between align-items-center">
+
+                    <div class="filter-item d-flex justify-content-between align-items-center" id="priceFilter">
                         <div class="filter-value">
-                            <i class="fas fa-dollar-sign"></i> $30 - $2,300
+                            <i class="fas fa-dollar-sign"></i> 
+                            <span id="selectedPriceText">Select Cost</span>
                         </div>
                         <i class="fas fa-chevron-down filter-arrow"></i>
-                    </div>
-                    <div class="filter-item d-flex justify-content-between align-items-center">
-                        <div class="filter-value">
-                            <i class="fas fa-map-marker-alt"></i> Destination
+                        <div class="country-dropdown" id="priceDropdown">
+                            <div class="country-option" data-price="max">Max Cost</div>
+                            <div class="country-option" data-price="50">Up to $50</div>
+                            <div class="country-option" data-price="100">Up to $100</div>
+                            <div class="country-option" data-price="150">Up to $150</div>
+                            <div class="country-option" data-price="200">Up to $200</div>
+                            <div class="country-option" data-price="250">Up to $250</div>
+                            <div class="country-option" data-price="300">Up to $300</div>
+                            <div class="country-option" data-price="400">Up to $400</div>
+                            <div class="country-option" data-price="500">Up to $500</div>
+                            <div class="country-option" data-price="600">Up to $600</div>
+                            <div class="country-option" data-price="700">Up to $700</div>
+                            <div class="country-option" data-price="800">Up to $800</div>
+                            <div class="country-option" data-price="900">Up to $900</div>
+                            <div class="country-option" data-price="1000">Up to $1000</div>
+                            <div class="country-option" data-price="1500">Up to $1500</div>
+                            <div class="country-option" data-price="2000">Up to $2000</div>
+                            <div class="country-option" data-price="3000">Up to $3000</div>
+                            <div class="country-option" data-price="5000">Up to $5000</div>
                         </div>
-                        <i class="fas fa-chevron-down filter-arrow"></i>
+                        <input type="hidden" name="maxPrice" id="selectedPriceInput" value="" />
                     </div>
-                    <div class="filter-item d-flex justify-content-between align-items-center">
-                        <div class="filter-value">
-                            <i class="far fa-clock"></i> 0 Days - 11 Days
-                        </div>
-                        <i class="fas fa-chevron-down filter-arrow"></i>
+
+                    <div class="button-group">
+                        <button type="button" class="search-btn" id="searchBtn" disabled>
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="button" class="clear-filters-btn" id="clearFiltersBtn">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
                     </div>
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i> Search
-                    </button>
+
+                    <div class="search-info-text" style="text-align: center; margin-top: 15px; font-size: 12px; color: #888; border-top: 1px solid #eaeaea; padding-top: 12px;">
+                        <i class="fas fa-chart-line" style="color: #ff6b35; margin-right: 5px;"></i> 
+                        Showing top 6 most popular accommodations and activities based on your selection
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Search Results Section (Hidden by default) -->
+<div id="searchResultsSection" class="search-results-section" style="display: none;">
+    <div class="section-container">
+        <div class="search-results-title">
+            <h2>Search Results for <span id="searchCountryName"></span></h2>
+            <p>Discover the best accommodations and activities</p>
+        </div>
+        
+        <!-- Accommodations Results -->
+        <div id="accommodationsResults">
+            <h3 class="mb-4" style="color: #1a2a3a;"><i class="fas fa-hotel"></i> Accommodations</h3>
+            <div class="row" id="accommodationsList"></div>
+        </div>
+        
+        <!-- Activities Results -->
+        <div id="activitiesResults" class="mt-5">
+            <h3 class="mb-4" style="color: #1a2a3a;"><i class="fas fa-hiking"></i> Activities</h3>
+            <div class="row" id="activitiesList"></div>
+        </div>
+        
+        <div id="noResultsMessage" class="no-results" style="display: none;">
+            <i class="fas fa-search-location"></i>
+            <h3>No Results Found</h3>
+            <p>We couldn't find any accommodations or activities matching your search. Try a different destination or price range!</p>
+        </div>
+    </div>
+</div>
+
 <!-- Features Section -->
-<section style="padding-top: 80px;">
+<section id="featuresSection">
     <div class="section-container">
         <div class="row g-4">
             <div class="col-md-4">
@@ -528,23 +777,27 @@
 <section id="accommodations" style="background: #f8f9fc;">
     <div class="section-container">
         <div class="section-title">
-            <h2>Explore featured accommodations</h2>
-            <p>Find your perfect place to stay from our curated collection of premium hotels and resorts</p>
+            <h2>🏆 Most Booked Accommodations</h2>
+            <p style="font-size: 1rem; max-width: 600px; margin: 0 auto;">
+                <strong>Top 6 most booked stays</strong> — handpicked based on real traveler bookings. 
+                These crowd favorites offer the perfect blend of quality, comfort, and value.
+            </p>
         </div>
-        <div class="row g-4">
+        <div class="row g-4" id="allAccommodations">
             @if (Model.Accommodations.Any())
             {
                 foreach (var acc in Model.Accommodations)
                 {
-                    <div class="col-lg-4 col-md-6">
+                    var priceValue = (int)acc.PricePerNight;
+                    <div class="col-lg-4 col-md-6 accommodation-card" data-country="@acc.Location?.Split(',').LastOrDefault()?.Trim()" data-price="@priceValue">
                         <div class="card trip-card position-relative">
-                            @if (acc.AvailableRooms > 0)
+                            @if (acc.BookingsHistory > 0)
                             {
-                                <span class="featured-badge">@acc.AvailableRooms Available</span>
+                                <span class="discount-badge">@acc.BookingsHistory Bookings</span>
                             }
                             else
                             {
-                                <span class="discount-badge">Fully Booked</span>
+                                <span class="featured-badge">@acc.BookingsHistory Bookings</span>
                             }
 
                             @if (!string.IsNullOrEmpty(acc.Image))
@@ -588,17 +841,23 @@
 <section id="activities">
     <div class="section-container">
         <div class="section-title">
-            <h2>Popular Activities</h2>
-            <p>Experience unforgettable adventures with our hand-picked selection of activities</p>
+            <h2>⭐ Most Visited Activities</h2>
+            <p><strong>Top 6 most visited experiences</strong> — Join the adventures that travelers love and book the most.</p>
         </div>
-        <div class="row g-4">
+        <div class="row g-4" id="allActivities">
             @if (Model.Activities.Any())
             {
                 foreach (var activity in Model.Activities)
                 {
-                    <div class="col-lg-4 col-md-6">
+                    var priceValue = (int)activity.Price;
+                    <div class="col-lg-4 col-md-6 activity-card" data-country="@activity.Location?.Split(',').LastOrDefault()?.Trim()" data-price="@priceValue">
                         <div class="card trip-card position-relative shadow-sm border-0">
-                            <span class="featured-badge" style="background:#ff6b35;">@activity.Capacity Spots</span>
+                            @if (activity.BookingsHistory > 0) {
+                                <span class="discount-badge">@activity.BookingsHistory Visitors</span>
+                            }
+                            else {
+                                <span class="featured-badge">@activity.BookingsHistory Visitors</span>
+                            }
 
                             @if (!string.IsNullOrEmpty(activity.Img))
                             {
@@ -638,114 +897,432 @@
     </div>
 </section>
 
-<!-- Stats Section -->
-<div class="stats-section">
-    <div class="section-container">
-        <div class="row text-center">
-            <div class="col-md-3 col-6 mb-3">
-                <div class="stat-number">1,250+</div>
-                <p>TRIPS AND TOURS</p>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="stat-number">85+</div>
-                <p>COUNTRIES</p>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="stat-number">340+</div>
-                <p>OUTDOOR ACTIVITIES</p>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="stat-number">15.8K+</div>
-                <p>HAPPY NOMADS</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Testimonials Section -->
-<section style="background: #f8f9fc;">
+<!-- Upcoming Departures Section -->
+<section style="background-color: #f8f9fc">
     <div class="section-container">
         <div class="section-title">
-            <h2>Client testimonials</h2>
-            <p>Real travelers. Real stories. Real opinions to help you make the right choice.</p>
+            <h2>✈️ Upcoming Departures</h2>
+            <p><strong>Latest departure dates & new trips</strong> — Don't miss out on these upcoming adventures. Limited spots available!</p>
         </div>
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <div class="testimonial-card">
-                    <div class="rating mb-3">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p>"Inquietude simplicity terminated she compliment remarkably few her nay. The weeks are ham asked jokes. Neglected perceived shy nay concluded."</p>
-                    <h5 class="mb-0 mt-3">Selvetica Forez</h5>
-                    <small class="text-muted">Travel Blogger</small>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="testimonial-card">
-                    <div class="rating mb-3">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p>"Having fun with everyone. In as name to here them deny wise this. As rapid woody my he me which. Men but they fail shew just wish next put."</p>
-                    <h5 class="mb-0 mt-3">Madam Nozaia</h5>
-                    <small class="text-muted">Adventure Seeker</small>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        <div class="row g-4" id="allFlights">
+            @if (Model.Flights != null && Model.Flights.Any())
+            {
+                foreach (var flight in Model.Flights)
+                {
+                    <div class="col-lg-4 col-md-6 flight-card" data-airline="@flight.Airline" data-departure="@flight.DepartureAirport" data-destination="@flight.DestinationAirport" data-price="@flight.Price">
+                        <div class="card flight-card position-relative">
+                            @{ var duration = flight.ArrivalDateTime - flight.DepartureDateTime; }
+                            @if (duration.Hours > 1)
+                            {
+                                <span class="discount-badge-right bg-success">
+                                    <i class="far fa-hourglass-half"></i>
+                                        @duration.Hours hrs @duration.Minutes min
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="discount-badge-right bg-warning">
+                                    <i class="far fa-hourglass-half"></i>
+                                        @duration.Hours hrs @duration.Minutes min
+                                </span>
+                            }
 
-<!-- Blog Section -->
-<section>
-    <div class="section-container">
-        <div class="section-title">
-            <h2>Travel tips and blog</h2>
-            <p>Latest travel tips and blog covering all travel experiences</p>
-        </div>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card blog-card">
-                    <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600" class="card-img-top" alt="Rocky Mountains">
-                    <div class="card-body">
-                        <small class="text-muted"><i class="far fa-calendar-alt"></i> December 10, 2024</small>
-                        <h5 class="card-title mt-2">A Guide to Rocky Mountain vacations</h5>
-                        <p class="card-text">The style guide provides you with a blueprint of Paperback's default post and page styles.</p>
-                        <a href="#" class="btn-link text-orange" style="text-decoration: none; font-weight: 600;">Read More <i class="fas fa-arrow-right"></i></a>
+                            <img src="/images/Image_sk6v4vsk6v4vsk6v.png" class="card-img-top" alt="Flight">
+
+                            <div class="card-body">
+                                <!-- Airline -->
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <h5 class="card-title mb-0">@flight.Airline</h5>
+                                    <i class="fas fa-plane" style="color: #ff6b35; font-size: 20px;"></i>
+                                </div>
+
+                                <!-- Route -->
+                                <div class="flight-route text-center">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-start flex-grow-1">
+                                            <strong>@flight.DepartureAirport</strong>
+                                            <div><small class="text-muted">@flight.DepartureAirport</small></div>
+                                        </div>
+                                        <i class="fas fa-arrow-right text-muted mx-2"></i>
+                                        <div class="text-end flex-grow-1">
+                                            <strong>@flight.DestinationAirport</strong>
+                                            <div><small class="text-muted">@flight.DestinationAirport</small></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Times -->
+                                <div class="flight-times d-flex justify-content-between">
+                                    <div>
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span class="ms-1">@flight.DepartureDateTime.ToString("MMM dd")</span>
+                                        <div>
+                                            <i class="fas fa-clock"></i>
+                                            <span class="ms-1">@flight.DepartureDateTime.ToString("hh:mm tt")</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span class="ms-1">@flight.ArrivalDateTime.ToString("MMM dd")</span>
+                                        <div>
+                                            <i class="fas fa-clock"></i>
+                                            <span class="ms-1">@flight.ArrivalDateTime.ToString("hh:mm tt")</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Price & Seats -->
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                    <div>
+                                        <span class="price">@flight.Price.ToString("C")</span>
+                                        <small class="text-muted d-block">per person</small>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <a href="/Flight/Details/@flight.Id" class="btn-orange w-100 text-center d-block" style="text-decoration: none; padding: 10px;">
+                                        Book Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted">
+                    <i class="fas fa-plane-slash fa-3x mb-3"></i>
+                    <h4>No Flights Found</h4>
+                    <p>Check back soon for exciting flight deals.</p>
                 </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card blog-card">
-                    <img src="https://images.unsplash.com/photo-1535498730771-e735b998cd64?w=600" class="card-img-top" alt="Everest">
-                    <div class="card-body">
-                        <small class="text-muted"><i class="far fa-calendar-alt"></i> November 25, 2024</small>
-                        <h5 class="card-title mt-2">Everest Base Camp Trekking in Nepal</h5>
-                        <p class="card-text">The style guide provides you with a blueprint of Paperback's default post and page styles.</p>
-                        <a href="#" class="btn-link text-orange" style="text-decoration: none; font-weight: 600;">Read More <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card blog-card">
-                    <img src="https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=600" class="card-img-top" alt="Puerto Rico">
-                    <div class="card-body">
-                        <small class="text-muted"><i class="far fa-calendar-alt"></i> November 10, 2024</small>
-                        <h5 class="card-title mt-2">Things to do in Puerto Rico</h5>
-                        <p class="card-text">The style guide provides you with a blueprint of Paperback's default post and page styles.</p>
-                        <a href="#" class="btn-link text-orange" style="text-decoration: none; font-weight: 600;">Read More <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
+            }
         <div class="text-center mt-4">
-            <a href="#" class="btn-orange" style="text-decoration: none;">View All Posts</a>
+            <a asp-controller="flight" asp-action="index" class="btn-orange" style="text-decoration: none;">Explore All Flights <i class="fas fa-arrow-right"></i></a>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM Elements
+        const countryFilter = document.getElementById('countryFilter');
+        const priceFilter = document.getElementById('priceFilter');
+        const countryDropdown = document.getElementById('countryDropdown');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        
+        // Hidden input fields
+        const selectedCountryInput = document.getElementById('selectedCountryInput');
+        const selectedPriceInput = document.getElementById('selectedPriceInput');
+        
+        // Filter values
+        let selectedCountry = '';
+        let selectedCountryName = '';
+        let selectedPrice = '';
+        
+        // Fetch countries from REST API
+        async function fetchCountries() {
+            try {
+                const response = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2');
+                const countries = await response.json();
+                
+                countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+                
+                countryDropdown.innerHTML = '';
+                
+                // Add "All Destinations" option
+                const allOption = document.createElement('div');
+                allOption.className = 'country-option';
+                allOption.innerHTML = '<span>🌍 All Destinations</span>';
+                allOption.setAttribute('data-country', 'all');
+                allOption.setAttribute('data-country-name', 'All Destinations');
+                countryDropdown.appendChild(allOption);
+                
+                // Add countries
+                countries.forEach(country => {
+                    const option = document.createElement('div');
+                    option.className = 'country-option';
+                    option.innerHTML = `
+                        <img src="${country.flags.png}" alt="${country.name.common} flag" onerror="this.style.display='none'">
+                        <span>${country.name.common}</span>
+                    `;
+                    option.setAttribute('data-country', country.name.common);
+                    countryDropdown.appendChild(option);
+                });
+                
+                attachCountryEvents();
+                
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+                countryDropdown.innerHTML = '<div class="country-option" data-country="all">🌍 All Destinations</div>';
+                const fallbackCountries = ['Egypt', 'France', 'Italy', 'Spain', 'Greece', 'Turkey', 'Thailand', 'Japan', 'USA', 'UK', 'Germany', 'Switzerland'];
+                fallbackCountries.forEach(country => {
+                    const option = document.createElement('div');
+                    option.className = 'country-option';
+                    option.innerHTML = `<span>${country}</span>`;
+                    option.setAttribute('data-country', country);
+                    countryDropdown.appendChild(option);
+                });
+                attachCountryEvents();
+            }
+        }
+        
+        function attachCountryEvents() {
+            const countryOptions = document.querySelectorAll('#countryDropdown .country-option[data-country]');
+            const selectedCountryText = document.getElementById('selectedCountryText');
+            
+            countryOptions.forEach(option => {
+                option.removeEventListener('click', countryClickHandler);
+                option.addEventListener('click', countryClickHandler);
+            });
+            
+            function countryClickHandler(e) {
+                e.stopPropagation();
+                const countryValue = this.getAttribute('data-country');
+                selectedCountryName = this.querySelector('span')?.innerText || this.innerText;
+                
+                if (countryValue === 'all') {
+                    selectedCountry = 'all';
+                    selectedCountryText.innerHTML = '🌍 All Destinations';
+                    selectedCountryText.classList.add('selected-country');
+                    selectedCountryInput.value = 'all';
+                } else {
+                    selectedCountry = countryValue;
+                    selectedCountryText.innerHTML = selectedCountryName || selectedCountry;
+                    selectedCountryText.classList.add('selected-country');
+                    selectedCountryInput.value = selectedCountry;
+                }
+                countryFilter.classList.remove('active');
+                updateSearchButton();
+            }
+        }
+        
+        // Price selection
+        const priceOptions = document.querySelectorAll('#priceDropdown .country-option[data-price]');
+        const selectedPriceText = document.getElementById('selectedPriceText');
+        
+        priceOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const priceValue = this.getAttribute('data-price');
+                const priceText = this.innerText;
+                
+                if (priceValue === 'max') {
+                    selectedPrice = 'max';
+                    selectedPriceText.innerHTML = priceText;
+                    selectedPriceInput.value = Number.MAX_SAFE_INTEGER;
+                } else {
+                    selectedPrice = priceValue;
+                    selectedPriceText.innerHTML = priceText;
+                    selectedPriceInput.value = priceValue;
+                }
+                priceFilter.classList.remove('active');
+                updateSearchButton();
+            });
+        });
+        
+        function updateSearchButton() {
+            const hasCountry = selectedCountryInput && selectedCountryInput.value !== '';
+            const hasPrice = selectedPriceInput && selectedPriceInput.value !== '';
+            searchBtn.disabled = !(hasCountry && hasPrice);
+        }
+        
+        // Toggle dropdowns
+        countryFilter.addEventListener('click', function(e) {
+            e.stopPropagation();
+            countryFilter.classList.toggle('active');
+            priceFilter.classList.remove('active');
+        });
+        
+        priceFilter.addEventListener('click', function(e) {
+            e.stopPropagation();
+            priceFilter.classList.toggle('active');
+            countryFilter.classList.remove('active');
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function() {
+            countryFilter.classList.remove('active');
+            priceFilter.classList.remove('active');
+        });
+        
+        // Search results elements
+        const searchResultsSection = document.getElementById('searchResultsSection');
+        const featuresSection = document.getElementById('featuresSection');
+        const accommodationsSection = document.getElementById('accommodations');
+        const activitiesSection = document.getElementById('activities');
+        const statsSection = document.querySelector('.stats-section');
+        
+        // Function to update search results
+        function updateSearchResults(data) {
+            const searchCountryName = document.getElementById('searchCountryName');
+            const accommodationsList = document.getElementById('accommodationsList');
+            const activitiesList = document.getElementById('activitiesList');
+            
+            let titleText = data.location || 'All Destinations';
+            if (data.price && data.price > 0) {
+                titleText += ` (up to $${data.price})`;
+            }
+            searchCountryName.innerHTML = titleText;
+            
+            // Clear and populate accommodations
+            accommodationsList.innerHTML = '';
+            if (data.accommodations && data.accommodations.length > 0) {
+                data.accommodations.forEach(acc => {
+                    const col = document.createElement('div');
+                    col.className = 'col-lg-4 col-md-6';
+                    const badgeClass = acc.bookingsHistory > 0 ? 'featured-badge' : 'discount-badge';
+                    const badgeColor = acc.bookingsHistory > 0 ? '#ff6b35' : '#dc3545';
+                    col.innerHTML = `
+                        <div class="card trip-card position-relative">
+                            <span class="${badgeClass}" style="background-color: ${badgeColor}">${acc.bookingsHistory || 0} Bookings</span>
+                            <img src="${acc.image ? '/images/' + acc.image : 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}" class="card-img-top" alt="${acc.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
+                            <div class="card-body">
+                                <h5 class="card-title">${acc.name}</h5>
+                                <p class="card-text text-muted"><i class="fas fa-map-marker-alt"></i> ${acc.location}</p>
+                                <p class="card-text">Experience luxury and comfort in this stunning property. Perfect for your next getaway.</p>
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <div>
+                                        <span class="price">$${acc.pricePerNight}</span>
+                                        <small class="text-muted d-block">per night</small>
+                                    </div>
+                                    <a href="/Accommodation/Details/${acc.id}" class="btn-outline-orange">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    accommodationsList.appendChild(col);
+                });
+                document.getElementById('accommodationsResults').style.display = 'block';
+            } else {
+                document.getElementById('accommodationsResults').style.display = 'none';
+            }
+            
+            // Clear and populate activities
+            activitiesList.innerHTML = '';
+            if (data.activities && data.activities.length > 0) {
+                data.activities.forEach(activity => {
+                    const col = document.createElement('div');
+                    col.className = 'col-lg-4 col-md-6';
+                    const date = new Date(activity.date);
+                    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const badgeClass = activity.bookingsHistory > 0 ? 'featured-badge' : 'discount-badge';
+                    const badgeColor = activity.bookingsHistory > 0 ? '#ff6b35' : '#dc3545';
+                    col.innerHTML = `
+                        <div class="card trip-card position-relative shadow-sm border-0">
+                            <span class="${badgeClass}" style="background:${badgeColor};">${activity.bookingsHistory || 0} Visitors</span>
+                            <img src="${activity.image ? '/images/' + activity.image : 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400'}" class="card-img-top" alt="${activity.name}" onerror="this.src='https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400'">
+                            <div class="card-body">
+                                <h5 class="card-title">${activity.name}</h5>
+                                <p class="card-text text-muted mb-1"><i class="fas fa-map-marker-alt" style="color:#ff6b35;"></i> ${activity.location}</p>
+                                <p class="card-text text-muted small mb-3"><i class="far fa-calendar-alt"></i> ${formattedDate}</p>
+                                <p class="card-text">Join an unforgettable experience with expert guides and amazing adventure.</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                                        <span class="price font-weight-bold" style="font-size:1.4rem; color:#1a2a3a;">$${activity.price}</span>
+                                        <small class="text-muted">/person</small>
+                                    </div>
+                                    <a href="/Activity/Details/${activity.id}" class="btn-orange text-white px-4 py-2" style="font-size:0.9rem;">Book Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    activitiesList.appendChild(col);
+                });
+                document.getElementById('activitiesResults').style.display = 'block';
+            } else {
+                document.getElementById('activitiesResults').style.display = 'none';
+            }
+            
+            // Show/hide no results message
+            if ((!data.accommodations || data.accommodations.length === 0) && 
+                (!data.activities || data.activities.length === 0)) {
+                document.getElementById('noResultsMessage').style.display = 'block';
+                document.getElementById('accommodationsResults').style.display = 'none';
+                document.getElementById('activitiesResults').style.display = 'none';
+            } else {
+                document.getElementById('noResultsMessage').style.display = 'none';
+            }
+            
+            // Show results, hide original sections
+            searchResultsSection.style.display = 'block';
+            featuresSection.style.display = 'none';
+            accommodationsSection.style.display = 'none';
+            activitiesSection.style.display = 'none';
+            if (statsSection) statsSection.style.display = 'none';
+            
+            searchResultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Search functionality with AJAX GET
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (searchBtn.disabled) return;
+            
+            const country = selectedCountryInput.value;
+            const price = selectedPriceInput.value;
+
+            const locationVal = country || '';
+            const priceVal = (price && price !== '' && price !== 'max') ? parseFloat(price) : '';
+
+            const params = new URLSearchParams();
+            if (locationVal) params.append('Location', locationVal);
+            if (priceVal) params.append('Price', priceVal);
+            
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+            searchBtn.disabled = true;
+            
+            fetch(`@Url.Action("Filter", "Home")?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+                searchBtn.disabled = false;
+                updateSearchResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+                searchBtn.disabled = false;
+                alert('An error occurred while searching. Please check the console.');
+            });
+        });
+        
+        // Clear filters button
+        clearFiltersBtn.addEventListener('click', function() {
+            selectedCountry = '';
+            selectedCountryName = '';
+            selectedPrice = '';
+            
+            selectedCountryInput.value = '';
+            selectedPriceInput.value = '';
+            
+            document.getElementById('selectedCountryText').innerHTML = 'Select Destination';
+            document.getElementById('selectedCountryText').classList.remove('selected-country');
+            document.getElementById('selectedPriceText').innerHTML = 'Select Cost';
+            searchBtn.disabled = true;
+            
+            searchResultsSection.style.display = 'none';
+            featuresSection.style.display = 'block';
+            accommodationsSection.style.display = 'block';
+            activitiesSection.style.display = 'block';
+            if (statsSection) statsSection.style.display = 'block';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        fetchCountries();
+    });
+</script>
