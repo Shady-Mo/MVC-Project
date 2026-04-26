@@ -10,7 +10,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MVCProject.Controllers
 {
-    [Authorize]
+    
     public class ActivityController : Controller
     {
         private readonly UnitOfWork unitOfWork;
@@ -35,11 +35,13 @@ namespace MVCProject.Controllers
             return View("Index", activitiesVM);
         }
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View("Create");
         }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(AddActivityVM addActivityVM)
         {
             if (ModelState.IsValid)
@@ -68,6 +70,7 @@ namespace MVCProject.Controllers
             return View("Details", activity);
         }
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int id)
         {
             var activityEntity = unitOfWork.ActivityRepository.GetById(id);
@@ -77,6 +80,7 @@ namespace MVCProject.Controllers
             return View("Edit", activity);
         }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(UpdateActivityVM updateActivityVM)
         {
             if (ModelState.IsValid)
@@ -100,6 +104,7 @@ namespace MVCProject.Controllers
             }
             return View("Edit", updateActivityVM);
         }
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var activityEntity = unitOfWork.ActivityRepository.GetById(id);
