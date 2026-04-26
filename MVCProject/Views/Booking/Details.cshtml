@@ -25,12 +25,22 @@
                 ℹ️ Booking Details
             </h2>
             <div>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom shadow-sm me-2 fw-bold">
-                    ✏️ Edit
-                </a>
-                <a asp-action="Index" class="btn btn-outline-secondary shadow-sm fw-bold">
-                    ⬅️ Back to List
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom shadow-sm me-2 fw-bold">
+                        ✏️ Edit
+                    </a>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary shadow-sm fw-bold">
+                        ⬅️ Back to List
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="MyBooking" class="btn btn-outline-secondary shadow-sm fw-bold">
+                        ⬅️ Back to List
+                    </a>
+                }
             </div>
         </div>
 
@@ -57,12 +67,19 @@
                 </h3>
 
                 <div class="row mb-4">
-                    <div class="col-md-6 mb-4">
+                    <div class="col-md-4 mb-4">
+                        <div class="info-label">👤 User ID</div>
+                        <div class="info-value text-muted" style="font-size: 0.95rem; word-break: break-all;">
+                            @Model.UserId
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
                         <div class="info-label">📅 Flight Date</div>
-                        <div class="info-value">@Model.BookingDate.ToString("MMMM dd, yyyy")</div>
+                        <div class="info-value">@Model.FlightDate</div>
                     </div>
                     
-                    <div class="col-md-6 mb-4">
+                    <div class="col-md-4 mb-4">
                         <div class="info-label">💲 Total Amount</div>
                         <div class="info-value text-primary-custom fw-bold fs-4">
                             @Model.TotalAmount.ToString("C")

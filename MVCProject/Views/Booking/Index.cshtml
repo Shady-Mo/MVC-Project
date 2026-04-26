@@ -64,6 +64,7 @@
                     <thead>
                         <tr>
                             <th># ID</th>
+                            <th>User ID</th>
                             <th>Destination</th>
                             <th>Date</th>
                             <th>Included</th>
@@ -77,6 +78,12 @@
                         {
                             <tr>
                                 <td class="text-muted fw-bold">#@item.Id</td>
+                                
+                                <td>
+                                    <div class="text-muted small" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@item.UserId">
+                                        👤 @item.UserId
+                                    </div>
+                                </td>
                                 
                                 <td>
                                     <div class="fw-bold text-dark">@item.Country</div>

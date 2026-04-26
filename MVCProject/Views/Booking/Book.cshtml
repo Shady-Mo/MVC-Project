@@ -95,14 +95,6 @@
                         errors.push("You must select a Flight.");
                     }
 
-                    if ($('.hotel-checkbox').length > 0 && $('.hotel-checkbox:checked').length === 0) {
-                        errors.push("You must select at least one Accommodation.");
-                    }
-
-                    if ($('input[name="ActivitiesId"]').length > 0 && $('input[name="ActivitiesId"]:checked').length === 0) {
-                        errors.push("You must select at least one Activity.");
-                    }
-
                 } 
                 else {
                     errors.push("Please search and select travel options first.");
@@ -193,14 +185,24 @@
                     html = '<div class="col-12 text-muted">No flights found.</div>';
                 } else {
                     flights.forEach(function(f) {
+                        // فرمتة التواريخ
+                        var depTime = formatDateTime(f.departureDateTime);
+                        var arrTime = formatDateTime(f.arrivalDateTime);
+
                         html += `
                             <div class="col-md-4">
                                 <label class="w-100 selectable-card">
                                     <input type="radio" name="FlightId" value="${f.id}" class="hidden-radio item-selector" />
                                     <div class="card-content p-3 shadow-sm card flight-card">
                                         <div class="fw-bold text-dark">${f.airline || 'Flight'} - ${f.flightNumber || ''}</div>
-                                        <div class="text-muted small">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
-                                        <div class="text-primary-custom fw-bold mt-2">$${f.price || 0}</div>
+                                        <div class="text-muted small mt-1">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
+                            
+                                        <div class="bg-light p-2 rounded mt-2 small border">
+                                            <div class="text-dark"><span class="fw-bold">🛫 Dep:</span> ${depTime}</div>
+                                            <div class="text-dark mt-1"><span class="fw-bold">🛬 Arr:</span> ${arrTime}</div>
+                                        </div>
+
+                                        <div class="text-primary-custom fw-bold mt-2 fs-5">$${f.price || 0}</div>
                                     </div>
                                 </label>
                             </div>
@@ -293,5 +295,18 @@
             }
 
         });
+
+        // دالة لفرمتة التاريخ والوقت بشكل شيك
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            var d = new Date(dateString);
+            return d.toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true
+            });
+        }
     </script>
 }

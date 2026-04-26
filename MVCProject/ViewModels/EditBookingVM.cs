@@ -19,7 +19,7 @@ namespace MVCProject.ViewModels.BookingViewModel
         public Status Status { get; set; }
 
         public int FlightId { get; set; }
-        public List<BookingAccomodationVM> Accomodations { get; set; } = new List<BookingAccomodationVM>();
-        public List<int> ActivitiesId { get; set; } = new List<int>();
+        public List<BookingAccomodationVM>? Accomodations { get; set; } = new List<BookingAccomodationVM>();
+        public List<int>? ActivitiesId { get; set; } = new List<int>();
     }
 }

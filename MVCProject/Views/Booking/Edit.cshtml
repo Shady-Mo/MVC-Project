@@ -14,7 +14,7 @@
     .selectable-card { cursor: pointer; transition: all 0.2s ease-in-out; border: 2px solid transparent; height: 100%; }
     .selectable-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
     
-    /* الـ CSS ده هو اللي هيتولى التلوين لما الـ Checkbox يكون Checked */
+    /* تلوين الكارت لما اليوزر يختاره */
     input[type="checkbox"].item-selector:checked + .card-content,
     input[type="radio"].item-selector:checked + .card-content {
         border-color: #28b5a4 !important; 
@@ -38,7 +38,7 @@
             <h5 class="fw-bold text-muted mb-3">Booking Details</h5>
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label asp-for="src" class="form-label fw-bold">🛬 Source</label>
+                    <label asp-for="src" class="form-label fw-bold">🛫 Source</label>
                     <input asp-for="src" id="srcCountry" class="form-control" required />
                 </div>
                 <div class="col-md-3">
@@ -47,8 +47,8 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label asp-for="BookingDate" class="form-label fw-bold">📅 Flight Date</label>
-                    <input asp-for="BookingDate" id="BookingDate" type="date" class="form-control" required />
+                    <label asp-for="BookingDate" class="form-label fw-bold">📅 Flight Date & Time</label>
+                    <input asp-for="BookingDate" id="BookingDate" type="datetime-local" class="form-control" value="@Model.BookingDate.ToString("yyyy-MM-ddTHH:mm")" required />
                 </div>
 
                 <div class="col-md-3">
@@ -56,9 +56,9 @@
                     <select asp-for="Status" asp-items="Html.GetEnumSelectList<MVCProject.Models.Status>()" class="form-select"></select>
                 </div>
 
-                <div class="col-md-3 d-grid">
-                    <button type="button" id="btnLoadData" class="btn btn-dark fw-bold">
-                        🔄 Load Options
+                <div class="col-md-12 d-flex justify-content-end mt-3">
+                    <button type="button" id="btnLoadData" class="btn btn-dark fw-bold px-4">
+                        🔄 Reload Options
                     </button>
                 </div>
             </div>
@@ -88,32 +88,26 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // نقل الداتا القديمة للجافاسكريبت
         var existingFlightId = '@Model.FlightId'; 
-        var existingActivities = @Html.Raw(JsonSerializer.Serialize(Model.ActivitiesId));
-        var existingHotels = @Html.Raw(JsonSerializer.Serialize(Model.Accomodations));
+        var existingActivities = @Html.Raw(JsonSerializer.Serialize(Model.ActivitiesId ?? new List<int>()));
+        var existingHotels = @Html.Raw(JsonSerializer.Serialize(Model.Accomodations ?? new List<MVCProject.ViewModels.BookingViewModel.BookingAccomodationVM>()));
 
         $(document).ready(function () {
             
-            // --- Custom Client-Side Validation --- //
+            // --- 1. Custom Client-Side Validation (SweetAlert) --- //
             $("#bookingForm").submit(function (e) {
                 var errors = [];
 
                 if (!$("#srcCountry").val().trim()) errors.push("Please enter the Source country.");
                 if (!$("#destCountry").val().trim()) errors.push("Please enter the Destination country.");
-                if (!$("#BookingDate").val()) errors.push("Please select a Flight Date.");
+                if (!$("#BookingDate").val()) errors.push("Please select a Flight Date and Time.");
 
                 if ($("#resultsSection").is(":visible")) {
                     if ($('input[name="FlightId"]').length > 0 && !$('input[name="FlightId"]:checked').val()) {
                         errors.push("You must select a Flight.");
                     }
-
-                    if ($('.hotel-checkbox').length > 0 && $('.hotel-checkbox:checked').length === 0) {
-                        errors.push("You must select at least one Accommodation.");
-                    }
-
-                    if ($('input[name="ActivitiesId"]').length > 0 && $('input[name="ActivitiesId"]:checked').length === 0) {
-                        errors.push("You must select at least one Activity.");
-                    }
+                    
                 }
 
                 var hotelDateMissing = false;
@@ -153,13 +147,14 @@
                 }
             });
 
-
-            loadTravelData();
+            // --- 2. AJAX Loading Data --- //
+            loadTravelData(); // تحميل عند الفتح
 
             $("#btnLoadData").click(function () {
                 loadTravelData();
             });
 
+            // التحديث التلقائي عند تغيير أي قيمة
             $("#destCountry, #BookingDate, #srcCountry").change(function () {
                 var dest = $("#destCountry").val();
                 var src = $("#srcCountry").val();
@@ -193,28 +188,47 @@
                         Swal.fire('Error', 'Error loading data. Please try again.', 'error');
                     },
                     complete: function() {
-                        $("#btnLoadData").html("🔄 Load Options").prop("disabled", false);
+                        $("#btnLoadData").html("🔄 Reload Options").prop("disabled", false);
                     }
+                });
+            }
+
+            // --- 3. Rendering Functions --- //
+
+            // دالة لفرمتة الوقت
+            function formatDateTime(dateString) {
+                if (!dateString) return 'N/A';
+                var d = new Date(dateString);
+                return d.toLocaleString('en-US', { 
+                    month: 'short', day: 'numeric', 
+                    hour: '2-digit', minute: '2-digit', hour12: true
                 });
             }
 
             function renderFlights(flights) {
                 var html = '';
                 if(!flights || flights.length === 0) {
-                    html = '<div class="col-12 text-muted">No flights found for this destination and date.</div>';
+                    html = '<div class="col-12 text-muted">No flights found for this route and date.</div>';
                 } else {
                     flights.forEach(function(f) {
                         var isChecked = (existingFlightId == f.id) ? 'checked' : '';
-                        
-                        // تم إزالة Inline Style عشان الـ CSS يشتغل صح
+                        var depTime = formatDateTime(f.departureDateTime);
+                        var arrTime = formatDateTime(f.arrivalDateTime);
+
                         html += `
                             <div class="col-md-4">
                                 <label class="w-100 selectable-card">
                                     <input type="radio" name="FlightId" value="${f.id}" class="hidden-radio item-selector" ${isChecked} />
                                     <div class="card-content p-3 shadow-sm card flight-card">
                                         <div class="fw-bold text-dark">${f.airline || 'Flight'} - ${f.flightNumber || ''}</div>
-                                        <div class="text-muted small">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
-                                        <div class="text-primary-custom fw-bold mt-2">$${f.price || 0}</div>
+                                        <div class="text-muted small mt-1">From: ${f.departureCountry || f.departureAirport || ''} ➡️ To: ${f.arrivalCountry || f.destinationAirport || ''}</div>
+                                        
+                                        <div class="bg-light p-2 rounded mt-2 small border">
+                                            <div class="text-dark"><span class="fw-bold">🛫 Dep:</span> ${depTime}</div>
+                                            <div class="text-dark mt-1"><span class="fw-bold">🛬 Arr:</span> ${arrTime}</div>
+                                        </div>
+
+                                        <div class="text-primary-custom fw-bold mt-2 fs-5">$${f.price || 0}</div>
                                     </div>
                                 </label>
                             </div>
@@ -232,7 +246,6 @@
                     hotels.forEach(function(h, i) {
                         var savedHotel = existingHotels.find(x => x.Id === h.id);
                         var isChecked = savedHotel ? 'checked' : '';
-                        var borderStyle = isChecked ? 'border-color: #28b5a4;' : '';
                         var displayDates = isChecked ? 'display: block;' : 'display: none;';
                         
                         var checkInVal = savedHotel ? savedHotel.CheckInDate.split('T')[0] : '';
@@ -241,10 +254,11 @@
 
                         html += `
                             <div class="col-md-6">
-                                <div class="card shadow-sm p-3 card-content hotel-wrapper" style="${borderStyle}">
+                                <div class="card shadow-sm p-3 card-content hotel-wrapper">
                                     <label class="w-100 mb-0" style="cursor:pointer;">
                                         <input type="checkbox" name="Accomodations[${i}].Id" value="${h.id}" class="hotel-checkbox me-2" ${isChecked} />
                                         <span class="fw-bold text-dark fs-5">🏨 ${h.name}</span>
+                                        <div class="text-muted small ms-4">${h.location}</div>
                                         <div class="text-primary-custom fw-bold mt-1 ms-4">$${h.pricePerNight || 0} / night</div>
                                     </label>
                                     <div class="hotel-dates ms-4" style="${displayDates}">
@@ -266,6 +280,7 @@
                 }
                 $("#hotelsContainer").html(html);
 
+                // إظهار وإخفاء التواريخ عند التحديد
                 $(".hotel-checkbox").change(function() {
                     var wrapper = $(this).closest('.hotel-wrapper');
                     var dateInputs = wrapper.find('.date-input');
@@ -273,11 +288,9 @@
                     if(this.checked) {
                         dateSection.slideDown();
                         dateInputs.prop('disabled', false);
-                        wrapper.css('border-color', '#28b5a4');
                     } else {
                         dateSection.slideUp();
                         dateInputs.prop('disabled', true).val('');
-                        wrapper.css('border-color', 'transparent');
                     }
                 });
             }
