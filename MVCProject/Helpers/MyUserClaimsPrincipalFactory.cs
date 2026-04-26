@@ -9,6 +9,7 @@ namespace MVCProject.Helpers {
             RoleManager<IdentityRole> roleManager,
             IOptions<IdentityOptions> options) : 
             base(userManager, roleManager, options) {
+            
         }
 
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(AppUser user) {
