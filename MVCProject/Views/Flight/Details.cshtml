@@ -60,13 +60,13 @@
             <div class="d-flex gap-2 flex-wrap">
                 <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
 
-                @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                @* @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
                 {
                     <a asp-action="Edit" asp-route-id="@Model.Id"
                        class="btn btn-outline-secondary">Edit</a>
                     <a asp-action="Delete" asp-route-id="@Model.Id"
                        class="btn btn-outline-danger">Delete</a>
-                }
+                } *@
 
 
 

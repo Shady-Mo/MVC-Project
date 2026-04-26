@@ -163,7 +163,7 @@ namespace MVCProject.Controllers
 
             unitOfWork.Save();
 
-            TempData["Success"] = "Flight booked successfully!";
+            //TempData["Success"] = "Flight booked successfully!";
             //return RedirectToAction(nameof(Details), new { id });
             return RedirectToAction("MyBooking", "Booking");
         }
