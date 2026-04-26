@@ -60,15 +60,39 @@
             <div class="d-flex gap-2 flex-wrap">
                 <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
 
-                @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                @* @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
                 {
                     <a asp-action="Edit" asp-route-id="@Model.Id"
                        class="btn btn-outline-secondary">Edit</a>
                     <a asp-action="Delete" asp-route-id="@Model.Id"
                        class="btn btn-outline-danger">Delete</a>
-                }
+                } *@
 
-                @if (/*User.Identity.IsAuthenticated &&*/ Model.AvailableSeats > 0)
+
+
+                @*  ///// this logic if we will send data to omar endpoint , we may do more to make the flight pre chosen ///////
+                    @if (User.Identity.IsAuthenticated
+                     && Model.AvailableSeats > 0
+                     && Model.DepartureDateTime > DateTime.Now)
+                {
+                    <a asp-controller="Booking" asp-action="Book"
+                       asp-route-flightId="@Model.Id"
+                       class="btn btn-primary-custom">Book Now</a>
+                }
+                else if (Model.AvailableSeats <= 0)
+                {
+                    <button class="btn btn-secondary" disabled>Fully Booked</button>
+                }
+                else if (Model.DepartureDateTime <= DateTime.Now)
+                {
+                    <button class="btn btn-secondary" disabled>Flight Departed</button>
+                } *@
+
+
+
+                @if (User.Identity.IsAuthenticated
+                     && Model.AvailableSeats > 0
+                     && Model.DepartureDateTime > DateTime.Now)
                 {
                     <form asp-action="Book" asp-route-id="@Model.Id" method="post">
                         @Html.AntiForgeryToken()
@@ -78,6 +102,10 @@
                 else if (Model.AvailableSeats <= 0)
                 {
                     <button class="btn btn-secondary" disabled>Fully Booked</button>
+                }
+                else if (Model.DepartureDateTime <= DateTime.Now)
+                {
+                    <button class="btn btn-secondary" disabled>Flight Departed</button>
                 }
             </div>
         </div>

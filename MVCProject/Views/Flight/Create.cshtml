@@ -42,12 +42,12 @@
                 <div class="row g-3 mb-3">
                     <div class="col-6">
                         <label asp-for="DepartureDateTime" class="form-label fw-bold text-muted">Departure</label>
-                        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" />
+                        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" id="departureDateTime" />
                         <span asp-validation-for="DepartureDateTime" class="text-danger small"></span>
                     </div>
                     <div class="col-6">
                         <label asp-for="ArrivalDateTime" class="form-label fw-bold text-muted">Arrival</label>
-                        <input asp-for="ArrivalDateTime" type="datetime-local" class="form-control" />
+                        <input asp-for="ArrivalDateTime" type="datetime-local" class="form-control" id="arrivalDateTime" />
                         <span asp-validation-for="ArrivalDateTime" class="text-danger small"></span>
                     </div>
                 </div>
@@ -74,6 +74,27 @@
     </div>
 </div>
 
-@section Scripts {
+@* @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} *@
+
+    @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const departure = document.getElementById('departureDateTime');
+        const arrival = document.getElementById('arrivalDateTime');
+
+        // Set min for departure to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        departure.min = now.toISOString().slice(0, 16);
+
+        // When departure changes, update arrival min
+        departure.addEventListener('change', function () {
+            arrival.min = this.value;
+            if (arrival.value && arrival.value <= this.value) {
+                arrival.value = '';
+            }
+        });
+    </script>
 }

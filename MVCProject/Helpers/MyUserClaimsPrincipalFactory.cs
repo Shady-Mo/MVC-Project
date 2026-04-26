@@ -1,4 +1,4 @@
-﻿ using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MVCProject.Models;
 using System.Security.Claims;
