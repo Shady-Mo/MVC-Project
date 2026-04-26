@@ -43,12 +43,12 @@
                 <div class="row g-3 mb-3">
                     <div class="col-6">
                         <label asp-for="DepartureDateTime" class="form-label fw-bold text-muted">Departure</label>
-                        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" />
+                        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" id="departureDateTime" />
                         <span asp-validation-for="DepartureDateTime" class="text-danger small"></span>
                     </div>
                     <div class="col-6">
                         <label asp-for="ArrivalDateTime" class="form-label fw-bold text-muted">Arrival</label>
-                        <input asp-for="ArrivalDateTime" type="datetime-local" class="form-control" />
+                        <input asp-for="ArrivalDateTime" type="datetime-local" class="form-control" id="arrivalDateTime" />
                         <span asp-validation-for="ArrivalDateTime" class="text-danger small"></span>
                     </div>
                 </div>
@@ -75,6 +75,27 @@
     </div>
 </div>
 
+@* @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} *@
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const departure = document.getElementById('departureDateTime');
+        const arrival = document.getElementById('arrivalDateTime');
+
+        // When departure changes, update arrival min
+        departure.addEventListener('change', function () {
+            arrival.min = this.value;
+            if (arrival.value && arrival.value <= this.value) {
+                arrival.value = '';
+            }
+        });
+
+        // On load, set arrival min based on current departure value
+        if (departure.value) {
+            arrival.min = departure.value;
+        }
+    </script>
 }

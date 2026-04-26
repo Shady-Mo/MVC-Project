@@ -269,6 +269,10 @@
         flex-direction: column;
     }
 
+    #allFlights .col-lg-4, #allFlights .col-md-6 {
+        display: flex;
+    }
+
     .trip-card:hover, .destination-card:hover, .blog-card:hover, .flight-card:hover {
         transform: translateY(-8px);
     }
@@ -471,11 +475,43 @@
     }
 
     /* Flight Card Specific Styles */
+    .flight-card {
+        min-height: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 580px;
+    }
+
+    .flight-card .card-body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .flight-card .card-body > div:nth-child(-n+4) {
+        flex-shrink: 0;
+    }
+
+    .flight-card .card-body > div:last-child {
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
     .flight-route {
         background: #f8f9fc;
         padding: 12px;
         border-radius: 8px;
         margin-bottom: 15px;
+        flex-shrink: 0;
+    }
+
+    .airport-code {
+        max-width: 65px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
     }
 
     .flight-times {
@@ -484,6 +520,7 @@
         padding: 10px;
         border-radius: 8px;
         margin-bottom: 10px;
+        flex-shrink: 0;
     }
 
     .flight-times i {
@@ -940,13 +977,13 @@
                                 <div class="flight-route text-center">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="text-start flex-grow-1">
-                                            <strong>@flight.DepartureAirport</strong>
-                                            <div><small class="text-muted">@flight.DepartureAirport</small></div>
+                                            <strong class="airport-code" title="@flight.DepartureAirport">@(flight.DepartureAirport?.Length > 7 ? flight.DepartureAirport.Substring(0, 7) + "..." : flight.DepartureAirport)</strong>
+                                            <div><small class="text-muted airport-code" title="@flight.DepartureAirport">@(flight.DepartureAirport?.Length > 7 ? flight.DepartureAirport.Substring(0, 7) + "..." : flight.DepartureAirport)</small></div>
                                         </div>
                                         <i class="fas fa-arrow-right text-muted mx-2"></i>
                                         <div class="text-end flex-grow-1">
-                                            <strong>@flight.DestinationAirport</strong>
-                                            <div><small class="text-muted">@flight.DestinationAirport</small></div>
+                                            <strong class="airport-code" title="@flight.DestinationAirport">@(flight.DestinationAirport?.Length > 7 ? flight.DestinationAirport.Substring(0, 7) + "..." : flight.DestinationAirport)</strong>
+                                            <div><small class="text-muted airport-code" title="@flight.DestinationAirport">@(flight.DestinationAirport?.Length > 7 ? flight.DestinationAirport.Substring(0, 7) + "..." : flight.DestinationAirport)</small></div>
                                         </div>
                                     </div>
                                 </div>
