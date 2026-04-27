@@ -5,6 +5,7 @@
 }
 
 <style>
+    /* ---------- Base & Layout ---------- */
     .flights-wrapper {
         display: flex;
         gap: 2rem;
@@ -24,6 +25,12 @@
         top: 90px;
     }
 
+    .content-area {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* ---------- Filters ---------- */
     .sidebar-filters h5 {
         font-size: 1rem;
         font-weight: 700;
@@ -34,7 +41,6 @@
     }
 
     .filter-group { margin-bottom: 1.25rem; }
-
     .filter-group label {
         font-size: 0.8rem;
         font-weight: 600;
@@ -44,7 +50,6 @@
         margin-bottom: 0.4rem;
         display: block;
     }
-
     .filter-group input {
         width: 100%;
         padding: 0.5rem 0.75rem;
@@ -55,48 +60,36 @@
         transition: border-color 0.2s;
         outline: none;
     }
-
     .filter-group input:focus { border-color: #28b5a4; }
 
-    .filter-btn {
+    .filter-btn, .clear-btn {
         width: 100%;
-        background: #28b5a4;
-        color: white;
-        border: none;
         padding: 0.65rem;
         border-radius: 8px;
         font-weight: 600;
         font-size: 0.9rem;
         cursor: pointer;
-        transition: background 0.2s;
-        margin-top: 0.5rem;
-    }
-
-    .filter-btn:hover { background: #219688; }
-
-    .clear-btn {
-        width: 100%;
-        background: transparent;
-        color: #64748b;
-        border: 1.5px solid #e2e8f0;
-        padding: 0.6rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.88rem;
-        cursor: pointer;
         transition: all 0.2s;
-        margin-top: 0.5rem;
         text-align: center;
         display: block;
         text-decoration: none;
+        margin-top: 0.5rem;
     }
-
+    .filter-btn {
+        background: #28b5a4;
+        color: white;
+        border: none;
+    }
+    .filter-btn:hover { background: #219688; }
+    .clear-btn {
+        background: transparent;
+        color: #64748b;
+        border: 1.5px solid #e2e8f0;
+    }
     .clear-btn:hover { border-color: #28b5a4; color: #28b5a4; }
 
-    .content-area { flex: 1; min-width: 0; }
-
-    /* Top bar */
-    .top-bar {
+    /* ---------- Top bar ---------- */
+    .filter-bar {
         background: #28b5a4;
         border-radius: 12px;
         padding: 1rem 1.25rem;
@@ -107,34 +100,29 @@
         flex-wrap: wrap;
         gap: 0.75rem;
     }
-
-    .top-bar h1 {
+    .filter-bar h1 {
         font-size: 1.6rem;
         font-weight: 800;
         color: white;
         margin: 0;
     }
-
-    .top-bar-right {
+    .filter-bar-right {
         display: flex;
         align-items: center;
         gap: 0.75rem;
         flex-wrap: wrap;
     }
-
     .sort-bar {
         display: flex;
         align-items: center;
         gap: 0.4rem;
         flex-wrap: wrap;
     }
-
     .sort-label {
         font-size: 0.85rem;
         font-weight: 600;
         color: white;
     }
-
     .sort-btn {
         padding: 0.3rem 0.75rem;
         border-radius: 20px;
@@ -146,14 +134,13 @@
         cursor: pointer;
         transition: all 0.2s;
         text-decoration: none;
+        display: inline-block;
     }
-
     .sort-btn:hover, .sort-btn.active {
         background: white;
         border-color: white;
         color: #28b5a4;
     }
-
     .add-btn {
         padding: 0.45rem 1rem;
         background: white;
@@ -162,32 +149,42 @@
         font-weight: 700;
         font-size: 0.85rem;
         text-decoration: none;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 0.4rem;
         transition: all 0.2s;
-        white-space: nowrap;
     }
-
     .add-btn:hover { background: #f0fbf9; color: #219688; }
 
-    /* Flight card */
+    /* ---------- Flight Card (Fully Responsive & Stacked) ---------- */
     .flight-card {
         background: white;
         border-radius: 12px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-        padding: 1.1rem 1.25rem;
+        padding: 1rem 1.25rem;
         margin-bottom: 1rem;
         border: 1.5px solid transparent;
         transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
-
     .flight-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         border-color: #28b5a4;
     }
-
+    /* Make every row in the card stack on mobile */
+    .flight-card .flight-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    /* Airline block */
+    .airline-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+    }
     .airline-icon {
         width: 44px;
         height: 44px;
@@ -198,119 +195,135 @@
         justify-content: center;
         margin-bottom: 0.35rem;
     }
-
     .airline-icon i { color: white; font-size: 1.1rem; }
-    .airline-name { font-weight: 700; font-size: 0.82rem; color: #0f172a; text-align: center; }
+    .airline-name {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #0f172a;
+        text-align: center;
+    }
 
+    /* Route block (departure, line, arrival) */
+    .route-block {
+        flex: 2;
+        min-width: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .departure-box, .arrival-box {
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+    }
     .airport-code {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 800;
         color: #0f172a;
     }
-
     .airport-time {
         font-size: 0.75rem;
         color: #64748b;
     }
-
-    .route-line {
-        flex: 1;
-        height: 2px;
-        background: linear-gradient(to right, #28b5a4, #e2e8f0, #28b5a4);
-        border-radius: 2px;
-        margin: 0 0.5rem;
+    .duration-box {
+        text-align: center;
+        padding: 0 0.5rem;
+        min-width: 70px;
     }
-
     .duration-label {
         font-size: 0.7rem;
         color: #94a3b8;
         font-weight: 600;
-        text-align: center;
-        margin-bottom: 0.2rem;
+    }
+    .route-line {
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(to right, #28b5a4, #e2e8f0);
+        border-radius: 2px;
+        margin: 0.3rem auto;
     }
 
+    /* Price & Seats */
+    .price-block {
+        text-align: center;
+        min-width: 110px;
+    }
     .price-main {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         font-weight: 800;
         color: #28b5a4;
+        white-space: nowrap;
     }
-
     .per-person {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #94a3b8;
     }
-
     .seats-badge {
         display: inline-block;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 700;
-        padding: 0.25rem 0.6rem;
+        padding: 0.2rem 0.6rem;
         border-radius: 20px;
         background: #f0fdf4;
         color: #16a34a;
     }
-
     .seats-badge.low { background: #fff7ed; color: #ea580c; }
 
+    /* Action buttons */
+    .action-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 90px;
+    }
+    .btn-details, .btn-edit, .btn-delete {
+        text-decoration: none;
+        text-align: center;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+        display: block;
+    }
     .btn-details {
         background: #28b5a4;
         color: white;
         border: none;
-        padding: 0.45rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.82rem;
-        text-decoration: none;
-        transition: background 0.2s;
-        white-space: nowrap;
     }
-
-    .btn-details:hover { background: #219688; color: white; }
-
+    .btn-details:hover { background: #219688; }
     .btn-edit {
         color: #64748b;
         border: 1.5px solid #e2e8f0;
-        padding: 0.4rem 0.9rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.78rem;
-        text-decoration: none;
-        transition: all 0.2s;
     }
-
     .btn-edit:hover { border-color: #94a3b8; color: #334155; }
-
     .btn-delete {
         color: #ef4444;
         border: 1.5px solid #fecaca;
-        padding: 0.4rem 0.9rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.78rem;
-        text-decoration: none;
-        transition: all 0.2s;
     }
-
     .btn-delete:hover { background: #fef2f2; }
 
+    /* Empty state */
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
         color: #94a3b8;
     }
-
     .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
     .empty-state h4 { color: #64748b; margin-bottom: 0.5rem; }
 
+    /* Pagination */
     .pagination-container {
         display: flex;
         justify-content: center;
         gap: 0.4rem;
         margin-top: 2rem;
+        flex-wrap: wrap;
     }
-
     .page-btn {
-        width: 36px;
+        min-width: 36px;
         height: 36px;
         display: flex;
         align-items: center;
@@ -323,20 +336,78 @@
         text-decoration: none;
         transition: all 0.2s;
     }
-
     .page-btn:hover { border-color: #28b5a4; color: #28b5a4; }
     .page-btn.active { background: #28b5a4; border-color: #28b5a4; color: white; }
     .page-btn.disabled { opacity: 0.4; pointer-events: none; }
 
+    /* ---------- Responsive Breakpoints ---------- */
+    @@media (max-width: 992px) {
+        .flights-wrapper { gap: 1.5rem; }
+        .sidebar-filters { flex: 0 0 240px; }
+    }
+
     @@media (max-width: 768px) {
-        .flights-wrapper { flex-direction: column; padding: 1rem; }
-        .sidebar-filters { position: static; flex: none; }
+        .flights-wrapper {
+            flex-direction: column;
+            padding: 1rem;
+        }
+        .sidebar-filters {
+            position: static;
+            width: 100%;
+        }
+        .flight-card .flight-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .route-block {
+            flex-direction: column;
+            align-items: center;
+        }
+        .departure-box, .arrival-box {
+            width: 100%;
+        }
+        .duration-box {
+            order: -1;
+            margin: 0.5rem 0;
+        }
+        .price-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .action-block {
+            flex-direction: row;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .btn-details, .btn-edit, .btn-delete {
+            padding: 0.35rem 1rem;
+            font-size: 0.8rem;
+        }
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filter-bar-right {
+            justify-content: space-between;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .price-main { font-size: 1.1rem; }
+        .airport-code { font-size: 0.95rem; }
+        .airline-name { font-size: 0.8rem; }
+        .filter-bar h1 { font-size: 1.3rem; }
+        .flight-card { padding: 0.9rem; }
+        .action-block { flex-wrap: wrap; justify-content: center; }
     }
 </style>
 
 <div class="flights-wrapper">
 
-    <!-- Sidebar -->
+    <!-- Sidebar Filters -->
     <div class="sidebar-filters">
         <h5>🔍 Filter Flights</h5>
         <form asp-action="Index" method="get">
@@ -363,13 +434,13 @@
         </form>
     </div>
 
-    <!-- Content -->
+    <!-- Main Content Area -->
     <div class="content-area">
 
-        <!-- Top Bar -->
-        <div class="top-bar">
+        <!-- Top Bar (title + actions) -->
+        <div class="filter-bar">
             <h1>Flights</h1>
-            <div class="top-bar-right">
+            <div class="filter-bar-right">
                 @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
                 {
                     <a asp-action="Create" class="add-btn">
@@ -408,47 +479,40 @@
                     : $"{duration.Minutes}m";
 
                 <div class="flight-card">
-                    <div class="row align-items-center g-3">
+                    <div class="flight-row">
 
                         <!-- Airline -->
-                        <div class="col-auto text-center">
-                            <div class="airline-icon mx-auto">
+                        <div class="airline-block">
+                            <div class="airline-icon">
                                 <i class="fas fa-plane"></i>
                             </div>
-                            <div class="airport-code">@item.Airline</div>
+                            <div class="airline-name">@item.Airline</div>
                         </div>
 
-                        <!-- Route -->
-                            <div class="col">
-                                <div class="d-flex align-items-center">
-
-                                    <!-- Departure -->
-                                    <div class="text-center" style="width: 160px; flex-shrink: 0;">
-                                        <div class="airport-code">@item.DepartureAirport</div>
-                                        <div class="airport-time">@item.DepartureDateTime.ToString("MMM dd")</div>
-                                        <div class="airport-time">@item.DepartureDateTime.ToString("HH:mm")</div>
-                                        <i class="fa-solid fa-plane-departure mt-1" style="color: #f39c12; font-size: 0.9rem;"></i>
-                                    </div>
-
-                                    <!-- Line + Duration -->
-                                    <div class="flex-grow-1 text-center px-2">
-                                        <div class="duration-label">@durationStr</div>
-                                        <div class="route-line"></div>
-                                    </div>
-
-                                    <!-- Destination -->
-                                    <div class="text-center" style="width: 160px; flex-shrink: 0;">
-                                        <div class="airport-code">@item.DestinationAirport</div>
-                                        <div class="airport-time">@item.ArrivalDateTime.ToString("MMM dd")</div>
-                                        <div class="airport-time">@item.ArrivalDateTime.ToString("HH:mm")</div>
-                                        <i class="fa-solid fa-plane-arrival mt-1" style="color: #3498db; font-size: 0.9rem;"></i>
-                                    </div>
-
-                                </div>
+                        <!-- Route (departure, duration, arrival) -->
+                        <div class="route-block">
+                            <div class="departure-box">
+                                <div class="airport-code">@item.DepartureAirport</div>
+                                <div class="airport-time">@item.DepartureDateTime.ToString("MMM dd")</div>
+                                <div class="airport-time">@item.DepartureDateTime.ToString("HH:mm")</div>
+                                <i class="fa-solid fa-plane-departure mt-1" style="color: #f39c12;"></i>
                             </div>
 
+                            <div class="duration-box">
+                                <div class="duration-label">@durationStr</div>
+                                <div class="route-line"></div>
+                            </div>
+
+                            <div class="arrival-box">
+                                <div class="airport-code">@item.DestinationAirport</div>
+                                <div class="airport-time">@item.ArrivalDateTime.ToString("MMM dd")</div>
+                                <div class="airport-time">@item.ArrivalDateTime.ToString("HH:mm")</div>
+                                <i class="fa-solid fa-plane-arrival mt-1" style="color: #3498db;"></i>
+                            </div>
+                        </div>
+
                         <!-- Price & Seats -->
-                        <div class="col-auto text-center">
+                        <div class="price-block">
                             <div class="price-main">@item.Price.ToString("C")</div>
                             <div class="per-person">per person</div>
                             <div class="mt-1">
@@ -458,8 +522,8 @@
                             </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="col-auto d-flex flex-column gap-2">
+                        <!-- Action Buttons -->
+                        <div class="action-block">
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn-details">Details</a>
                             @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
                             {
@@ -493,4 +557,4 @@
             }
         }
     </div>
-</div>  
+</div>

@@ -400,7 +400,7 @@
             width: 70%;
             height: 100vh;
             background: white;
-            z-index: 1001;
+            z-index: 10001;
             padding: 20px;
             overflow-y: auto;
             transition-duration: 0.3s;
@@ -631,32 +631,19 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-md-12 text-lg-start text-center mb-2 mb-lg-0">
-                    <div class="contact-info justify-content-center justify-content-lg-start">
+                    <div class="contact-info justify-content-center justify-content-lg-start" id="userInfoSection">
                         <div class="social-icons">
                             <a href="#"><i class="fab fa-facebook-f"></i></a>
                             <a href="#"><i class="fab fa-twitter"></i></a>
                             <a href="#"><i class="fab fa-instagram"></i></a>
                         </div>
                         <div class="separator d-none d-md-block"></div>
-                        <span><i class="fas fa-phone-alt"></i>@User.FindFirst("PhoneNumber")?.Value</span>
-                        <span><i class="fas fa-envelope"></i>@User.FindFirst(ClaimTypes.Email)?.Value</span>
+                        <span id="userPhone"><i class="fas fa-phone-alt"></i> --</span>
+                        <span id="userEmail"><i class="fas fa-envelope"></i> --</span>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-12">
-                    <div class="auth-links justify-content-center justify-content-lg-end">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <a asp-controller="Profile" asp-action="Index">Welcome, @User.Identity.Name</a>
-                            <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
-                                <button type="submit">Logout</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <a asp-controller="Account" asp-action="Login">Login</a>
-                            <a asp-controller="Account" asp-action="Register">Sign Up</a>
-                        }
-                    </div>
+                    <div class="auth-links justify-content-center justify-content-lg-end" id="authLinks"></div>
                 </div>
             </div>
         </div>
@@ -671,30 +658,30 @@
             <i class="fas fa-times"></i>
         </button>
 
-        <a href="#" class="mobile-menu-item">
+        <a asp-controller="Home" asp-action="Index" class="mobile-menu-item">
             <i class="fas fa-home"></i> Home
         </a>
-        <a href="#" class="mobile-menu-item">
-            <i class="fas fa-plane"></i> All Trips
+        <a asp-controller="Flight" asp-action="Index" class="mobile-menu-item">
+            <i class="fas fa-plane"></i> Flights
         </a>
-        <a href="#" class="mobile-menu-item">
-            <i class="fas fa-map-marker-alt"></i> Destination
+        <a asp-controller="Accomodation" asp-action="Index" class="mobile-menu-item">
+            <i class="fas fa-map-marker-alt"></i> Accomodations
         </a>
-        <a href="#" class="mobile-menu-item">
+        <a asp-controller="Activity" asp-action="Index" class="mobile-menu-item">
             <i class="fas fa-hiking"></i> Activities
         </a>
-        <a href="#" class="mobile-menu-item">
-            <i class="fas fa-tag"></i> Trip Types
-        </a>
-        <a href="#" class="mobile-menu-item">
-            Blog
-        </a>
-        <a href="#" class="mobile-menu-item">
-            <i class="fas fa-file-alt"></i> Pages
-        </a>
-        <a href="#" class="mobile-menu-item">
-            <i class="fas fa-envelope"></i> Contact
-        </a>
+        @if (User.Identity.IsAuthenticated)
+        {
+            @if(User.IsInRole("Admin"))
+            {
+                <a asp-controller="Booking" asp-action="Index" class="mobile-menu-item">Bookings</a>
+            }
+            else
+            {
+                <a asp-controller="Booking" asp-action="MyBooking" class="mobile-menu-item">Bookings</a>
+
+            }
+        }
 
         <div class="mobile-menu-divider"></div>
 
@@ -761,7 +748,7 @@
                             <div class="nav-menu ms-lg-auto w-100 w-lg-auto justify-content-end">
                                 <a asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "selected" : "")">Home</a>
                                 <a asp-controller="Flight" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Flight" ? "selected" : "")">Flights</a>
-                                <a asp-controller="Accomodation" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Accommodation" ? "selected" : "")">Accommodations</a>
+                                <a asp-controller="Accomodation" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Accomodation" ? "selected" : "")">Accommodations</a>
                                 <a asp-controller="Activity" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Activity" ? "selected" : "")">Activities</a>
                                 @if (User.Identity.IsAuthenticated)
                                 {
@@ -824,6 +811,21 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+        function handleLogout() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/Account/Logout', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ "__RequestVerificationToken": token })
+            }).then(() => {
+                window.location.href = '/Home/Index';
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -871,6 +873,36 @@
                 }
             });
         });
+
+        function fetchUserInfo() {
+            fetch('/Account/GetUserInfo')
+                .then(response => response.json())
+                .then(data => {
+                    const authLinks = document.getElementById('authLinks');
+                    const userPhone = document.getElementById('userPhone');
+                    const userEmail = document.getElementById('userEmail');
+
+                    if (data.isAuthenticated) {
+                        if(data.phoneNumber) userPhone.innerHTML = `<i class="fas fa-phone-alt"></i>${data.phoneNumber}`;
+                        if(data.email) userEmail.innerHTML = `<i class="fas fa-envelope"></i>${data.email}`;
+
+                        authLinks.innerHTML = `
+                            <a href="/Profile/Index">Welcome, ${data.userName}</a>
+                            <a href="javascript:void(0)" onclick="handleLogout()">Logout</a>
+                        `;
+                    } else {
+                        authLinks.innerHTML = `
+                            <a href="/Account/Login">Login</a>
+                            <a href="/Account/Register">Sign Up</a>
+                        `;
+                        userPhone.style.display = 'none';
+                        userEmail.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching user info:', error));
+        }
+
+        fetchUserInfo();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

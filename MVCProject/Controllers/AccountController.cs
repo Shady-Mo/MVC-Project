@@ -204,6 +204,19 @@ namespace MVCProject.Controllers {
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpGet]
+        public IActionResult GetUserInfo() {
+            if (User.Identity.IsAuthenticated) {
+                return Json(new {
+                    isAuthenticated = true,
+                    userName = User.Identity.Name,
+                    email = User.FindFirst(ClaimTypes.Email)?.Value,
+                    phoneNumber = User.FindFirst("PhoneNumber")?.Value
+                });
+            }
+            return Json(new { isAuthenticated = false });
+        }
+
         private IActionResult RedirectToLocal(string returnUrl) {
             if (Url.IsLocalUrl(returnUrl)) {
                 return Redirect(returnUrl);

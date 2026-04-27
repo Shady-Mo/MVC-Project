@@ -5,6 +5,7 @@ using MVCProject.Data;
 using MVCProject.Helpers;
 using MVCProject.Models;
 using MVCProject.Repositories;
+using MVCProject.Services;
 using MVCProject.Services.AccountService;
 using MVCProject.Services.BaseService;
 using MVCProject.Services.EmailService;
@@ -36,23 +37,25 @@ namespace MVCProject {
                 .AddScoped<IUserClaimsPrincipalFactory<AppUser>, MyUserClaimsPrincipalFactory>();
 
             builder.Services.AddOutputCache(options => {
+                options.SizeLimit = 100 * 1024 * 1024;
+
                 options.AddPolicy("GlobalExpiry", builder =>
                     builder.Expire(TimeSpan.FromMinutes(30))
                         .SetLocking(true)
                         .Tag("GlobalExpiry")
                 );
 
-            options.AddPolicy("GlobalExpiryWithFilteration", builder =>
-                builder.Expire(TimeSpan.FromMinutes(30))
-                    .SetLocking(true)
-                    .Tag("GlobalWithFilteration")
-                    .SetVaryByQuery("location", "price")
-                    .VaryByValue(context =>
-                        new KeyValuePair<string, string>(
-                            "user_id", context.User.Identity?.IsAuthenticated == true ? "anonymous" : "Guest"
+                options.AddPolicy("GlobalExpiryWithFilteration", builder =>
+                    builder.Expire(TimeSpan.FromMinutes(30))
+                        .SetLocking(true)
+                        .Tag("GlobalWithFilteration")
+                        .SetVaryByQuery("location", "price")
+                        .VaryByValue(context =>
+                            new KeyValuePair<string, string>(
+                                "user_id", context.User.Identity?.IsAuthenticated == true ? "anonymous" : "Guest"
+                            )
                         )
-                    )
-                );
+                    );
 
                 options.AddPolicy("PrivateExpiry", builder =>
                     builder.Expire(TimeSpan.FromMinutes(1))
@@ -90,6 +93,9 @@ namespace MVCProject {
 
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.AddTransient<IEmailService, EmailService>();
+
+            builder.Services.AddHttpClient();
+            builder.Services.AddHostedService<CacheWarmerService>();
 
             var app = builder.Build();
 

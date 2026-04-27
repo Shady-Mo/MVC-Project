@@ -36,8 +36,6 @@ namespace MVCProject.Services.AccountService {
                 .PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded) {
-                await _cacheStore.EvictByTagAsync("GlobalExpiry", default);
-
                 return ResultService.Success();
             }
 
@@ -151,7 +149,6 @@ namespace MVCProject.Services.AccountService {
                     externalLoginConfirmationViewModel.RememberMe);
 
             if (loginResult.Succeeded) {
-                await _cacheStore.EvictByTagAsync("GlobalExpiry", default);
                 return ResultService.Success();
             }
 
@@ -190,7 +187,6 @@ namespace MVCProject.Services.AccountService {
         }
 
         public async Task LogoutAsync() {
-            await _cacheStore.EvictByTagAsync("GlobalExpiry", default);
             await _signInManager.SignOutAsync();
         }
 
