@@ -750,18 +750,16 @@
                                 <a asp-controller="Flight" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Flight" ? "selected" : "")">Flights</a>
                                 <a asp-controller="Accomodation" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Accomodation" ? "selected" : "")">Accommodations</a>
                                 <a asp-controller="Activity" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Activity" ? "selected" : "")">Activities</a>
-                                @if (User.Identity.IsAuthenticated)
+                                @if(User.IsInRole("Admin"))
                                 {
-                                    @if(User.IsInRole("Admin"))
-                                    {
-                                        <a asp-controller="Booking" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
-                                    }
-                                    else
-                                    {
-                                        <a asp-controller="Booking" asp-action="MyBooking" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
-
-                                    }
+                                    <a asp-controller="Booking" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
                                 }
+                                else if (User.IsInRole("Customer"))
+                                {
+                                    <a asp-controller="Booking" asp-action="MyBooking" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
+
+                                }
+                                
                                 <div class="search-icon">
                                     <i class="fas fa-search"></i>
                                 </div>
