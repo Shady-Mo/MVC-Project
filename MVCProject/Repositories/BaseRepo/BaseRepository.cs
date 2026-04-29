@@ -2,7 +2,7 @@
 using MVCProject.Data;
 
 namespace MVCProject.Repositories.BaseRepo {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class {
+    public class BaseRepository<T, TKey> : IBaseRepository<T, TKey> where T : class {
         public readonly AppDbContext _context;
         public readonly DbSet<T> _dbSet;
 
@@ -14,7 +14,7 @@ namespace MVCProject.Repositories.BaseRepo {
             _dbSet.Add(entity);
         }
 
-        public void Delete(int id) {
+        public void Delete(TKey id) {
             var item = GetById(id);
 
             if (item != null)
@@ -25,7 +25,7 @@ namespace MVCProject.Repositories.BaseRepo {
             return _dbSet.AsNoTracking().AsQueryable();
         }
 
-        public T GetById(int id) {
+        public T GetById(TKey id) {
             return _dbSet.Find(id);
         }
 

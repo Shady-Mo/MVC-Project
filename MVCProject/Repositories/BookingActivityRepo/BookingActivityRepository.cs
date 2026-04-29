@@ -4,7 +4,7 @@ using MVCProject.Repositories.BaseRepo;
 
 namespace MVCProject.Repositories.BookingActivityRepo
 {
-    public class BookingActivityRepository : BaseRepository<BookingActivity>, IBookingActivityRepository
+    public class BookingActivityRepository : BaseRepository<BookingActivity, int>, IBookingActivityRepository
     {
         public BookingActivityRepository(AppDbContext context) : base(context)
         {

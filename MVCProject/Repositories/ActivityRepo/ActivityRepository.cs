@@ -5,7 +5,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MVCProject.Repositories.ActivityRepo
 {
-    public class ActivityRepository : BaseRepository<Activity>, IActivityRepository
+    public class ActivityRepository : BaseRepository<Activity, int>, IActivityRepository
     {
         private readonly AppDbContext context;
 

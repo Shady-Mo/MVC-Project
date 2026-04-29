@@ -5,7 +5,7 @@ using MVCProject.Repositories.BaseRepo;
 
 namespace MVCProject.Repositories.FlightRepo
 {
-    public class FlightRepository : BaseRepository<Flight>, IFlightRepository
+    public class FlightRepository : BaseRepository<Flight, int>, IFlightRepository
     {
         private readonly AppDbContext context;
 

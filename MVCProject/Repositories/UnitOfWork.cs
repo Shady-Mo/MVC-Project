@@ -1,6 +1,7 @@
 ﻿using MVCProject.Data;
 using MVCProject.Repositories.AccmodationRepo;
 using MVCProject.Repositories.ActivityRepo;
+using MVCProject.Repositories.AdminRepo;
 using MVCProject.Repositories.BookingAccomodationRepo;
 using MVCProject.Repositories.BookingActivityRepo;
 //using MVCProject.Repositories.BookingFlightRepo;
@@ -19,6 +20,7 @@ namespace MVCProject.Repositories
         private IBookingRepository bookingRepository;
         private IBookingAccomodationRepository bookingAccomodationRepository;
         private IBookingActivityRepository bookingActivityRepository;
+        private IUserRepository userRepository;
         //private IBookingFlightRepository bookingFlightRepository;
 
         public UnitOfWork(AppDbContext context)
@@ -79,6 +81,16 @@ namespace MVCProject.Repositories
                 if (bookingActivityRepository == null)
                     bookingActivityRepository = new BookingActivityRepository(context);
                 return bookingActivityRepository;
+            }
+        }
+
+        public IUserRepository UserRepository
+        {
+            get
+            {
+                if (userRepository == null)
+                    userRepository = new UserRepository(context);
+                return userRepository;
             }
         }
 

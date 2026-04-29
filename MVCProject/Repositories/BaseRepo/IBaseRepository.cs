@@ -1,10 +1,10 @@
 ﻿namespace MVCProject.Repositories.BaseRepo {
-    public interface IBaseRepository<T> where T : class {
+    public interface IBaseRepository<T, TKey> where T : class {
         void Add(T item);
         void Update(T item);
-        void Delete(int id);
+        void Delete(TKey id);
         IQueryable<T> GetAll();
-        T GetById(int id);
+        T GetById(TKey id);
         void Save();
     }
 }
