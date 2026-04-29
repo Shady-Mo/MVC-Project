@@ -360,7 +360,7 @@
     .stat-number {
         font-size: 3rem;
         font-weight: 800;
-        color: #ff6b35;
+        color: #14b8a6;
         margin-bottom: 10px;
     }
 
@@ -1220,7 +1220,7 @@
                     const col = document.createElement('div');
                     col.className = 'col-lg-4 col-md-6';
                     const badgeClass = acc.bookingsHistory > 0 ? 'featured-badge' : 'discount-badge';
-                    const badgeColor = acc.bookingsHistory > 0 ? '#ff6b35' : '#dc3545';
+                    const badgeColor = acc.bookingsHistory > 0 ? '#14b8a6' : '#dc3545';
                     col.innerHTML = `
                         <div class="card trip-card position-relative">
                             <span class="${badgeClass}" style="background-color: ${badgeColor}">${acc.bookingsHistory || 0} Bookings</span>
@@ -1262,14 +1262,14 @@
                     const date = new Date(activity.date);
                     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     const badgeClass = activity.bookingsHistory > 0 ? 'featured-badge' : 'discount-badge';
-                    const badgeColor = activity.bookingsHistory > 0 ? '#ff6b35' : '#dc3545';
+                    const badgeColor = activity.bookingsHistory > 0 ? '#14b8a6' : '#dc3545';
                     col.innerHTML = `
                         <div class="card trip-card position-relative shadow-sm border-0">
                             <span class="${badgeClass}" style="background:${badgeColor};">${activity.bookingsHistory || 0} Visitors</span>
                             <img src="${activity.image ? '/images/' + activity.image : 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400'}" class="card-img-top" alt="${activity.name}" onerror="this.src='https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400'">
                             <div class="card-body">
                                 <h5 class="card-title">${activity.name}</h5>
-                                <p class="card-text text-muted mb-1"><i class="fas fa-map-marker-alt" style="color:#ff6b35;"></i> ${activity.location}</p>
+                                <p class="card-text text-muted mb-1"><i class="fas fa-map-marker-alt" style="color:#14b8a6;"></i> ${activity.location}</p>
                                 <p class="card-text text-muted small mb-3"><i class="far fa-calendar-alt"></i> ${formattedDate}</p>
                                 <p class="card-text">Join an unforgettable experience with expert guides and amazing adventure.</p>
                                 <div class="d-flex justify-content-between align-items-center mt-3">

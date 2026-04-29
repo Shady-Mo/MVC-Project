@@ -11,6 +11,15 @@
     <!-- Font Awesome 6 (free icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="~/css/activities-list.css">
+    <style>
+        .Add-Activity {
+            transition-duration: 0.3s;
+        }
+
+        .Add-Activity:hover {
+            background-color: #0d9488 !important;
+        }
+    </style>
 </head>
 <body>
     <div class="activities-container">
@@ -27,7 +36,7 @@
                     </div>
                     @if (User.IsInRole("Admin"))
                     {
-                        <a href="@Url.Action("Create", "Activity")" style="background:#ff6b35; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-plus"></i> Add Activity</a>
+                        <a href="@Url.Action("Create", "Activity")" class="Add-Activity" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-plus"></i> Add Activity</a>
                     }
                 </div>
             </div>

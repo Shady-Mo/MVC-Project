@@ -21,21 +21,21 @@ namespace MVCProject.Services.BaseService {
                     _logger.LogInformation("Ensuring the database is created.");
                     await _context.Database.MigrateAsync();
 
-                    _logger.LogInformation("Seeding roles.");
-                    await AddRoleAsync(_roleManager, "Admin");
-                    await AddRoleAsync(_roleManager, "Seller");
-                    await AddRoleAsync(_roleManager, "Customer");
+                    //_logger.LogInformation("Seeding roles.");
+                    //await AddRoleAsync(_roleManager, "Admin");
+                    //await AddRoleAsync(_roleManager, "Seller");
+                    //await AddRoleAsync(_roleManager, "Customer");
 
-                    await SeedAdminAsync(_userManager, _logger);
-                    await SeedCustomersAsync(_userManager, numberOfCustomers, _logger);
-                    await SeedSellersAsync(_userManager, numberOfSellers, _logger);
+                    //await SeedAdminAsync(_userManager, _logger);
+                    //await SeedCustomersAsync(_userManager, numberOfCustomers, _logger);
+                    //await SeedSellersAsync(_userManager, numberOfSellers, _logger);
 
-                    await SeedAccommodationsAsync(_context, numberOfAccommodations, _logger);
-                    await SeedActivitiesAsync(_context, numberOfActivities, _logger);
-                    await SeedFlightsAsync(_context, numberOfFlights, _logger);
+                    //await SeedAccommodationsAsync(_context, numberOfAccommodations, _logger);
+                    //await SeedActivitiesAsync(_context, numberOfActivities, _logger);
+                    //await SeedFlightsAsync(_context, numberOfFlights, _logger);
 
-                    _logger.LogInformation("Seeding bookings with accommodations and activities.");
-                    await SeedBookingsAsync(_context, _logger);
+                    //_logger.LogInformation("Seeding bookings with accommodations and activities.");
+                    //await SeedBookingsAsync(_context, _logger);
                 }
                 catch (Exception ex) {
                     _logger.LogError(ex, "An error occurred while seeding the database.");

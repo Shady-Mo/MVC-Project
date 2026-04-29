@@ -94,7 +94,7 @@ namespace MVCProject {
             builder.Services.AddTransient<IEmailService, EmailService>();
 
             builder.Services.AddHttpClient();
-            builder.Services.AddHostedService<CacheWarmerService>();
+            //builder.Services.AddHostedService<CacheWarmerService>();
 
             var app = builder.Build();
 
