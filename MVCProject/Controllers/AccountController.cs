@@ -196,8 +196,7 @@ namespace MVCProject.Controllers {
             return View(forgetPasswordViewModel);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public async Task<IActionResult> Logout() {
             await _accountService.LogoutAsync();
 

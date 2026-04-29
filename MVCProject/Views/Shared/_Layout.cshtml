@@ -810,18 +810,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         function handleLogout() {
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-            fetch('/Account/Logout', {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': token,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ "__RequestVerificationToken": token })
-            }).then(() => {
-                window.location.href = '/Home/Index';
-            });
+            window.location.href = '/Account/Logout';
         }
 
         document.addEventListener('DOMContentLoaded', function() {

@@ -16,7 +16,7 @@ namespace MVCProject.Services.EmailService {
             message.IsBodyHtml = true;
 
             using var client = new SmtpClient(_emailSettings.SmtpServer, _emailSettings.Port) {
-                Credentials = new NetworkCredential(_emailSettings.SenderName, _emailSettings.SenderPassword),
+                Credentials = new NetworkCredential(_emailSettings.SenderUserName, _emailSettings.SenderPassword),
                 EnableSsl = true
             };
 
