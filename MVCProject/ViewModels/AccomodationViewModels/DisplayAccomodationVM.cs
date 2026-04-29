@@ -13,6 +13,7 @@ namespace MVCProject.ViewModels.AccomodationViewModels
         public decimal PricePerNight { get; set; }
         public int AvailableRooms { get; set; }
 
+        public string SellerName { get; set; }
         public string? Image { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using MVCProject.Repositories;
 using MVCProject.Services.ImgAddingService;
 using MVCProject.ViewModels.AccomodationViewModels;
 using MVCProject.ViewModels.ActivityViewModels;
+using System.Security.Claims;
 
 namespace MVCProject.Controllers
 {
@@ -36,6 +37,22 @@ namespace MVCProject.Controllers
             return View("Index", accomodationesVM);
         }
 
+        [Authorize(Roles = "Admin,Seller")]
+        [HttpGet]
+        public IActionResult SellerAccomodations([FromQuery] string searchQuery = "", [FromQuery] decimal? maxPrice = null, [FromQuery] int? minCapacity = null, [FromQuery] int pageNumber = 1)
+        {
+            int pageSize = 6;
+            var (accomodations, count) = unitOfWork.AccomodationRepositroy.GetAllWithFilterBySellerId(User.FindFirstValue(ClaimTypes.NameIdentifier), searchQuery, maxPrice, minCapacity, pageNumber, pageSize);
+
+            var accomodationesVM = accomodations.Adapt<List<DisplayAccomodationVM>>();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+
+
+            return View("SellerAccomodations", accomodationesVM);
+        }
+
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -46,7 +63,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         [HttpGet]
         public IActionResult New()
         {
@@ -54,7 +71,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
         public async Task<IActionResult> New(AddAcccomodationVM acccomodationVM)
         {
@@ -62,7 +79,9 @@ namespace MVCProject.Controllers
             {
                 var accomodation = acccomodationVM.Adapt<Accomodation>();
 
-                if(acccomodationVM.ImageFile != null)
+                accomodation.SellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (acccomodationVM.ImageFile != null)
                 {
                     accomodation.Image = await fileService.SaveFileAsync(acccomodationVM.ImageFile, "images");
                 }
@@ -70,13 +89,13 @@ namespace MVCProject.Controllers
                 unitOfWork.AccomodationRepositroy.Add(accomodation);
                 unitOfWork.Save();
 
-                return RedirectToAction("Index");
+                return RedirectToAction("SellerAccomodations");
             }
             return View("New", acccomodationVM);
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -86,7 +105,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
         public async Task<IActionResult> Edit(EditAccomodationVM accomodationVM)
         {
@@ -106,13 +125,13 @@ namespace MVCProject.Controllers
 
                 unitOfWork.AccomodationRepositroy.Update(existingAccomodation);
                 unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(SellerAccomodations));
             }
             return View("Edit", accomodationVM);
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         [HttpGet]
         public IActionResult Delete(int id)
         {
@@ -125,7 +144,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
@@ -141,7 +160,7 @@ namespace MVCProject.Controllers
             unitOfWork.AccomodationRepositroy.Delete(id);
             unitOfWork.Save();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(SellerAccomodations));
         }
 
     }
