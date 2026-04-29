@@ -27,7 +27,7 @@
                     </div>
                     @if (User.IsInRole("Admin"))
                     {
-                        <a href="@Url.Action("Create", "Activity")" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-plus"></i> Add Activity</a>
+                        <a href="@Url.Action("Create", "Activity")" style="background:#ff6b35; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-plus"></i> Add Activity</a>
                     }
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     <div class="filter-section">
                         <div class="filter-title">Price <i class="fas fa-chevron-up" style="color:#94a3b8; font-size:0.8rem;"></i></div>
                         <div class="slider-container">
-                            <input type="range" name="maxPrice" min="0" max="5000" step="10" value="@(Context.Request.Query["maxPrice"].ToString() == "" ? "5000" : Context.Request.Query["maxPrice"])" style="width: 100%; accent-color: #14b8a6;" oninput="document.getElementById('priceVal').innerText = '$' + this.value">
+                            <input type="range" name="maxPrice" min="0" max="5000" step="10" value="@(Context.Request.Query["maxPrice"].ToString() == "" ? "5000" : Context.Request.Query["maxPrice"])" style="width: 100%; accent-color: #ff6b35;" oninput="document.getElementById('priceVal').innerText = '$' + this.value">
                         </div>
                         <div class="slider-values">
                             <span>$0</span>
@@ -58,7 +58,7 @@
                     <div class="filter-section">
                         <div class="filter-title">Capacity (Min) <i class="fas fa-chevron-up" style="color:#94a3b8; font-size:0.8rem;"></i></div>
                         <div class="slider-container">
-                            <input type="range" name="minCapacity" min="1" max="50" step="1" value="@(Context.Request.Query["minCapacity"].ToString() == "" ? "1" : Context.Request.Query["minCapacity"])" style="width: 100%; accent-color: #14b8a6;" oninput="document.getElementById('capVal').innerText = this.value + ' Persons'">
+                            <input type="range" name="minCapacity" min="1" max="50" step="1" value="@(Context.Request.Query["minCapacity"].ToString() == "" ? "1" : Context.Request.Query["minCapacity"])" style="width: 100%; accent-color: #ff6b35;" oninput="document.getElementById('capVal').innerText = this.value + ' Persons'">
                         </div>
                         <div class="slider-values">
                             <span>1</span>
@@ -76,16 +76,64 @@
                     <!-- Pagination -->
                     @if (ViewBag.TotalPages > 1)
                     {
-                        <div class="pagination-container">
-                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem;">
+                            @if (ViewBag.CurrentPage > 1)
                             {
-                                <a href="@Url.Action("Index", new { 
-                                        searchQuery = Context.Request.Query["searchQuery"], 
-                                        maxPrice = Context.Request.Query["maxPrice"], 
-                                        minCapacity = Context.Request.Query["minCapacity"], 
-                                        pageNumber = i 
-                                    })" class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.CurrentPage - 1 })" 
+                                   class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
+                                    Previous
+                                </a>
+                            }
+
+                            @{
+                                int maxPagesToShow = 10;
+                                int startPage = Math.Max(1, ViewBag.CurrentPage - (maxPagesToShow / 2));
+                                int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                                if (endPage - startPage + 1 < maxPagesToShow)
+                                {
+                                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                                }
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = 1 })" 
+                                   class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
+                                    1
+                                </a>
+                                @if (startPage > 2)
+                                {
+                                    <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = i })" 
+                                   class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")" 
+                                   style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; font-weight: 500; @(i == ViewBag.CurrentPage ? "background-color: #14b8a6; color: white; border-color: #14b8a6;" : "color: #333;")">
                                     @i
+                                </a>
+                            }
+
+                            @if (endPage < ViewBag.TotalPages)
+                            {
+                                @if (endPage < ViewBag.TotalPages - 1)
+                                {
+                                    <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
+                                }
+                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.TotalPages })" 
+                                   class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
+                                    @ViewBag.TotalPages
+                                </a>
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.CurrentPage + 1 })" 
+                                   class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
+                                    Next
                                 </a>
                             }
                         </div>
@@ -94,9 +142,6 @@
             </div>
         </form>
 
-        <footer>
-            <i class="fas fa-map-marked-alt"></i> Explore real wilderness — dummy demo inspired by travel monster design
-        </footer>
     </div>
 
     <script>
@@ -223,7 +268,7 @@
             // document.addEventListener('click', (e) => {
             //     if (e.target.classList.contains('btn-details') || e.target.closest('.btn-details')) {
             //         const cardTitle = e.target.closest('.activity-card')?.querySelector('.activity-title')?.innerText || 'activity';
-            //         alert(`✨ MVC demo: view details for "${cardTitle}"\n(Full integration would redirect to activity controller)`);
+            //         alert(`? MVC demo: view details for "${cardTitle}"\n(Full integration would redirect to activity controller)`);
             //     }
             // });
 

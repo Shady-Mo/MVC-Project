@@ -19,7 +19,7 @@ namespace MVCProject.Controllers {
         }
 
         [HttpGet]
-        [OutputCache(PolicyName = "GlobalExpiry")]
+        //[OutputCache(PolicyName = "GlobalExpiry")]
         public async Task<IActionResult> Index() {
             var accommodations = await _unitOfWork.AccomodationRepositroy.GetAll()
                 .Include(acc => acc.bookingAccomodations)
@@ -49,7 +49,7 @@ namespace MVCProject.Controllers {
         }
 
         [HttpGet]
-        [OutputCache(PolicyName = "GlobalExpiryWithFilteration")]
+        //[OutputCache(PolicyName = "GlobalExpiryWithFilteration")]
         public async Task<IActionResult> Filter(FilterResult request) {
             var accommodations = _unitOfWork.AccomodationRepositroy.GetAll();
             var activities = _unitOfWork.ActivityRepository.GetAll();

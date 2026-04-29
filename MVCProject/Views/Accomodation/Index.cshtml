@@ -67,7 +67,7 @@
 
     <div class="row">
         <div class="col-lg-3 col-md-4 mb-4">
-            <div class="filter-sidebar sticky-top" style="top: 30px;">
+            <div class="filter-sidebar sticky-top" style="top: 90px;">
                 <h5 class="mb-4 text-dark fw-bold d-flex align-items-center">
                     <span class="me-2">🎯</span> Filters
                 </h5>
@@ -108,7 +108,7 @@
             @if (!Model.Any())
             {
                 <div class="text-center p-5 bg-white rounded-3 shadow-sm border mt-2">
-                    <div style="font-size: 5rem; margin-bottom: 15px; opacity: 0.7;">🤷‍♂️</div>
+                    <div style="font-size: 5rem; margin-bottom: 15px; opacity: 0.7;">?????</div>
                     <h4 class="fw-bold text-dark">No accommodations found</h4>
                     <p class="text-muted">Try adjusting your filters or search query to find what you're looking for.</p>
                     <a asp-action="Index" class="btn btn-outline-primary-custom mt-3 fw-bold px-4">Clear All Filters</a>
@@ -129,7 +129,7 @@
                                     else
                                     {
                                         <div class="bg-light card-img-top d-flex align-items-center justify-content-center text-secondary" style="font-size: 4rem;">
-                                            🛏️
+                                            ???
                                         </div>
                                     }
                                     <div class="position-absolute top-0 end-0 m-3 badge bg-white text-primary-custom shadow-sm fs-6 px-3 py-2 rounded-pill">
@@ -167,23 +167,63 @@
 
                 @if (ViewBag.TotalPages > 1)
                 {
-                    <nav aria-label="Page navigation" class="mt-5 pb-4">
-                        <ul class="pagination justify-content-center shadow-sm d-inline-flex rounded-pill overflow-hidden">
-                            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link text-primary-custom fw-bold border-0 px-4" href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity" tabindex="-1">Prev</a>
-                            </li>
-                            
-                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    <nav aria-label="Page navigation" class="mt-5 pb-4 d-flex justify-content-center align-items-md-center gap-5">
+                        <ul class="pagination justify-content-center d-inline-flex flex-wrap gap-2" style="background: transparent; box-shadow: none;">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link text-primary-custom" style="border-radius: 8px; font-weight: 500; border: 1px solid #dee2e6; color: #333;" href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity">Previous</a>
+                                </li>
+                            }
+
+                            @{
+                                int maxPagesToShow = 10;
+                                int startPage = Math.Max(1, ViewBag.CurrentPage - (maxPagesToShow / 2));
+                                int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                                if (endPage - startPage + 1 < maxPagesToShow)
+                                {
+                                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                                }
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link text-primary-custom" style="border-radius: 8px; font-weight: 500; border: 1px solid #dee2e6; color: #333;" href="?pageNumber=1&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled"><span class="page-link" style="border-radius: 8px; background: transparent; border: none;">...</span></li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
                             {
                                 <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
-                                    <a class="page-link fw-bold border-0 px-3 @(ViewBag.CurrentPage == i ? "bg-primary-custom text-white" : "text-primary-custom")" 
+                                    <a class="page-link @(ViewBag.CurrentPage == i ? "bg-primary-custom text-white" : "text-primary-custom")" 
+                                       style="border-radius: 8px; font-weight: 500; border: 1px solid #dee2e6; @(ViewBag.CurrentPage != i ? "color: #333;" : "")" 
                                        href="?pageNumber=@i&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity">@i</a>
                                 </li>
                             }
-                            
-                            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                                <a class="page-link text-primary-custom fw-bold border-0 px-4" href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity">Next</a>
-                            </li>
+
+                            @if (endPage < ViewBag.TotalPages)
+                            {
+                                @if (endPage < ViewBag.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link" style="border-radius: 8px; background: transparent; border: none;">...</span></li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link text-primary-custom" style="border-radius: 8px; font-weight: 500; border: 1px solid #dee2e6; color: #333;" href="?pageNumber=@ViewBag.TotalPages&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity">@ViewBag.TotalPages</a>
+                                </li>
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link text-primary-custom" style="border-radius: 8px; font-weight: 500; border: 1px solid #dee2e6; color: #333;" href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@currentSearch&maxPrice=@currentMaxPrice&minCapacity=@currentMinCapacity">Next</a>
+                                </li>
+                            }
                         </ul>
                     </nav>
                 }

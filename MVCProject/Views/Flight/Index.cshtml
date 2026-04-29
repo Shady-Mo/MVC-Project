@@ -539,20 +539,59 @@
             <!-- Pagination -->
             @if (ViewBag.TotalPages > 1)
             {
-                <div class="pagination-container">
-                    <a class="page-btn @(ViewBag.CurrentPage == 1 ? "disabled" : "")"
-                       href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem;">
+                    @if (ViewBag.CurrentPage > 1)
                     {
-                        <a class="page-btn @(ViewBag.CurrentPage == i ? "active" : "")"
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">
+                            Previous
+                        </a>
+                    }
+
+                    @{
+                        int maxPagesToShow = 10;
+                        int startPage = Math.Max(1, ViewBag.CurrentPage - (maxPagesToShow / 2));
+                        int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                        if (endPage - startPage + 1 < maxPagesToShow)
+                        {
+                            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                        }
+                    }
+
+                    @if (startPage > 1)
+                    {
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=1&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">1</a>
+                        @if (startPage > 2)
+                        {
+                            <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
+                        }
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <a class="page-btn @(ViewBag.CurrentPage == i ? "active" : "")" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; font-weight: 500; height: auto; min-width: auto; @(ViewBag.CurrentPage == i ? "background-color: #28b5a4; color: white; border-color: #28b5a4;" : "color: #333;")"
                            href="?pageNumber=@i&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">@i</a>
                     }
-                    <a class="page-btn @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")"
-                       href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
+
+                    @if (endPage < ViewBag.TotalPages)
+                    {
+                        @if (endPage < ViewBag.TotalPages - 1)
+                        {
+                            <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
+                        }
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=@ViewBag.TotalPages&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">@ViewBag.TotalPages</a>
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">
+                            Next
+                        </a>
+                    }
                 </div>
             }
         }
