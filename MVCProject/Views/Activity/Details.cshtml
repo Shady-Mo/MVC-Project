@@ -248,7 +248,7 @@
             color: #14b8a6;
         }
 
-        media (max-width: 992px) {
+        @@media (max-width: 992px) {
             .content-grid {
                 grid-template-columns: 1fr;
             }
@@ -262,6 +262,116 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
+            }
+            .booking-widget {
+                position: static;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .details-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+            .hero-section {
+                height: 280px;
+                margin-bottom: 1.5rem;
+            }
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+                font-size: 0.95rem;
+            }
+            .info-card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .section-title {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            .highlights-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .booking-widget {
+                padding: 1.5rem;
+            }
+            .price-header .amount {
+                font-size: 2rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .details-container {
+                padding: 0 0.75rem;
+                margin: 0.5rem auto;
+            }
+            .hero-section {
+                height: 220px;
+                margin-bottom: 1rem;
+                border-radius: 1rem;
+            }
+            .hero-title {
+                font-size: 1.4rem;
+            }
+            .hero-content {
+                padding: 2rem 1rem 1.5rem;
+            }
+            .hero-meta {
+                font-size: 0.85rem;
+            }
+            .info-card {
+                padding: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            .section-title {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+            .description-text {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+            .highlights-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            .highlight-item {
+                gap: 0.75rem;
+            }
+            .highlight-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            .booking-widget {
+                padding: 1.2rem;
+            }
+            .price-header {
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+            }
+            .price-header .amount {
+                font-size: 1.5rem;
+            }
+            .price-header .label {
+                font-size: 0.8rem;
+            }
+            .booking-details {
+                margin-bottom: 1rem;
+            }
+            .booking-row {
+                padding: 0.6rem 0;
+                font-size: 0.85rem;
+            }
+            .btn-action {
+                padding: 0.75rem;
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
             }
         }
     </style>
