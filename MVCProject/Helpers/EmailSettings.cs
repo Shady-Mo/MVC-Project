@@ -1,4 +1,4 @@
-﻿namespace MVCProject.Models {
+﻿namespace MVCProject.Helpers {
     public class EmailSettings {
         public string SmtpServer { get; set; } = "";
         public int Port { get; set; }

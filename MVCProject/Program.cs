@@ -37,6 +37,8 @@ namespace MVCProject {
                 .AddScoped<IUserClaimsPrincipalFactory<AppUser>, MyUserClaimsPrincipalFactory>();
 
             builder.Services.AddOutputCache(options => {
+                options.MaximumBodySize = 20 * 1024 * 1024;
+
                 options.SizeLimit = 100 * 1024 * 1024;
 
                 options.AddPolicy("GlobalExpiry", builder =>
@@ -50,20 +52,17 @@ namespace MVCProject {
                         .SetLocking(true)
                         .Tag("GlobalWithFilteration")
                         .SetVaryByQuery("location", "price")
-                        .VaryByValue(context =>
-                            new KeyValuePair<string, string>(
-                                "user_id", context.User.Identity?.IsAuthenticated == true ? "anonymous" : "Guest"
-                            )
-                        )
-                    );
+                );
 
-                options.AddPolicy("PrivateExpiry", builder =>
-                    builder.Expire(TimeSpan.FromMinutes(1))
-                        .VaryByValue(context =>
-                            new KeyValuePair<string, string>(
-                                "user_id", context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous"
-                            )
-                        )
+                options.AddPolicy("ProfileExpiry", builder =>
+                    builder.Expire(TimeSpan.FromMinutes(10))
+                        .VaryByValue(context => {
+                            var identityCookie = context.Request.Cookies[".AspNetCore.Identity.Application"];
+
+                            return new KeyValuePair<string, string>(
+                                "userStatus", identityCookie ?? "Anonymous"
+                            );
+                        })
                 );
             });
 

@@ -18,7 +18,7 @@ namespace MVCProject.Services.BaseService {
 
                     _logger.LogInformation("Seeding roles.");
                     await AddRoleAsync(_roleManager, "Admin");
-                    await AddRoleAsync(_roleManager, "Vendor");
+                    await AddRoleAsync(_roleManager, "Seller");
                     await AddRoleAsync(_roleManager, "Customer");
 
                     _logger.LogInformation("Add admin email.");
