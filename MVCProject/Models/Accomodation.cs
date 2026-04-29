@@ -14,6 +14,10 @@ namespace MVCProject.Models
         public string? Image { get; set; }
 
 
+        [ForeignKey("Seller")]
+        public string? SellerId { get; set; }
+        public Seller? Seller { get; set; }
+
         public ICollection<BookingAccomodation> bookingAccomodations = new HashSet<BookingAccomodation>();
 
     }

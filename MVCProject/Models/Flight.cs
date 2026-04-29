@@ -17,7 +17,9 @@ namespace MVCProject.Models
 
         public ICollection<Booking> Bookings = new HashSet<Booking>();
 
-        //public ICollection<BookingFlight> BookingFlights = new HashSet<BookingFlight>();
+        [ForeignKey("Seller")]
+        public string? SellerId { get; set; }
+        public Seller? Seller { get; set; }
 
         public int CompareTo(Flight? other)
         {

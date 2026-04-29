@@ -14,6 +14,7 @@ namespace MVCProject.Data {
         }
 
         public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<Seller> Sellers { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Flight> Flights { get; set; }
         public DbSet<Accomodation> Accomodations { get; set; }
