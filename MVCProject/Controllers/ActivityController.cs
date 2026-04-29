@@ -6,6 +6,7 @@ using MVCProject.Models;
 using MVCProject.Repositories;
 using MVCProject.Services.ImgAddingService;
 using MVCProject.ViewModels.ActivityViewModels;
+using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MVCProject.Controllers
@@ -34,20 +35,40 @@ namespace MVCProject.Controllers
 
             return View("Index", activitiesVM);
         }
+
+        [Authorize(Roles = "Admin,Seller")]
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        public IActionResult SellerActivities([FromQuery] string searchQuery = "", [FromQuery] decimal? maxPrice = null, [FromQuery] int? minCapacity = null, [FromQuery] int pageNumber = 1)
+        {
+            int pageSize = 6; // Show 6 cards per page
+            var (activities, totalCount) = unitOfWork.ActivityRepository.GetAllWithFilterBySellerId(User.FindFirstValue(ClaimTypes.NameIdentifier), searchQuery, maxPrice, minCapacity, pageNumber, pageSize);
+
+            var activitiesVM = activities.Adapt<List<DisplayActivityVM>>();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return View("SellerActivities", activitiesVM);
+        }
+
+
+
+        [Authorize(Roles = "Admin,Seller")]
+        [HttpGet]
         public IActionResult Create()
         {
             return View("Create");
         }
+
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(AddActivityVM addActivityVM)
         {
             if (ModelState.IsValid)
             {
                 var activity = addActivityVM.Adapt<Activity>();
 
+                activity.SellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (addActivityVM.ImageFile != null)
                 {
                     // Use the global service
@@ -56,10 +77,12 @@ namespace MVCProject.Controllers
 
                 unitOfWork.ActivityRepository.Add(activity);
                 unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(SellerActivities));
             }
             return View("Create", addActivityVM);
         }
+
+
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -69,8 +92,10 @@ namespace MVCProject.Controllers
             var activity = activityEntity.Adapt<DisplayActivityVM>();
             return View("Details", activity);
         }
+
+
+        [Authorize(Roles = "Admin,Seller")]
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int id)
         {
             var activityEntity = unitOfWork.ActivityRepository.GetById(id);
@@ -79,8 +104,10 @@ namespace MVCProject.Controllers
             var activity = activityEntity.Adapt<UpdateActivityVM>();
             return View("Edit", activity);
         }
+
+
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(UpdateActivityVM updateActivityVM)
         {
             if (ModelState.IsValid)
@@ -100,11 +127,14 @@ namespace MVCProject.Controllers
 
                 unitOfWork.ActivityRepository.Update(existingActivity);
                 unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(SellerActivities));
             }
             return View("Edit", updateActivityVM);
         }
-        [Authorize(Roles = "Admin")]
+
+
+        [Authorize(Roles = "Admin,Seller")]
+        [HttpGet]
         public IActionResult Delete(int id)
         {
             var activityEntity = unitOfWork.ActivityRepository.GetById(id);
@@ -116,8 +146,10 @@ namespace MVCProject.Controllers
             }
             unitOfWork.ActivityRepository.Delete(id);
             unitOfWork.Save();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(SellerActivities));
         }
+
+        [Authorize(Roles = "Admin,Seller")]
         [HttpGet]
         public IActionResult checkDate(DateTime Date)
         {

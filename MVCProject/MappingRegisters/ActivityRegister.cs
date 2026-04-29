@@ -10,7 +10,8 @@ namespace MVCProject.MappingRegisters {
             config.NewConfig<Activity, AddActivityVM>();
 
             config.NewConfig<DisplayActivityVM, Activity>();
-            config.NewConfig<Activity, DisplayActivityVM>();
+            config.NewConfig<Activity, DisplayActivityVM>()
+                .Map(dest => dest.SellerName, src => (src.Seller != null)? src.Seller.FullName : "");
 
             config.NewConfig<Activity, MostBookedActivitiesViewModel>()
                 .Map(d => d.BookingsHistory, s => s.BookingActivities.Count());

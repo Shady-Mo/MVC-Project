@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Outdoor Adventures | Hiking & Trekking Activities</title>
+    <title>My Activities | Outdoor Adventures</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="~/css/activities-list.css">
@@ -16,6 +16,21 @@
 
                 .Add-Activity:hover {
                     background-color: #0d9488 !important;
+                }
+
+            .btn-edit {
+                background-color: #f59e0b;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                text-decoration: none;
+                font-size: 0.85rem;
+                font-weight: 500;
+            }
+
+                .btn-edit:hover {
+                    background-color: #d97706;
+                    color: white;
                 }
 
             @@media (max-width: 768px) {
@@ -30,22 +45,21 @@
         <div class="page-header" style="border-bottom: none; margin-bottom: 1rem;">
             <div class="title-section" style="display: flex; gap: 1rem; flex: 1; flex-wrap: wrap; align-items: stretch;">
                 <div style="flex: 0 0 auto; min-width: 200px;">
-                    <h2 class="filter-title" style="margin-bottom: 0; white-space: nowrap;">Filter By</h2>
+                    <h2 class="filter-title" style="margin-bottom: 0; white-space: nowrap;">My Activities Filter</h2>
                 </div>
                 <div style="flex: 1; display:flex; gap: 1rem; align-items:center; flex-wrap: wrap; min-width: 200px;">
                     <div style="display:flex; align-items:center; background:#f1f5f9; padding: 0.5rem 1rem; border-radius: 8px; flex:1; min-width: 150px;">
                         <i class="fas fa-search" style="color: #94a3b8; margin-right: 0.5rem; flex-shrink: 0;"></i>
-                        <input type="text" form="filterForm" name="searchQuery" value="@Context.Request.Query["searchQuery"]" placeholder="Search" style="border: none; background: transparent; outline: none; width: 100%; color: #334155; font-size: 0.9rem;" />
+                        <input type="text" form="filterForm" name="searchQuery" value="@Context.Request.Query["searchQuery"]" placeholder="Search my activities" style="border: none; background: transparent; outline: none; width: 100%; color: #334155; font-size: 0.9rem;" />
                     </div>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
-                    {
-                        <a href="@Url.Action("Create", "Activity")" class="Add-Activity" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; flex-shrink: 0;"><i class="fas fa-plus"></i><span> Add Activity</span></a>
-                    }
+                    
+                    <a href="@Url.Action("Create", "Activity")" class="Add-Activity" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; flex-shrink: 0;">
+                        <i class="fas fa-plus"></i><span> Add Activity</span>
+                    </a>
 
-                    @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
-                    {
-                        <a href="@Url.Action("SellerActivities", "Activity")" class="Add-Activity" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; flex-shrink: 0;"><i class="fas fa-list"></i><span> My Activities</span></a>
-                    }
+                    <a href="@Url.Action("Index", "Activity")" class="Add-Activity" style="background:#64748b; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; flex-shrink: 0;">
+                        <i class="fas fa-globe"></i><span> All Activities</span>
+                    </a>
                 </div>
             </div>
             <div class="sorting-bar">
@@ -56,7 +70,7 @@
             </div>
         </div>
 
-        <form id="filterForm" method="get" action="@Url.Action("Index", "Activity")">
+        <form id="filterForm" method="get" action="@Url.Action("SellerActivities", "Activity")">
             <div class="main-layout">
                 <div class="sidebar-filters">
 
@@ -93,7 +107,7 @@
                         <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem;">
                             @if (ViewBag.CurrentPage > 1)
                             {
-                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.CurrentPage - 1 })"
+                                <a href="@Url.Action("SellerActivities", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.CurrentPage - 1 })"
                                        class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
                                     Previous
                                 </a>
@@ -112,7 +126,7 @@
 
                             @if (startPage > 1)
                             {
-                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = 1 })"
+                                <a href="@Url.Action("SellerActivities", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = 1 })"
                                        class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
                                     1
                                 </a>
@@ -124,7 +138,7 @@
 
                             @for (int i = startPage; i <= endPage; i++)
                             {
-                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = i })"
+                                <a href="@Url.Action("SellerActivities", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = i })"
                                        class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")"
                                        style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; font-weight: 500; @(i == ViewBag.CurrentPage ? "background-color: #14b8a6; color: white; border-color: #14b8a6;" : "color: #333;")">
                                     @i
@@ -137,7 +151,7 @@
                                 {
                                     <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
                                 }
-                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.TotalPages })"
+                                <a href="@Url.Action("SellerActivities", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.TotalPages })"
                                        class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
                                     @ViewBag.TotalPages
                                 </a>
@@ -145,7 +159,7 @@
 
                             @if (ViewBag.CurrentPage < ViewBag.TotalPages)
                             {
-                                <a href="@Url.Action("Index", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.CurrentPage + 1 })"
+                                <a href="@Url.Action("SellerActivities", new { searchQuery = Context.Request.Query["searchQuery"], maxPrice = Context.Request.Query["maxPrice"], minCapacity = Context.Request.Query["minCapacity"], pageNumber = ViewBag.CurrentPage + 1 })"
                                        class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500;">
                                     Next
                                 </a>
@@ -167,7 +181,7 @@
                         {
                             id: @activity.Id,
                             title: "@Html.Raw(activity.Name.Replace("\"", "\\\""))",
-                            seller: "@Html.Raw((activity.SellerName ?? "Unknown").Replace("\"", "\\\""))",
+                            seller: "@Html.Raw((activity.SellerName ?? "Me").Replace("\"", "\\\""))",
                             description: "@Html.Raw(activity.Location.Replace("\"", "\\\""))",
                             duration: "1 Day(s)",
                             oldPrice: @activity.Price,
@@ -202,7 +216,7 @@
                 const filteredList = filterAndSortActivities();
 
                 if (filteredList.length === 0) {
-                    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;"><i class="fas fa-mountain"></i> No activities match this search.</div>`;
+                    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;"><i class="fas fa-box-open" style="font-size: 2rem; color: #94a3b8; margin-bottom: 1rem;"></i><br>You haven't added any activities matching this criteria yet.</div>`;
                     return;
                 }
 
@@ -214,16 +228,16 @@
 
                     const departuresHtml = activity.departures.map(d => `<span class="date-badge available"><i class="fas fa-check"></i>${d} (Available)</span>`).join('');
                     
-                    // الأيقونات التعريفية
                     const groupIcon = `<i class="far fa-user"></i> ${activity.group}`;
                     const sellerIcon = `<i class="fas fa-store"></i> ${activity.seller}`;
 
                     const detailsUrl = '@Url.Action("Details", "Activity")/' + activity.id;
+                    const editUrl = '@Url.Action("Edit", "Activity")/' + activity.id; // لينك تعديل النشاط عشان ده البائع
 
                     return `
                         <div class="activity-card">
                             <div class="card-img" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2)), url('${activity.image}');">
-                                <span class="img-cat-tag"><i class="fas fa-star"></i> Featured</span>
+                                <span class="img-cat-tag" style="background-color: #0ea5e9;"><i class="fas fa-user-tag"></i> My Activity</span>
                             </div>
                             <div class="card-content">
                                 <div class="card-main-info">
@@ -244,7 +258,10 @@
                                                 ${savingHtml}
                                             </div>
                                         </div>
-                                        <a href="${detailsUrl}" class="btn-details" style="text-decoration:none;">View Details</a>
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                            <a href="${detailsUrl}" class="btn-details" style="flex: 1; text-align: center; text-decoration:none;">View</a>
+                                            <a href="${editUrl}" class="btn-edit" style="flex: 1; text-align: center;"><i class="fas fa-pen"></i> Edit</a>
+                                        </div>
                                         <div class="departures" style="margin-top: 1rem;">
                                             <p>Next Departures</p>
                                             <div class="departure-dates">

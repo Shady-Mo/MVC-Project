@@ -7,6 +7,7 @@ namespace MVCProject.ViewModels.ActivityViewModels
         public int Id { get; set; }
         [Display(Name = "Activity")]
         public string Name { get; set; }
+        public string SellerName { get; set; }
 
         public string Location { get; set; }
 
