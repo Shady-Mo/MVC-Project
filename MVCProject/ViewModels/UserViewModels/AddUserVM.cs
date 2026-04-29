@@ -16,8 +16,9 @@ namespace MVCProject.ViewModels.UserViewModels
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)]
+        [StringLength(40, MinimumLength = 8, ErrorMessage = "The {0} must be at least {2} and at most {1}.")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Please select a role")]

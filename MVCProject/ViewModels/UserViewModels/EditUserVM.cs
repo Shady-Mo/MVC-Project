@@ -17,9 +17,6 @@ namespace MVCProject.ViewModels.UserViewModels
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-
         [Required(ErrorMessage = "Please select a role")]
         public string SelectedRole { get; set; }
 
