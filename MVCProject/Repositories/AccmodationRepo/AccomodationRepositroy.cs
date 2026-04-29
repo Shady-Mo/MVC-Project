@@ -13,8 +13,33 @@ namespace MVCProject.Repositories.AccmodationRepo
 
         public (List<Accomodation> accomodations, int TotalCount) GetAllWithFilterBy(string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6)
         {
-            var query = _context.Accomodations.AsQueryable();
+            var query = _context.Accomodations.Include(a => a.Seller).AsQueryable();
             
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(a => a.Name.Contains(searchQuery) || a.Location.Contains(searchQuery));
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(a => a.PricePerNight <= maxPrice.Value);
+            }
+
+            if (minCapacity.HasValue)
+            {
+                query = query.Where(a => a.AvailableRooms >= minCapacity.Value);
+            }
+
+            var accomodations = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return (accomodations, query.Count());
+        }
+
+        public (List<Accomodation> accomodations, int TotalCount) GetAllWithFilterBySellerId(string sellerId, string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6)
+        {
+            var query = _context.Accomodations.Where(a => a.SellerId == sellerId).Include(a => a.Seller).AsQueryable();
+
 
             if (!string.IsNullOrEmpty(searchQuery))
             {

@@ -1,7 +1,6 @@
 ﻿using Mapster;
 using MVCProject.Models;
 using MVCProject.ViewModels.AccomodationViewModels;
-using MVCProject.ViewModels.AccomodationViewModels;
 using MVCProject.ViewModels.HomeViewModels;
 
 namespace MVCProject.MappingRegisters {
@@ -11,7 +10,9 @@ namespace MVCProject.MappingRegisters {
             config.NewConfig<Accomodation, AddAcccomodationVM>();
 
             config.NewConfig<DisplayAccomodationVM, Accomodation>();
-            config.NewConfig<Accomodation, DisplayAccomodationVM>();
+
+            config.NewConfig<Accomodation, DisplayAccomodationVM>()
+                .Map(dest => dest.SellerName, src => (src.Seller != null) ? src.Seller.FullName : "");
 
             config.NewConfig<EditAccomodationVM, Accomodation>();
             config.NewConfig<Accomodation, EditAccomodationVM>();

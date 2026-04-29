@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<MVCProject.ViewModels.AccomodationViewModels.DisplayAccomodationVM>
 
 @{
-    ViewData["Title"] = "Accommodations";
+    ViewData["Title"] = "Seller Accommodations";
     
     var currentSearch = Context.Request.Query["searchQuery"].FirstOrDefault() ?? "";
     var currentMaxPrice = Context.Request.Query["maxPrice"].FirstOrDefault() ?? "5000";
@@ -56,19 +56,9 @@
             </h1>
         </div>
         <div class="col text-end">
-            @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
-            {
-                <a asp-action="New" class="btn btn-primary-custom fw-bold px-4 rounded-pill shadow-sm">
+            <a asp-action="New" class="btn btn-primary-custom fw-bold px-4 rounded-pill shadow-sm">
                     + New Accommodation
-                </a>
-            }
-
-            @if (User.IsInRole("Seller"))
-            {
-                <a asp-action="SellerAccomodations" class="btn btn-primary-custom fw-bold px-4 rounded-pill shadow-sm">
-                    My Accomodations
-                </a>
-            }
+             </a>
         </div>
     </div>
 
@@ -166,11 +156,9 @@
                                 <div class="card-footer bg-transparent border-top-0 pt-0 pb-4 px-4">
                                     <div class="btn-group w-100 shadow-sm rounded" role="group">
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary-custom fw-bold">Details</a>
-                                        @if (User.IsInRole("Admin"))
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary fw-bold">Edit</a>
-                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger fw-bold">Delete</a>
-                                        }
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary fw-bold">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger fw-bold">Delete</a>
+                                        
                                     </div>
                                 </div>
                             </div>
