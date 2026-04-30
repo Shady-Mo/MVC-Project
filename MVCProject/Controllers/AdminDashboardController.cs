@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MVCProject.Models;
 using MVCProject.Repositories;
 using MVCProject.ViewModels.UserViewModels;
+using MVCProject.ViewModels.AdminDashboardViewModels;
 
 namespace MVCProject.Controllers
 {
@@ -229,6 +230,107 @@ namespace MVCProject.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Statistics()
+        {
+            var model = new DashboardStatisticsVM();
+
+            // 1. Revenue Overview - Last 6 months of confirmed bookings
+            var sixMonthsAgo = DateTime.UtcNow.AddMonths(-6);
+            var confirmedBookings = await unitOfWork.BookingRepository
+                .GetAll()
+                .Where(b => b.Status == Status.Confirmed && b.BookingDate >= sixMonthsAgo)
+                .ToListAsync();
+
+            var revenueByMonth = confirmedBookings
+                .GroupBy(b => new { b.BookingDate.Year, b.BookingDate.Month })
+                .OrderBy(g => g.Key.Year)
+                .ThenBy(g => g.Key.Month)
+                .Select(g => new
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Total = g.Sum(b => b.TotalAmount)
+                })
+                .ToList();
+
+            // Ensure all 6 months are represented (even with 0 revenue)
+            var allMonths = new List<DateTime>();
+            for (int i = 5; i >= 0; i--)
+            {
+                var date = DateTime.UtcNow.AddMonths(-i);
+                allMonths.Add(new DateTime(date.Year, date.Month, 1, 0, 0, 0, DateTimeKind.Utc));
+            }
+
+            model.RevenueOverview = new RevenueOverviewVM
+            {
+                Months = allMonths.Select(m => m.ToString("MMM yyyy")).ToList(),
+                Revenue = allMonths.Select(m =>
+                    revenueByMonth.FirstOrDefault(r => r.Month == m)?.Total ?? 0
+                ).ToList()
+            };
+
+            // 2. Service Distribution - Counts from join tables
+            var flightBookings = await unitOfWork.BookingRepository
+                .GetAll()
+                .Where(b => b.FlightId != 0)
+                .CountAsync();
+
+            var activityBookings = (await unitOfWork.BookingRepository
+                .GetAll()
+                .Include(b => b.BookingActivities)
+                .ToListAsync())
+                .SelectMany(b => b.BookingActivities ?? new List<BookingActivity>())
+                .Count();
+
+            var accommodationBookings = (await unitOfWork.BookingRepository
+                .GetAll()
+                .Include(b => b.bookingAccomodations)
+                .ToListAsync())
+                .SelectMany(b => b.bookingAccomodations ?? new List<BookingAccomodation>())
+                .Count();
+
+            model.ServiceDistribution = new ServiceDistributionVM
+            {
+                Services = new List<string> { "Flights", "Activities", "Accommodations" },
+                Counts = new List<int> { flightBookings, activityBookings, accommodationBookings }
+            };
+
+            // 3. Booking Status Breakdown
+            var bookingsByStatus = await unitOfWork.BookingRepository
+                .GetAll()
+                .GroupBy(b => b.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var pendingCount = bookingsByStatus.FirstOrDefault(b => b.Status == Status.Pending)?.Count ?? 0;
+            var confirmedCount = bookingsByStatus.FirstOrDefault(b => b.Status == Status.Confirmed)?.Count ?? 0;
+            var cancelledCount = bookingsByStatus.FirstOrDefault(b => b.Status == Status.Cancelled)?.Count ?? 0;
+
+            model.BookingStatusBreakdown = new BookingStatusBreakdownVM
+            {
+                Statuses = new List<string> { "Pending", "Confirmed", "Cancelled" },
+                Counts = new List<int> { pendingCount, confirmedCount, cancelledCount }
+            };
+
+            // 4. Top 5 Destinations
+            var topDestinations = await unitOfWork.BookingRepository
+                .GetAll()
+                .Where(b => !string.IsNullOrWhiteSpace(b.Country))
+                .GroupBy(b => b.Country)
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => new { Country = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            model.TopDestinations = new TopDestinationsVM
+            {
+                Countries = topDestinations.Select(d => d.Country).ToList(),
+                BookingCounts = topDestinations.Select(d => d.Count).ToList()
+            };
+
+            return View(model);
         }
     }
 }

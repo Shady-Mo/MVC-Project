@@ -1,0 +1,447 @@
+@model MVCProject.ViewModels.AdminDashboardViewModels.DashboardStatisticsVM
+
+@{
+    ViewData["Title"] = "Dashboard Statistics";
+    Layout = "_AdminDashboardLayout";
+}
+
+<style>
+    .statistics-container {
+        padding: 20px 0;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border-top: 4px solid #3ac0ad;
+        transition: all 0.3s ease;
+    }
+
+    .chart-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .chart-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a2a3a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .chart-title i {
+        color: #3ac0ad;
+        font-size: 20px;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 300px;
+        margin-bottom: 10px;
+    }
+
+    .chart-wrapper.large {
+        height: 350px;
+    }
+
+    .chart-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+
+    .chart-row.full {
+        grid-template-columns: 1fr;
+    }
+
+    .statistics-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e5e5e5;
+    }
+
+    .statistics-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a2a3a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .statistics-header i {
+        color: #3ac0ad;
+        font-size: 28px;
+    }
+
+    .refresh-btn {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #3ac0ad 0%, #2aac99 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(58,192,173,0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-mini-card {
+        background: linear-gradient(135deg, #3ac0ad 0%, #2aac99 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(58,192,173,0.2);
+    }
+
+    .stat-mini-card h4 {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.9);
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-mini-card .value {
+        font-size: 24px;
+        font-weight: 800;
+        color: white;
+    }
+
+    @@media (max-width: 1024px) {
+        .chart-row {
+            grid-template-columns: 1fr;
+        }
+
+        .chart-wrapper {
+            height: 280px;
+        }
+
+        .statistics-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .refresh-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .statistics-container {
+            padding: 10px 0;
+        }
+
+        .chart-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+        }
+
+        .chart-wrapper {
+            height: 250px;
+        }
+
+        .statistics-header h2 {
+            font-size: 22px;
+        }
+
+        .stats-summary {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-mini-card {
+            padding: 12px;
+        }
+
+        .stat-mini-card .value {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<div class="statistics-container">
+    <div class="statistics-header">
+        <h2>
+            <i class="fas fa-chart-line"></i> Dashboard Analytics
+        </h2>
+        <a href="@Url.Action("Statistics")" class="refresh-btn">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats-summary">
+        <div class="stat-mini-card">
+            <h4>Total Revenue</h4>
+            <div class="value">$@Model.RevenueOverview.Revenue.Sum().ToString("F0")</div>
+        </div>
+        <div class="stat-mini-card">
+            <h4>Total Bookings</h4>
+            <div class="value">@(Model.BookingStatusBreakdown.Counts.Sum())</div>
+        </div>
+        <div class="stat-mini-card">
+            <h4>Confirmed</h4>
+            <div class="value">@Model.BookingStatusBreakdown.Counts[1]</div>
+        </div>
+        <div class="stat-mini-card">
+            <h4>Destinations</h4>
+            <div class="value">@Model.TopDestinations.Countries.Count</div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="chart-row">
+        <!-- Revenue Chart -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-chart-line"></i> Revenue Overview (Last 6 Months)
+            </div>
+            <div class="chart-wrapper large">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Service Distribution Chart -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-pie-chart"></i> Service Distribution
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="serviceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="chart-row">
+        <!-- Booking Status Chart -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-doughnut-chart"></i> Booking Status Breakdown
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Destinations Chart -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-map-marker-alt"></i> Top 5 Destinations
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="destinationChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Chart configuration
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        color: '#555'
+                    }
+                }
+            }
+        };
+
+        // 1. Revenue Chart - Line Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueOverview.Months)),
+                datasets: [{
+                    label: 'Monthly Revenue ($)',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueOverview.Revenue)),
+                    borderColor: '#3ac0ad',
+                    backgroundColor: 'rgba(58, 192, 173, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#3ac0ad',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                ...chartConfig,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#999',
+                            font: { size: 11 }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#999',
+                            font: { size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Service Distribution - Pie Chart
+        const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+        new Chart(serviceCtx, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ServiceDistribution.Services)),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ServiceDistribution.Counts)),
+                    backgroundColor: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ServiceDistribution.Colors)),
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...chartConfig,
+                plugins: {
+                    ...chartConfig.plugins,
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + ' bookings';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. Booking Status - Doughnut Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookingStatusBreakdown.Statuses)),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookingStatusBreakdown.Counts)),
+                    backgroundColor: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookingStatusBreakdown.Colors)),
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...chartConfig,
+                plugins: {
+                    ...chartConfig.plugins,
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + ' bookings';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 4. Top Destinations - Bar Chart
+        const destinationCtx = document.getElementById('destinationChart').getContext('2d');
+        new Chart(destinationCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopDestinations.Countries)),
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopDestinations.BookingCounts)),
+                    backgroundColor: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopDestinations.Colors)),
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                ...chartConfig,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#999',
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#999',
+                            font: { size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
