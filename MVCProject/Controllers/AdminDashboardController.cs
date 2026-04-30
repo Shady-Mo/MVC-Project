@@ -28,15 +28,49 @@ namespace MVCProject.Controllers
             this.userManager = userManager;
         }
         [HttpGet]
-        public async Task<IActionResult> Index(int page = 1, string searchName = "")
+        public async Task<IActionResult> Index(int page = 1, string searchName = "", string role = "", string status = "")
         {
             const int pageSize = 10;
             var allUsers = unitOfWork.UserRepository.GetAll().ToList();
+
+            // Get all user roles for dropdown
+            var allRoles = await roleManager.Roles.Select(r => r.Name).ToListAsync();
+            ViewBag.Roles = allRoles;
+            ViewBag.SelectedRole = role;
+            ViewBag.SelectedStatus = status;
 
             // Apply search filter if provided
             if (!string.IsNullOrWhiteSpace(searchName))
             {
                 allUsers = allUsers.Where(u => u.FullName.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Apply role filter if provided
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                var usersWithRole = new List<AppUser>();
+                foreach (var user in allUsers)
+                {
+                    var userRoles = await userManager.GetRolesAsync(user);
+                    if (userRoles.Contains(role))
+                    {
+                        usersWithRole.Add(user);
+                    }
+                }
+                allUsers = usersWithRole;
+            }
+
+            // Apply status filter if provided
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (status == "active")
+                {
+                    allUsers = allUsers.Where(u => !u.IsBanned).ToList();
+                }
+                else if (status == "banned")
+                {
+                    allUsers = allUsers.Where(u => u.IsBanned).ToList();
+                }
             }
 
             int totalUsers = allUsers.Count;
