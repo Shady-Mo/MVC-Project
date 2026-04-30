@@ -658,64 +658,18 @@
             <i class="fas fa-times"></i>
         </button>
 
-        <a asp-controller="Home" asp-action="Index" class="mobile-menu-item">
-            <i class="fas fa-home"></i> Home
-        </a>
-        <a asp-controller="Flight" asp-action="Index" class="mobile-menu-item">
-            <i class="fas fa-plane"></i> Flights
-        </a>
-        <a asp-controller="Accomodation" asp-action="Index" class="mobile-menu-item">
-            <i class="fas fa-map-marker-alt"></i> Accomodations
-        </a>
-        <a asp-controller="Activity" asp-action="Index" class="mobile-menu-item">
-            <i class="fas fa-hiking"></i> Activities
-        </a>
-        @if (User.Identity.IsAuthenticated)
-        {
-            @if(User.IsInRole("Admin"))
-            {
-                <a asp-controller="Booking" asp-action="Index" class="mobile-menu-item">Bookings</a>
-            }
-            else
-            {
-                <a asp-controller="Booking" asp-action="MyBooking" class="mobile-menu-item">Bookings</a>
+        <a href="/Home/Index" class="mobile-menu-item"><i class="fas fa-home"></i> Home</a>
+        <a href="/Flight/Index" class="mobile-menu-item"><i class="fas fa-plane"></i> Flights</a>
+        <a href="/Accomodation/Index" class="mobile-menu-item"><i class="fas fa-map-marker-alt"></i> Accommodations</a>
+        <a href="/Activity/Index" class="mobile-menu-item"><i class="fas fa-hiking"></i> Activities</a>
 
-            }
-        }
+        <div id="mobileRoleLinks"></div>
 
         <div class="mobile-menu-divider"></div>
 
-        @if (User.Identity.IsAuthenticated)
-        {
-            <a asp-controller="Profile" asp-action="Index" class="mobile-menu-item">
-                <i class="fas fa-user"></i> Welcome, @User.Identity.Name
-            </a>
-            <form asp-controller="Account" asp-action="Logout" method="post">
-                <button type="submit" class="mobile-menu-item logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        }
-        else
-        {
-            <a asp-controller="Account" asp-action="Login" class="mobile-menu-item">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </a>
-            <a asp-controller="Account" asp-action="Register" class="mobile-menu-item">
-                <i class="fas fa-user-plus"></i> Sign Up
-            </a>
-        }
+        <div id="mobileAuthSection"></div>
 
-        <div class="mobile-menu-contact">
-            <div class="mobile-menu-contact-item">
-                <i class="fas fa-phone-alt"></i>
-                <a href="tel:+20@(User.FindFirst("PhoneNumber")?.Value)" class="mobile-menu-contact-link">@(User.FindFirst("PhoneNumber")?.Value)</a>
-            </div>
-            <div class="mobile-menu-contact-item">
-                <i class="fas fa-envelope"></i>
-                <a href="mailto:@(User.FindFirst(ClaimTypes.Email)?.Value)" class="mobile-menu-contact-link">@(User.FindFirst(ClaimTypes.Email)?.Value)</a>
-            </div>
-        </div>
+        <div class="mobile-menu-contact" id="mobileContactSection"></div>
 
         <div class="mobile-menu-social">
             <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -745,22 +699,14 @@
                             <span class="navbar-toggler-icon"></span>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarNav">
-                            <div class="nav-menu ms-lg-auto w-100 w-lg-auto justify-content-end">
-                                <a asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "selected" : "")">Home</a>
-                                <a asp-controller="Flight" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Flight" ? "selected" : "")">Flights</a>
-                                <a asp-controller="Accomodation" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Accomodation" ? "selected" : "")">Accommodations</a>
-                                <a asp-controller="Activity" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Activity" ? "selected" : "")">Activities</a>
-                                @if(User.IsInRole("Admin"))
-                                {
-                                    <a asp-controller="Booking" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
-                                }
-                                else if (User.IsInRole("Customer"))
-                                {
-                                    <a asp-controller="Booking" asp-action="MyBooking" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" ? "selected" : "")">Bookings</a>
-
-                                }
-                                
-                                <div class="search-icon">
+                            <div class="nav-menu ms-lg-auto w-100 w-lg-auto justify-content-end" id="desktopNavMenu">
+                                <!-- Static links -->
+                                <a asp-controller="Home" asp-action="Index">Home</a>
+                                <a asp-controller="Flight" asp-action="Index">Flights</a>
+                                <a asp-controller="Accomodation" asp-action="Index">Accommodations</a>
+                                <a asp-controller="Activity" asp-action="Index">Activities</a>
+                                <!-- Dynamic links will be inserted here by JavaScript -->
+                                <div class="search-icon" id="searchIconContainer">
                                     <i class="fas fa-search"></i>
                                 </div>
                             </div>
@@ -861,35 +807,131 @@
             });
         });
 
-        function fetchUserInfo() {
-            fetch('/Account/GetUserInfo')
-                .then(response => response.json())
-                .then(data => {
-                    const authLinks = document.getElementById('authLinks');
-                    const userPhone = document.getElementById('userPhone');
-                    const userEmail = document.getElementById('userEmail');
+        async function initializeAppHeader() {
+            try {
+                const response = await fetch('/Account/GetUserInfo');
+                const data = await response.json();
 
-                    if (data.isAuthenticated) {
-                        if(data.phoneNumber) userPhone.innerHTML = `<i class="fas fa-phone-alt"></i>${data.phoneNumber}`;
-                        if(data.email) userEmail.innerHTML = `<i class="fas fa-envelope"></i>${data.email}`;
+                updateTopBar(data);
 
-                        authLinks.innerHTML = `
-                            <a href="/Profile/Index">Welcome, ${data.userName}</a>
-                            <a href="javascript:void(0)" onclick="handleLogout()">Logout</a>
-                        `;
-                    } else {
-                        authLinks.innerHTML = `
-                            <a href="/Account/Login">Login</a>
-                            <a href="/Account/Register">Sign Up</a>
-                        `;
-                        userPhone.style.display = 'none';
-                        userEmail.style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Error fetching user info:', error));
+                updateDynamicNavLinks(data);
+
+                updateMobileMenu(data);
+
+            } 
+            catch (error) {
+                console.error('Error initializing header:', error);
+            }
         }
 
-        fetchUserInfo();
+        function updateTopBar(data) {
+            const authLinks = document.getElementById('authLinks');
+            const userPhone = document.getElementById('userPhone');
+            const userEmail = document.getElementById('userEmail');
+
+            if (!authLinks) return;
+
+            if (data.isAuthenticated) {
+                if (userPhone) userPhone.innerHTML = `<i class="fas fa-phone-alt"></i> ${data.phoneNumber || '--'}`;
+                if (userEmail) userEmail.innerHTML = `<i class="fas fa-envelope"></i> ${data.email || '--'}`;
+
+                authLinks.innerHTML = `
+                <a href="/Profile/Index">Welcome, ${data.userName}</a>
+                <a href="javascript:void(0)" onclick="handleLogout()">Logout</a>
+                `;
+            } 
+            else {
+                authLinks.innerHTML = `
+                <a href="/Account/Login">Login</a>
+                <a href="/Account/Register">Sign Up</a>
+                `;
+                if (userPhone) userPhone.style.display = 'none';
+                if (userEmail) userEmail.style.display = 'none';
+            }
+        }
+
+        function updateDynamicNavLinks(data) {
+            const searchIcon = document.getElementById('searchIconContainer');
+            if (!searchIcon) return;
+
+            document.querySelectorAll('.dynamic-role-link').forEach(el => el.remove());
+
+            if (data.isAuthenticated) {
+                let linksHtml = "";
+                if (data.role === "Admin") {
+                    linksHtml = `
+                    <a href="/Booking/Index" class="dynamic-role-link">Bookings</a>
+                    <a href="/AdminDashboard/Index" class="dynamic-role-link">Dashboard</a>
+                    `;
+                } 
+                else if (data.role === "Customer") {
+                    linksHtml = `<a href="/Booking/MyBooking" class="dynamic-role-link">Bookings</a>`;
+                }
+                searchIcon.insertAdjacentHTML('beforebegin', linksHtml);
+            }
+    
+            applyActiveNavbarStyle();
+        }
+
+        function updateMobileMenu(data) {
+            const roleContainer = document.getElementById('mobileRoleLinks');
+            const authContainer = document.getElementById('mobileAuthSection');
+            const contactContainer = document.getElementById('mobileContactSection');
+
+            if (!authContainer) return;
+
+            if (data.isAuthenticated) {
+                let roleHtml = "";
+                if (data.role === "Admin") {
+                    roleHtml = `<a href="/Booking/Index" class="mobile-menu-item">Bookings</a>`;
+                } 
+                else if (data.role === "Customer") {
+                    roleHtml = `<a href="/Booking/MyBooking" class="mobile-menu-item">Bookings</a>`;
+                }
+                if (roleContainer) roleContainer.innerHTML = roleHtml;
+
+                authContainer.innerHTML = `
+                <a href="/Profile/Index" class="mobile-menu-item"><i class="fas fa-user"></i> Welcome, ${data.userName}</a>
+                <button type="button" onclick="handleLogout()" class="mobile-menu-item logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        `;
+
+                if (contactContainer) {
+                    contactContainer.innerHTML = `
+                    <div class="mobile-menu-contact-item"><i class="fas fa-phone-alt"></i><a href="tel:${data.phoneNumber}" class="mobile-menu-contact-link">${data.phoneNumber || '--'}</a></div>
+                    <div class="mobile-menu-contact-item"><i class="fas fa-envelope"></i><a href="mailto:${data.email}" class="mobile-menu-contact-link">${data.email || '--'}</a></div>
+                    `;
+                }
+            } 
+            else {
+                if (roleContainer) roleContainer.innerHTML = "";
+                authContainer.innerHTML = `
+                    <a href="/Account/Login" class="mobile-menu-item"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="/Account/Register" class="mobile-menu-item"><i class="fas fa-user-plus"></i> Sign Up</a>
+                `;
+                if (contactContainer) contactContainer.innerHTML = "";
+            }
+        }
+
+        function applyActiveNavbarStyle() {
+            const currentPath = window.location.pathname.toLowerCase();
+            const allLinks = document.querySelectorAll('.nav-menu a, .mobile-menu a');
+
+            allLinks.forEach(link => {
+                const linkPath = link.getAttribute('href')?.toLowerCase();
+                if (linkPath && (currentPath === linkPath || (currentPath === "/" && linkPath === "/home/index"))) {
+                    link.classList.add('selected');
+                } 
+                else {
+                    link.classList.remove('selected');
+                }
+            });
+        }
+
+        function handleLogout() {
+            window.location.href = '/Account/Logout';
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeAppHeader);
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

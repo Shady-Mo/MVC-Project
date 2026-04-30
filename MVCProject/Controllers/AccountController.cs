@@ -212,7 +212,8 @@ namespace MVCProject.Controllers {
                     isAuthenticated = true,
                     userName = User.Identity.Name,
                     email = User.FindFirst(ClaimTypes.Email)?.Value,
-                    phoneNumber = User.FindFirst("PhoneNumber")?.Value
+                    phoneNumber = User.FindFirst("PhoneNumber")?.Value,
+                    role = User.FindFirst(ClaimTypes.Role)?.Value
                 });
             }
             return Json(new { isAuthenticated = false });
