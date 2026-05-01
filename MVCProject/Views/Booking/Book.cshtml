@@ -9,18 +9,70 @@
     .bg-primary-custom { background-color: #28b5a4 !important; color: white; }
     .btn-primary-custom { background-color: #28b5a4; border-color: #28b5a4; color: white; }
     .btn-primary-custom:hover { background-color: #219688; border-color: #219688; color: white; }
-    
+
     .selectable-card { cursor: pointer; transition: all 0.2s ease-in-out; border: 2px solid transparent; height: 100%; }
     .selectable-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
-    
+
     input[type="checkbox"].item-selector:checked + .card-content,
     input[type="radio"].item-selector:checked + .card-content {
         border-color: #28b5a4; background-color: #f0fbf9;
     }
     .card-content { border: 2px solid transparent; border-radius: 0.375rem; height: 100%; }
     .hidden-checkbox, .hidden-radio { display: none; }
-    
+
     .hotel-dates { display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; }
+
+    /* Dropdown for country selection */
+    .country-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #eaeaea;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 250px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .form-group-relative {
+        position: relative;
+    }
+
+    .form-group-relative.active .country-dropdown {
+        display: block;
+    }
+
+    .country-option {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background 0.3s;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .country-option:hover {
+        background: #f5f5f5;
+        color: #ff6b35;
+    }
+
+    .country-option img {
+        width: 24px;
+        height: 16px;
+        object-fit: cover;
+        border-radius: 2px;
+    }
+
+    .loading-countries {
+        padding: 10px 15px;
+        text-align: center;
+        color: #999;
+    }
 </style>
 
 <div class="container mt-4 mb-5">
@@ -33,14 +85,20 @@
         <div class="card shadow-sm border-0 mb-4 p-4">
             <h5 class="fw-bold text-muted mb-3">1. Where are you traveling?</h5>
             <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-4 form-group-relative" id="sourceGroup">
                     <label class="form-label fw-bold">🛫 From (Source)</label>
-                    <input type="text" id="sourceCountry" class="form-control" placeholder="e.g. Egypt" required />
+                    <input type="text" id="sourceCountry" class="form-control" placeholder="e.g. Egypt" autocomplete="off" required />
+                    <div class="country-dropdown" id="sourceDropdown">
+                        <div class="loading-countries">Loading countries...</div>
+                    </div>
                 </div>
-                
-                <div class="col-md-4">
+
+                <div class="col-md-4 form-group-relative" id="destGroup">
                     <label asp-for="Country" class="form-label fw-bold">🛬 To (Destination)</label>
-                    <input asp-for="Country" id="destCountry" class="form-control" placeholder="e.g. France" required />
+                    <input asp-for="Country" id="destCountry" class="form-control" placeholder="e.g. France" autocomplete="off" required />
+                    <div class="country-dropdown" id="destDropdown">
+                        <div class="loading-countries">Loading countries...</div>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
@@ -82,7 +140,83 @@
 
     <script>
         $(document).ready(function () {
-            
+
+            // Country Fetch and Dropdown Logic
+            let countries = [];
+
+            function fetchCountries() {
+                fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2')
+                    .then(response => response.json())
+                    .then(data => {
+                        countries = data.sort((a, b) => a.name.common.localeCompare(b.name.common));
+                        renderCountryDropdown(countries, '#sourceDropdown', '#sourceCountry', '#sourceGroup');
+                        renderCountryDropdown(countries, '#destDropdown', '#destCountry', '#destGroup');
+                    })
+                    .catch(error => {
+                        console.error('Error fetching countries:', error);
+                        $('.loading-countries').text('Failed to load countries');
+                    });
+            }
+
+            function renderCountryDropdown(countryList, dropdownSelector, inputSelector, groupSelector) {
+                const dropdown = $(dropdownSelector);
+                dropdown.empty();
+
+                countryList.forEach(country => {
+                    const option = $(`
+                        <div class="country-option" data-value="${country.name.common}">
+                            <img src="${country.flags.svg}" alt="${country.name.common} flag" />
+                            <span>${country.name.common}</span>
+                        </div>
+                    `);
+
+                    option.click(function() {
+                        $(inputSelector).val(country.name.common);
+                        $(groupSelector).removeClass('active');
+                    });
+
+                    dropdown.append(option);
+                });
+            }
+
+            function setupCountryInput(inputSelector, groupSelector, dropdownSelector) {
+                $(inputSelector).on('focus', function() {
+                    $(groupSelector).addClass('active');
+                });
+
+                $(inputSelector).on('input', function() {
+                    const searchTerm = $(this).val().toLowerCase();
+
+                    if (searchTerm) {
+                        $(`${dropdownSelector} .country-option`).each(function() {
+                            const text = $(this).text().toLowerCase();
+                            if (text.includes(searchTerm)) {
+                                $(this).show();
+                            } else {
+                                $(this).hide();
+                            }
+                        });
+                    } else {
+                        $(`${dropdownSelector} .country-option`).show();
+                    }
+                    $(groupSelector).addClass('active');
+                });
+            }
+
+            setupCountryInput('#sourceCountry', '#sourceGroup', '#sourceDropdown');
+            setupCountryInput('#destCountry', '#destGroup', '#destDropdown');
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#sourceGroup').length) {
+                    $('#sourceGroup').removeClass('active');
+                }
+                if (!$(e.target).closest('#destGroup').length) {
+                    $('#destGroup').removeClass('active');
+                }
+            });
+
+            fetchCountries();
+
             $("#bookingForm").submit(function (e) {
                 var errors = [];
 
@@ -141,7 +275,8 @@
                         icon: 'error',
                         title: 'Missing Information!',
                         html: errorHtml,
-                        confirmButtonColor: '#28b5a4'
+                        confirmButtonColor: '#28b5a4',
+                        heightAuto: false
                     });
                 }
             });
@@ -153,7 +288,7 @@
                 var bookingDate = $("#BookingDate").val();
 
                 if (!source || !dest || !bookingDate) {
-                    Swal.fire({ icon: 'warning', title: 'Wait!', text: 'Please enter Source, Destination, and Booking Date to search.', confirmButtonColor: '#28b5a4' });
+                    Swal.fire({ icon: 'warning', title: 'Wait!', text: 'Please enter Source, Destination, and Booking Date to search.', confirmButtonColor: '#28b5a4', heightAuto: false });
                     return;
                 }
 
@@ -171,7 +306,7 @@
                         $("#resultsSection").fadeIn();
                     },
                     error: function () {
-                        Swal.fire('Error', 'Error loading data. Please try again.', 'error');
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading data. Please try again.', confirmButtonColor: '#28b5a4', heightAuto: false });
                     },
                     complete: function () {
                         btn.html("🔍 Find Options").prop("disabled", false);

@@ -64,6 +64,7 @@ namespace MVCProject.Controllers
             if (ModelState.IsValid)
             {
                 var flight = addFlightVM.Adapt<Flight>();
+                flight.SellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 unitOfWork.FlightRepository.Add(flight);
                 unitOfWork.Save();
                 return RedirectToAction(nameof(Index));

@@ -50,7 +50,7 @@ namespace MVCProject.Repositories.FlightRepo
 
         public List<Flight> GetByLocation(string location, string location2, DateTime bookingDate)
         {
-            return _context.Flights.Where(f => f.DepartureAirport == location && f.DestinationAirport == location2 && f.DepartureDateTime >= bookingDate && f.AvailableSeats > 0).ToList();
+            return _context.Flights.Where(f => f.DepartureAirport.Contains(location) && f.DestinationAirport.Contains(location2) && f.DepartureDateTime >= bookingDate && f.AvailableSeats > 0).ToList();
         }
     }
 }

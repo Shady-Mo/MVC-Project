@@ -56,7 +56,7 @@ namespace MVCProject.Controllers {
 
             if (!string.IsNullOrEmpty(request.Location) && request.Location != "all") {
                 accommodations = accommodations.Where(acc => acc.Location.Contains(request.Location));
-                activities = activities.Where(act => act.Location == request.Location);
+                activities = activities.Where(act => act.Location.Contains(request.Location));
             }
 
             if (request.Price != null && request.Price > 0) {

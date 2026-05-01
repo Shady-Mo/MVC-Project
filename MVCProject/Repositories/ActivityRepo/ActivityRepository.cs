@@ -65,7 +65,7 @@ namespace MVCProject.Repositories.ActivityRepo
 
         public List<Activity> GetByLocation(string location)
         {
-            return _context.Activities.Where(l => l.Location == location && l.Capacity > 0).ToList();
+            return _context.Activities.Where(l => l.Location.Contains(location) && l.Capacity > 0).ToList();
         }
     }
 }

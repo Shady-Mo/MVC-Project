@@ -1,7 +1,7 @@
 ﻿@model AddActivityVM
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Activity";
 }
 
 <style>
@@ -13,56 +13,106 @@
     .btn-outline-primary-custom:hover { background-color: #14b8a6; border-color: #14b8a6; color: white; }
     .form-control:focus { border-color: #14b8a6; box-shadow: 0 0 0 0.25rem rgba(20, 184, 166, 0.25); }
     .card-custom { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; }
+
+    /* Dropdown Styles */
+    .custom-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #eaeaea;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .form-group-relative { position: relative; }
+    .form-group-relative.active .custom-dropdown { display: block; }
+
+    .dropdown-option {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background 0.3s;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dropdown-option:hover { background: #f5f5f5; color: #14b8a6; }
+    .dropdown-option img { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; }
 </style>
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-8 col-lg-7">
             <div class="card card-custom">
-                <div class="card-header bg-primary-custom text-white text-center py-3 rounded-top" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <div class="card-header bg-primary-custom text-white text-center py-3 rounded-top">
                     <h3 class="mb-0 fw-bold">Create New Activity</h3>
                 </div>
                 <div class="card-body p-4">
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
-                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+
+                        <!-- الحقل المخفي الذي سيتم إرساله للداتا بيز -->
+                        <input type="hidden" asp-for="Location" id="finalLocation" />
 
                         <div class="row g-3">
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-12">
                                 <label asp-for="Name" class="form-label fw-bold text-muted"></label>
-                                <input asp-for="Name" class="form-control" placeholder="Activity Name" />
+                                <input asp-for="Name" class="form-control" placeholder="e.g., Desert Safari" />
                                 <span asp-validation-for="Name" class="text-danger small"></span>
                             </div>
-                            <div class="col-md-6 form-group">
-                                <label asp-for="Location" class="form-label fw-bold text-muted"></label>
-                                <input asp-for="Location" class="form-control" placeholder="City or Venue" />
+
+                            <!-- اختيار الدولة -->
+                            <div class="col-md-6 form-group-relative" id="countryGroup">
+                                <label class="form-label fw-bold text-muted">Country</label>
+                                <input id="countryInput" class="form-control" placeholder="Search Country..." autocomplete="off" />
+                                <div class="custom-dropdown" id="countryDropdown">
+                                    <div class="p-3 text-muted small">Loading countries...</div>
+                                </div>
+                            </div>
+
+                            <!-- اختيار المحافظة/المدينة -->
+                            <div class="col-md-6 form-group-relative" id="stateGroup">
+                                <label class="form-label fw-bold text-muted">City / State</label>
+                                <input id="stateInput" class="form-control" placeholder="Select Country first..." autocomplete="off" disabled />
+                                <div class="custom-dropdown" id="stateDropdown">
+                                    <div class="p-3 text-muted small">Select a country first...</div>
+                                </div>
                                 <span asp-validation-for="Location" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-12 form-group">
+                            <div class="col-md-12">
                                 <label asp-for="Date" class="form-label fw-bold text-muted"></label>
                                 <input asp-for="Date" class="form-control" type="datetime-local" />
                                 <span asp-validation-for="Date" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6">
                                 <label asp-for="Price" class="form-label fw-bold text-muted"></label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
+                                    <span class="input-group-text bg-light">$</span>
                                     <input asp-for="Price" class="form-control" placeholder="0.00" />
                                 </div>
                                 <span asp-validation-for="Price" class="text-danger small"></span>
                             </div>
-                            <div class="col-md-6 form-group">
+
+                            <div class="col-md-6">
                                 <label asp-for="Capacity" class="form-label fw-bold text-muted"></label>
                                 <div class="input-group">
-                                    <span class="input-group-text">👥</span>
+                                    <span class="input-group-text bg-light">👥</span>
                                     <input asp-for="Capacity" class="form-control" placeholder="Max participants" />
                                 </div>
                                 <span asp-validation-for="Capacity" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-12 form-group">
-                                <label asp-for="ImageFile" class="form-label fw-bold text-muted">Cover Image</label>
+                            <div class="col-md-12">
+                                <label asp-for="ImageFile" class="form-label fw-bold text-muted">Activity Cover Image</label>
                                 <input type="file" asp-for="ImageFile" class="form-control" accept="image/*">
                                 <span asp-validation-for="ImageFile" class="text-danger small"></span>
                             </div>
@@ -80,7 +130,96 @@
 </div>
 
 @section Scripts {
-    <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            let selectedCountry = "";
+            let selectedCity = "";
+
+            function updateFinalLocation() {
+                if (selectedCountry && selectedCity) {
+                    $('#finalLocation').val(`${selectedCity}, ${selectedCountry}`);
+                }
+            }
+
+            fetch('https://restcountries.com/v3.1/all?fields=name,flags')
+                .then(res => res.json())
+                .then(data => {
+                    const countries = data.sort((a, b) => a.name.common.localeCompare(b.name.common));
+                    renderCountries(countries);
+                })
+                .catch(() => $('#countryDropdown').html('<div class="p-3 text-danger">Failed to load</div>'));
+
+            function renderCountries(list) {
+                const container = $('#countryDropdown');
+                container.empty();
+                list.forEach(c => {
+                    const opt = $(`<div class="dropdown-option"><img src="${c.flags.svg}"/> <span>${c.name.common}</span></div>`);
+                    opt.click(function() {
+                        selectedCountry = c.name.common;
+                        $('#countryInput').val(selectedCountry);
+                        $('#countryGroup').removeClass('active');
+                        
+                        selectedCity = "";
+                        $('#finalLocation').val(""); 
+                        $('#stateInput').val('').prop('disabled', false).attr('placeholder', 'Loading cities...');
+                        fetchStates(selectedCountry);
+                    });
+                    container.append(opt);
+                });
+            }
+
+            function fetchStates(countryName) {
+                fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ country: countryName })
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (!result.error) {
+                        renderStates(result.data);
+                        $('#stateInput').attr('placeholder', 'Select city...');
+                    } else {
+                        $('#stateInput').val('No cities found').prop('disabled', true);
+                    }
+                })
+                .catch(() => $('#stateInput').val('Error loading cities'));
+            }
+
+            function renderStates(cities) {
+                const container = $('#stateDropdown');
+                container.empty();
+                cities.forEach(city => {
+                    const opt = $(`<div class="dropdown-option"><span>${city}</span></div>`);
+                    opt.click(function() {
+                        selectedCity = city;
+                        $('#stateInput').val(selectedCity);
+                        $('#stateGroup').removeClass('active');
+                        updateFinalLocation();
+                    });
+                    container.append(opt);
+                });
+            }
+
+            function setupSearch(inputId, groupId, dropdownId) {
+                $(inputId).on('focus', () => $(groupId).addClass('active'));
+                $(inputId).on('input', function() {
+                    const val = $(this).val().toLowerCase();
+                    $(`#${dropdownId} .dropdown-option`).each(function() {
+                        $(this).toggle($(this).text().toLowerCase().includes(val));
+                    });
+                });
+            }
+
+            setupSearch('#countryInput', '#countryGroup', 'countryDropdown');
+            setupSearch('#stateInput', '#stateGroup', 'stateDropdown');
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.form-group-relative').length) {
+                    $('.form-group-relative').removeClass('active');
+                }
+            });
+        });
+    </script>
 }

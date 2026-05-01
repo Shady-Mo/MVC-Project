@@ -10,8 +10,11 @@ using MVCProject.Services.AccountService;
 using MVCProject.Services.BaseService;
 using MVCProject.Services.EmailService;
 using MVCProject.Services.ImgAddingService;
+using Stripe;
 using System.Reflection;
 using System.Security.Claims;
+using AccountService = MVCProject.Services.AccountService.AccountService;
+using FileService = MVCProject.Services.ImgAddingService.FileService;
 
 namespace MVCProject {
     public class Program {
@@ -93,6 +96,8 @@ namespace MVCProject {
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.AddTransient<IEmailService, EmailService>();
 
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+
             builder.Services.AddHttpClient();
             //builder.Services.AddHostedService<CacheWarmerService>();
 
@@ -104,6 +109,9 @@ namespace MVCProject {
             if (!app.Environment.IsDevelopment()) {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            StripeConfiguration.ApiKey = builder.Configuration.GetSection("StripeSettings:SecretKey").Get<string>();
+
             app.UseRouting();
 
             app.UseOutputCache();
