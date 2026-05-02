@@ -13,6 +13,14 @@ namespace MVCProject.ViewModels.AccomodationViewModels
         [StringLength(100, MinimumLength = 3)]
         public string Name { get; set; }
 
+        [Required(ErrorMessage = "Country is required.")]
+        [StringLength(100, MinimumLength = 2)]
+        public string Country { get; set; }
+
+        [Required(ErrorMessage = "City is required.")]
+        [StringLength(100, MinimumLength = 2)]
+        public string City { get; set; }
+
         [Required(ErrorMessage = "Location is required.")]
         [StringLength(200, MinimumLength = 3)]
         public string Location { get; set; }
