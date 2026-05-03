@@ -58,7 +58,7 @@
         </div>
         <div class="card-footer bg-white border-top pt-3 pb-3">
             <div class="d-flex gap-2 flex-wrap">
-                <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
+                <a asp-action="MyFlights" class="btn btn-outline-secondary">← Back</a>
 
                 @* @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
                 {
@@ -90,7 +90,7 @@
 
 
 
-                @if (User.Identity.IsAuthenticated
+                @if (User.Identity.IsAuthenticated && User.IsInRole("Customer")
                      && Model.AvailableSeats > 0
                      && Model.DepartureDateTime > DateTime.Now)
                 {

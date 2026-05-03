@@ -37,7 +37,7 @@ namespace MVCProject.Controllers
             return View("Index", accomodationesVM);
         }
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult SellerAccomodations([FromQuery] string searchQuery = "", [FromQuery] decimal? maxPrice = null, [FromQuery] int? minCapacity = null, [FromQuery] int pageNumber = 1)
         {
@@ -63,7 +63,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult New()
         {
@@ -71,7 +71,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         public async Task<IActionResult> New(AddAcccomodationVM acccomodationVM)
         {
@@ -95,7 +95,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -105,7 +105,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         public async Task<IActionResult> Edit(EditAccomodationVM accomodationVM)
         {
@@ -131,7 +131,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult Delete(int id)
         {
@@ -144,7 +144,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)

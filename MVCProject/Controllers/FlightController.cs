@@ -38,6 +38,28 @@ namespace MVCProject.Controllers
             return View("Index", flightsVM);
         }
 
+
+        [HttpGet]
+        [Authorize(Roles ="Seller")]
+        public IActionResult MyFlights([FromQuery] string searchQuery = "",
+                           [FromQuery] string destination = "",
+                           [FromQuery] DateTime? date = null,
+                           [FromQuery] int pageNumber = 1,
+                           [FromQuery] string sortBy = "default")
+        {
+            int pageSize = 6;
+            var (flights, totalCount) = unitOfWork.FlightRepository
+                .GetAllWithFilterBySellerId(User.FindFirstValue(ClaimTypes.NameIdentifier), searchQuery, destination, date, pageNumber, pageSize, sortBy);
+
+            var flightsVM = flights.Adapt<List<DisplayFlightVM>>();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            ViewBag.SortBy = sortBy;
+
+            return View("MyFlights", flightsVM);
+        }
+
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -51,14 +73,14 @@ namespace MVCProject.Controllers
         // the next section is for Admins and Sellers to manage flights 
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public IActionResult Create()
         {
             return View("Create");
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public IActionResult Create(AddFlightVM addFlightVM)
         {
             if (ModelState.IsValid)
@@ -67,13 +89,13 @@ namespace MVCProject.Controllers
                 flight.SellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 unitOfWork.FlightRepository.Add(flight);
                 unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(MyFlights));
             }
             return View("Create", addFlightVM);
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public IActionResult Edit(int id)
         {
             var flightEntity = unitOfWork.FlightRepository.GetById(id);
@@ -84,7 +106,7 @@ namespace MVCProject.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public IActionResult Edit(UpdateFlightVM updateFlightVM)
         {
             if (ModelState.IsValid)
@@ -95,13 +117,13 @@ namespace MVCProject.Controllers
                 updateFlightVM.Adapt(existingFlight);
                 unitOfWork.FlightRepository.Update(existingFlight);
                 unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(MyFlights));
             }
             return View("Edit", updateFlightVM);
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public IActionResult Delete(int id)
         {
             var flightEntity = unitOfWork.FlightRepository.GetById(id);
@@ -112,7 +134,7 @@ namespace MVCProject.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [ActionName("DeleteConfirmed")]
         public IActionResult DeleteConfirmed(int id)
         {
@@ -121,13 +143,13 @@ namespace MVCProject.Controllers
 
             unitOfWork.FlightRepository.Delete(id);
             unitOfWork.Save();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyFlights));
         }
 
         // the next section is for all authenticated users to book flights
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles ="Customer")]
         public IActionResult Book(int id)
         {
             var flight = unitOfWork.FlightRepository.GetById(id);

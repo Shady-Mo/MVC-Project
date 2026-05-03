@@ -703,10 +703,19 @@
                             <div class="nav-menu ms-lg-auto w-100 w-lg-auto justify-content-end" id="desktopNavMenu">
                                 <!-- Static links -->
                                 <a asp-controller="Home" asp-action="Index">Home</a>
-                                <a asp-controller="Flight" asp-action="Index">Flights</a>
-                                <a asp-controller="Accomodation" asp-action="Index">Accommodations</a>
-                                <a asp-controller="Activity" asp-action="Index">Activities</a>
-                                <!-- Dynamic links will be inserted here by JavaScript -->
+                                @if (User.IsInRole("Customer"))
+                                    {
+                                        <a asp-controller="Flight" asp-action="Index">Flights</a>
+                                    <a asp-controller="Accomodation" asp-action="Index">Accommodations</a>
+                                    <a asp-controller="Activity" asp-action="Index">Activities</a>
+                                    }
+                                else if (User.IsInRole("Seller"))
+                                    {
+                                    <a asp-controller="Flight" asp-action="MyFlights">Flights</a>
+                                    <a asp-controller="Accomodation" asp-action="SellerAccomodations">Accommodations</a>
+                                    <a asp-controller="Activity" asp-action="SellerActivities">Activities</a>
+                                    }
+                                    <!-- Dynamic links will be inserted here by JavaScript -->
                                 <div class="search-icon" id="searchIconContainer">
                                     <i class="fas fa-search"></i>
                                 </div>
@@ -864,7 +873,13 @@
                     <a href="/Booking/Index" class="dynamic-role-link">Bookings</a>
                     <a href="/AdminDashboard/Index" class="dynamic-role-link">Dashboard</a>
                     `;
-                } 
+                }
+                else if(data.role === "Seller")
+                {
+                    linksHtml = `
+                    <a href="/SellerDashboard/Index" class="dynamic-role-link">Dashboard</a>
+                    `;
+                }
                 else if (data.role === "Customer") {
                     linksHtml = `<a href="/Booking/MyBooking" class="dynamic-role-link">Bookings</a>`;
                 }

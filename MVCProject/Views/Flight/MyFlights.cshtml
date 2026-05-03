@@ -1,0 +1,599 @@
+﻿@using System.Security.Claims
+@model IEnumerable<MVCProject.ViewModels.FlightViewModels.DisplayFlightVM>
+@{
+    ViewData["Title"] = "Flights";
+}
+
+<style>
+    /* ---------- Base & Layout ---------- */
+    .flights-wrapper {
+        display: flex;
+        gap: 2rem;
+        padding: 2rem 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .sidebar-filters {
+        flex: 0 0 260px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        height: fit-content;
+        position: sticky;
+        top: 90px;
+    }
+
+    .content-area {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* ---------- Filters ---------- */
+    .sidebar-filters h5 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .filter-group { margin-bottom: 1.25rem; }
+    .filter-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+    .filter-group input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        color: #334155;
+        transition: border-color 0.2s;
+        outline: none;
+    }
+    .filter-group input:focus { border-color: #28b5a4; }
+
+    .filter-btn, .clear-btn {
+        width: 100%;
+        padding: 0.65rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        display: block;
+        text-decoration: none;
+        margin-top: 0.5rem;
+    }
+    .filter-btn {
+        background: #28b5a4;
+        color: white;
+        border: none;
+    }
+    .filter-btn:hover { background: #219688; }
+    .clear-btn {
+        background: transparent;
+        color: #64748b;
+        border: 1.5px solid #e2e8f0;
+    }
+    .clear-btn:hover { border-color: #28b5a4; color: #28b5a4; }
+
+    /* ---------- Top bar ---------- */
+    .filter-bar {
+        background: #28b5a4;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .filter-bar h1 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+    }
+    .filter-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .sort-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+    .sort-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+    .sort-btn {
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        border: 1.5px solid rgba(255,255,255,0.5);
+        background: transparent;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .sort-btn:hover, .sort-btn.active {
+        background: white;
+        border-color: white;
+        color: #28b5a4;
+    }
+    .add-btn {
+        padding: 0.45rem 1rem;
+        background: white;
+        color: #28b5a4;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+    .add-btn:hover { background: #f0fbf9; color: #219688; }
+
+    /* ---------- Flight Card (Fully Responsive & Stacked) ---------- */
+    .flight-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        border: 1.5px solid transparent;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .flight-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        border-color: #28b5a4;
+    }
+    /* Make every row in the card stack on mobile */
+    .flight-card .flight-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    /* Airline block */
+    .airline-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+    }
+    .airline-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #28b5a4, #1a8a7d);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.35rem;
+    }
+    .airline-icon i { color: white; font-size: 1.1rem; }
+    .airline-name {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #0f172a;
+        text-align: center;
+    }
+
+    /* Route block (departure, line, arrival) */
+    .route-block {
+        flex: 2;
+        min-width: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .departure-box, .arrival-box {
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+    }
+    .airport-code {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .airport-time {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+    .duration-box {
+        text-align: center;
+        padding: 0 0.5rem;
+        min-width: 70px;
+    }
+    .duration-label {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .route-line {
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(to right, #28b5a4, #e2e8f0);
+        border-radius: 2px;
+        margin: 0.3rem auto;
+    }
+
+    /* Price & Seats */
+    .price-block {
+        text-align: center;
+        min-width: 110px;
+    }
+    .price-main {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #28b5a4;
+        white-space: nowrap;
+    }
+    .per-person {
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+    .seats-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+    .seats-badge.low { background: #fff7ed; color: #ea580c; }
+
+    /* Action buttons */
+    .action-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 90px;
+    }
+    .btn-details, .btn-edit, .btn-delete {
+        text-decoration: none;
+        text-align: center;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+        display: block;
+    }
+    .btn-details {
+        background: #28b5a4;
+        color: white;
+        border: none;
+    }
+    .btn-details:hover { background: #219688; }
+    .btn-edit {
+        color: #64748b;
+        border: 1.5px solid #e2e8f0;
+    }
+    .btn-edit:hover { border-color: #94a3b8; color: #334155; }
+    .btn-delete {
+        color: #ef4444;
+        border: 1.5px solid #fecaca;
+    }
+    .btn-delete:hover { background: #fef2f2; }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94a3b8;
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+    .empty-state h4 { color: #64748b; margin-bottom: 0.5rem; }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    .page-btn {
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1.5px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .page-btn:hover { border-color: #28b5a4; color: #28b5a4; }
+    .page-btn.active { background: #28b5a4; border-color: #28b5a4; color: white; }
+    .page-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+    /* ---------- Responsive Breakpoints ---------- */
+    @@media (max-width: 992px) {
+        .flights-wrapper { gap: 1.5rem; }
+        .sidebar-filters { flex: 0 0 240px; }
+    }
+
+    @@media (max-width: 768px) {
+        .flights-wrapper {
+            flex-direction: column;
+            padding: 1rem;
+        }
+        .sidebar-filters {
+            position: static;
+            width: 100%;
+        }
+        .flight-card .flight-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .route-block {
+            flex-direction: column;
+            align-items: center;
+        }
+        .departure-box, .arrival-box {
+            width: 100%;
+        }
+        .duration-box {
+            order: -1;
+            margin: 0.5rem 0;
+        }
+        .price-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .action-block {
+            flex-direction: row;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .btn-details, .btn-edit, .btn-delete {
+            padding: 0.35rem 1rem;
+            font-size: 0.8rem;
+        }
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filter-bar-right {
+            justify-content: space-between;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .price-main { font-size: 1.1rem; }
+        .airport-code { font-size: 0.95rem; }
+        .airline-name { font-size: 0.8rem; }
+        .filter-bar h1 { font-size: 1.3rem; }
+        .flight-card { padding: 0.9rem; }
+        .action-block { flex-wrap: wrap; justify-content: center; }
+    }
+</style>
+
+<div class="flights-wrapper">
+
+    <!-- Sidebar Filters -->
+    <div class="sidebar-filters">
+        <h5>🔍 Filter Flights</h5>
+        <form asp-action="MyFlights" method="get">
+            <input type="hidden" name="sortBy" value="@Context.Request.Query["sortBy"]" />
+            <div class="filter-group">
+                <label>Airline / Departure</label>
+                <input type="text" name="searchQuery"
+                       placeholder="e.g. Emirates, Cairo..."
+                       value="@Context.Request.Query["searchQuery"]" />
+            </div>
+            <div class="filter-group">
+                <label>Destination</label>
+                <input type="text" name="destination"
+                       placeholder="e.g. Dubai, London..."
+                       value="@Context.Request.Query["destination"]" />
+            </div>
+            <div class="filter-group">
+                <label>Date</label>
+                <input type="date" name="date"
+                       value="@Context.Request.Query["date"]" />
+            </div>
+            <button type="submit" class="filter-btn">Apply Filters</button>
+            <a asp-action="MyFlights" class="clear-btn">Clear Filters</a>
+        </form>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+
+        <!-- Top Bar (title + actions) -->
+        <div class="filter-bar">
+            <h1>Flights</h1>
+            <div class="filter-bar-right">
+                @if (User.IsInRole("Seller"))
+                {
+                    <a asp-action="Create" class="add-btn">
+                        <i class="fas fa-plus"></i> Add Flight
+                    </a>
+                }
+                <div class="sort-bar">
+                    <span class="sort-label">Sort:</span>
+                    <a href="?searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=default"
+                       class="sort-btn @(ViewBag.SortBy == "default" || string.IsNullOrEmpty(ViewBag.SortBy as string) ? "active" : "")">Default</a>
+                    <a href="?searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=price-low"
+                       class="sort-btn @(ViewBag.SortBy == "price-low" ? "active" : "")">Price ↑</a>
+                    <a href="?searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=price-high"
+                       class="sort-btn @(ViewBag.SortBy == "price-high" ? "active" : "")">Price ↓</a>
+                    <a href="?searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=date"
+                       class="sort-btn @(ViewBag.SortBy == "date" ? "active" : "")">Nearest</a>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-plane-slash"></i>
+                <h4>No flights found</h4>
+                <p>Try adjusting your filters or check back later.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                var duration = item.ArrivalDateTime - item.DepartureDateTime;
+                var durationStr = duration.Hours > 0
+                    ? $"{duration.Hours}h {duration.Minutes}m"
+                    : $"{duration.Minutes}m";
+
+                <div class="flight-card">
+                    <div class="flight-row">
+
+                        <!-- Airline -->
+                        <div class="airline-block">
+                            <div class="airline-icon">
+                                <i class="fas fa-plane"></i>
+                            </div>
+                            <div class="airline-name">@item.Airline</div>
+                        </div>
+
+                        <!-- Route (departure, duration, arrival) -->
+                        <div class="route-block">
+                            <div class="departure-box">
+                                <div class="airport-code">@item.DepartureAirport</div>
+                                <div class="airport-time">@item.DepartureDateTime.ToString("MMM dd")</div>
+                                <div class="airport-time">@item.DepartureDateTime.ToString("HH:mm")</div>
+                                <i class="fa-solid fa-plane-departure mt-1" style="color: #f39c12;"></i>
+                            </div>
+
+                            <div class="duration-box">
+                                <div class="duration-label">@durationStr</div>
+                                <div class="route-line"></div>
+                            </div>
+
+                            <div class="arrival-box">
+                                <div class="airport-code">@item.DestinationAirport</div>
+                                <div class="airport-time">@item.ArrivalDateTime.ToString("MMM dd")</div>
+                                <div class="airport-time">@item.ArrivalDateTime.ToString("HH:mm")</div>
+                                <i class="fa-solid fa-plane-arrival mt-1" style="color: #3498db;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Price & Seats -->
+                        <div class="price-block">
+                            <div class="price-main">@item.Price.ToString("C")</div>
+                            <div class="per-person">per person</div>
+                            <div class="mt-1">
+                                <span class="seats-badge @(item.AvailableSeats <= 10 ? "low" : "")">
+                                    💺 @item.AvailableSeats seats
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-block">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-details">Details</a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-edit">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn-delete">Delete</a>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem;">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=@(ViewBag.CurrentPage - 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">
+                            Previous
+                        </a>
+                    }
+
+                    @{
+                        int maxPagesToShow = 10;
+                        int startPage = Math.Max(1, ViewBag.CurrentPage - (maxPagesToShow / 2));
+                        int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                        if (endPage - startPage + 1 < maxPagesToShow)
+                        {
+                            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                        }
+                    }
+
+                    @if (startPage > 1)
+                    {
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=1&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">1</a>
+                        @if (startPage > 2)
+                        {
+                            <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
+                        }
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <a class="page-btn @(ViewBag.CurrentPage == i ? "active" : "")" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; font-weight: 500; height: auto; min-width: auto; @(ViewBag.CurrentPage == i ? "background-color: #28b5a4; color: white; border-color: #28b5a4;" : "color: #333;")"
+                           href="?pageNumber=@i&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">@i</a>
+                    }
+
+                    @if (endPage < ViewBag.TotalPages)
+                    {
+                        @if (endPage < ViewBag.TotalPages - 1)
+                        {
+                            <span style="padding: 0.5rem 1rem; color: #6c757d;">...</span>
+                        }
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=@ViewBag.TotalPages&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">@ViewBag.TotalPages</a>
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <a class="page-btn" style="padding: 0.5rem 1rem; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; height: auto; min-width: auto;"
+                           href="?pageNumber=@(ViewBag.CurrentPage + 1)&searchQuery=@Context.Request.Query["searchQuery"]&destination=@Context.Request.Query["destination"]&date=@Context.Request.Query["date"]&sortBy=@Context.Request.Query["sortBy"]">
+                            Next
+                        </a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

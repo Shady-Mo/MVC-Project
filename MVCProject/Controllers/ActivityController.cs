@@ -36,7 +36,7 @@ namespace MVCProject.Controllers
             return View("Index", activitiesVM);
         }
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult SellerActivities([FromQuery] string searchQuery = "", [FromQuery] decimal? maxPrice = null, [FromQuery] int? minCapacity = null, [FromQuery] int pageNumber = 1)
         {
@@ -53,14 +53,14 @@ namespace MVCProject.Controllers
 
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult Create()
         {
             return View("Create");
         }
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         public async Task<IActionResult> Create(AddActivityVM addActivityVM)
         {
@@ -94,7 +94,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -106,7 +106,7 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         public async Task<IActionResult> Edit(UpdateActivityVM updateActivityVM)
         {
@@ -133,8 +133,8 @@ namespace MVCProject.Controllers
         }
 
 
-        [Authorize(Roles = "Admin,Seller")]
-        [HttpGet]
+        [Authorize(Roles = "Seller")]
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var activityEntity = unitOfWork.ActivityRepository.GetById(id);

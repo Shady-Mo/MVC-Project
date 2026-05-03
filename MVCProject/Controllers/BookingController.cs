@@ -51,6 +51,7 @@ namespace MVCProject.Controllers
             return View("Details", bookingVM);
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpGet]
         public IActionResult MyBooking([FromQuery] string searchQuery = "", [FromQuery] int pageNumber = 1)
         {
@@ -67,12 +68,14 @@ namespace MVCProject.Controllers
             return View("MyBooking", bookingVMs);
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpGet]
         public IActionResult Book()
         {
             return View("Book");
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public IActionResult Book(AddBookingVM addBookingVM)
         {

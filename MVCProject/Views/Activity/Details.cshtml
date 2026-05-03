@@ -379,9 +379,19 @@
 <body>
     <div class="details-container">
 
-        <a href="@Url.Action("Index", "Activity")" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to all activities
-        </a>
+        @if (User.IsInRole("Seller"))
+            {
+            <a href="@Url.Action("SellerActivities", "Activity")" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to my activities
+            </a>
+            }
+            else
+            {
+            <a href="@Url.Action("Index", "Activity")" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to all activities
+            </a>
+            }
+            
 
         <!-- Hero Section -->
         <div class="hero-section">
@@ -466,7 +476,7 @@
                         </div>
                     </div>
 
-                    @if (User.IsInRole("Admin"))
+                    @if (User.IsInRole("Seller"))
                     {
                         @if (Model != null)
                         {

@@ -51,7 +51,35 @@ namespace MVCProject.Repositories.FlightRepo
             return (flights, totalCount);
         }
 
+        public (IEnumerable<Flight> flights, int totalCount) GetAllWithFilterBySellerId(string sellerId, string searchQuery, string destination, DateTime? date, int pageNumber, int pageSize, string sortBy = "default")
+        {
+            var query = context.Flights.Where(f => f.SellerId == sellerId).AsQueryable();
 
+            if (!string.IsNullOrEmpty(searchQuery))
+                query = query.Where(f => f.Airline.Contains(searchQuery) ||
+                                         f.DepartureAirport.Contains(searchQuery));
+
+            if (!string.IsNullOrEmpty(destination))
+                query = query.Where(f => f.DestinationAirport.Contains(destination));
+            // never show departed flights
+            query = query.Where(f => f.DepartureDateTime > DateTime.Now);
+
+            if (date.HasValue)
+                query = query.Where(f => f.DepartureDateTime.Date == date.Value.Date);
+
+            // sorting
+            query = sortBy switch
+            {
+                "price-low" => query.OrderBy(f => f.Price),
+                "price-high" => query.OrderByDescending(f => f.Price),
+                "date" => query.OrderBy(f => f.DepartureDateTime),
+                _ => query
+            };
+
+            int totalCount = query.Count();
+            var flights = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            return (flights, totalCount);
+        }
 
         public List<Flight> GetByLocation(string location, string location2, DateTime bookingDate)
         {
