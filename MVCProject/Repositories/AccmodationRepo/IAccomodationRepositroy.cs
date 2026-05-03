@@ -8,6 +8,10 @@ namespace MVCProject.Repositories.AccmodationRepo
         (List<Accomodation> accomodations, int TotalCount) GetAllWithFilterBy(string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6);
         (List<Accomodation> accomodations, int TotalCount) GetAllWithFilterBySellerId(string sellerId, string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6);
 
+        int ConuntBySeller(string sellerId);
+
+        List<Accomodation> GetLatestFiveBySellerId(string sellerId);
+
         List<Accomodation> GetByLocation(string location);
     }
 }

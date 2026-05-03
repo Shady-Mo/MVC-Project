@@ -11,6 +11,11 @@ namespace MVCProject.Repositories.AccmodationRepo
         {
         }
 
+        public int ConuntBySeller(string sellerId)
+        {
+            return _context.Accomodations.Where(a => a.SellerId == sellerId).Count();
+        }
+
         public (List<Accomodation> accomodations, int TotalCount) GetAllWithFilterBy(string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6)
         {
             var query = _context.Accomodations.Include(a => a.Seller).AsQueryable();
@@ -64,6 +69,11 @@ namespace MVCProject.Repositories.AccmodationRepo
         public List<Accomodation> GetByLocation(string location)
         {
             return _context.Accomodations.Where(l => l.Location.Contains(location) && l.AvailableRooms > 0).ToList();
+        }
+
+        public List<Accomodation> GetLatestFiveBySellerId(string sellerId)
+        {
+            return _context.Accomodations.Where(f => f.SellerId == sellerId).OrderByDescending(f => f.Id).Take(5).ToList();
         }
     }
 }

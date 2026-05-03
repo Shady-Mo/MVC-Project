@@ -8,6 +8,7 @@ namespace MVCProject.Repositories.BookingRepo
         (List<Booking> bookings, int TotalCount) GetAllWithFilterBy(string searchQuery, int pageNumber = 1, int pageSize = 6);
         (List<Booking> bookings, int TotalCount) GetAllWithFilterByUserId(string uderId, string searchQuery, int pageNumber = 1, int pageSize = 6);
 
+        List<Booking> GetBySellerId(string sellerId);
         Booking GetByIdIncluded(int id);
     }
 }

@@ -9,6 +9,9 @@ namespace MVCProject.Repositories.FlightRepo
                                                                                                    int pageNumber, int pageSize, string sortBy = "default");
 
         List<Flight> GetByLocation(string location, string location2, DateTime bookingDate);
+        List<Flight> GetLatestFiveBySellerId(string sellerId);
+
+        int ConuntBySeller(string sellerId);
 
     }
 }

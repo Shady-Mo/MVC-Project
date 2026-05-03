@@ -45,5 +45,12 @@ namespace MVCProject.Repositories.BookingRepo
         {
             return _context.Bookings.Include(b => b.Flight).Include(b => b.bookingAccomodations).Include(b => b.BookingActivities).FirstOrDefault(b => b.Id == id);
         }
+
+        public List<Booking> GetBySellerId(string sellerId)
+        {
+            return _context.Bookings.Include(b => b.bookingAccomodations).ThenInclude(a => a.Accomodation)
+                    .Include(b => b.BookingActivities).ThenInclude(a => a.Activity)
+                    .Include(b => b.Flight).Where(b => b.bookingAccomodations.Any(ba => ba.Accomodation.SellerId == sellerId) || b.BookingActivities.Any(ba => ba.Activity.SellerId == sellerId) || b.Flight.SellerId == sellerId).ToList();
+        }
     }
 }

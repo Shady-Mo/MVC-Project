@@ -1,0 +1,165 @@
+﻿@model MVCProject.ViewModels.SellerDashboardViewModels.SellerStatisticsVM
+
+@{
+    ViewData["Title"] = "My Analytics";
+    Layout = "_Layout";
+}
+
+<style>
+    /* --- نفس الستايل بتاعك بالظبط --- */
+    .statistics-container { padding: 20px 0; }
+    .chart-card { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 25px; margin-bottom: 25px; border-top: 4px solid #3ac0ad; transition: all 0.3s ease; }
+    .chart-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .chart-title { font-size: 18px; font-weight: 700; color: #1a2a3a; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .chart-title i { color: #3ac0ad; font-size: 20px; }
+    .chart-wrapper { position: relative; height: 300px; margin-bottom: 10px; }
+    .chart-wrapper.large { height: 350px; }
+    .chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 25px; margin-bottom: 25px; }
+    .chart-row.full { grid-template-columns: 1fr; }
+    .statistics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e5e5e5; }
+    .statistics-header h2 { font-size: 28px; font-weight: 700; color: #1a2a3a; margin: 0; display: flex; align-items: center; gap: 12px; }
+    .statistics-header i { color: #3ac0ad; font-size: 28px; }
+    .refresh-btn { padding: 10px 20px; background: linear-gradient(135deg, #3ac0ad 0%, #2aac99 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .refresh-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(58,192,173,0.3); color: white; text-decoration: none; }
+    .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-mini-card { background: linear-gradient(135deg, #3ac0ad 0%, #2aac99 100%); color: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(58,192,173,0.2); }
+    .stat-mini-card h4 { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-mini-card .value { font-size: 24px; font-weight: 800; color: white; }
+
+    @@media (max-width: 1024px) {
+        .chart-row { grid-template-columns: 1fr; }
+        .chart-wrapper { height: 280px; }
+        .statistics-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        .refresh-btn { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="statistics-container">
+    <div class="statistics-header">
+        <h2>
+            <i class="fas fa-chart-line"></i> My Analytics
+        </h2>
+        <a href="@Url.Action("Statistics")" class="refresh-btn">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats-summary">
+        <div class="stat-mini-card">
+            <h4>My Total Revenue</h4>
+            <div class="value">$@Model.RevenueOverview.Revenue.Sum().ToString("F0")</div>
+        </div>
+        <div class="stat-mini-card">
+            <h4>Total Bookings</h4>
+            <div class="value">@(Model.BookingStatusBreakdown.Counts.Sum())</div>
+        </div>
+        <div class="stat-mini-card">
+            <h4>Confirmed Bookings</h4>
+            <div class="value">@Model.BookingStatusBreakdown.Counts.ElementAtOrDefault(1)</div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1: Full width Line Chart for Revenue -->
+    <div class="chart-row full">
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-chart-line"></i> My Revenue Overview (Last 6 Months)
+            </div>
+            <div class="chart-wrapper large">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2: Pie and Doughnut -->
+    <div class="chart-row">
+        <!-- Service Distribution Chart -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-pie-chart"></i> My Service Distribution
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="serviceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Booking Status Chart -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-doughnut-chart"></i> My Booking Status Breakdown
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { usePointStyle: true, padding: 15, font: { size: 12, weight: '600' }, color: '#555' }
+                }
+            }
+        };
+
+        // 1. Revenue Chart - Line Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueOverview.Months)),
+                datasets: [{
+                    label: 'Monthly Revenue ($)',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueOverview.Revenue)),
+                    borderColor: '#3ac0ad', backgroundColor: 'rgba(58, 192, 173, 0.1)', borderWidth: 3, fill: true,
+                    tension: 0.4, pointRadius: 5, pointBackgroundColor: '#3ac0ad', pointBorderColor: '#fff', pointBorderWidth: 2, pointHoverRadius: 7
+                }]
+            },
+            options: {
+                ...chartConfig,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false }, ticks: { color: '#999', font: { size: 11 } } },
+                    x: { grid: { display: false, drawBorder: false }, ticks: { color: '#999', font: { size: 11 } } }
+                }
+            }
+        });
+
+        // 2. Service Distribution - Pie Chart
+        const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+        new Chart(serviceCtx, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ServiceDistribution.Services)),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ServiceDistribution.Counts)),
+                    backgroundColor: ['#3ac0ad', '#f4b266', '#dc3545'], // الألوان اللي إنت بتستخدمها في الكروت
+                    borderColor: 'white', borderWidth: 2
+                }]
+            },
+            options: chartConfig
+        });
+
+        // 3. Booking Status - Doughnut Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookingStatusBreakdown.Statuses)),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookingStatusBreakdown.Counts)),
+                    backgroundColor: ['#f4b266', '#3ac0ad', '#dc3545'], // Pending(Warning), Confirmed(Success), Cancelled(Danger)
+                    borderColor: 'white', borderWidth: 2
+                }]
+            },
+            options: chartConfig
+        });
+    </script>
+}

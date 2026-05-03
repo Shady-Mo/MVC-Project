@@ -13,6 +13,11 @@ namespace MVCProject.Repositories.ActivityRepo
         {
         }
 
+        public int ConuntBySeller(string sellerId)
+        {
+            return _context.Activities.Where(a => a.SellerId == sellerId).Count();
+        }
+
         public (List<Activity> Activities, int TotalCount) GetAllWithFilterBy(string searchQuery, decimal? maxPrice = null, int? minCapacity = null, int pageNumber = 1, int pageSize = 6)
         {
             var query = _context.Activities.Include(a => a.Seller).AsQueryable();
@@ -66,6 +71,11 @@ namespace MVCProject.Repositories.ActivityRepo
         public List<Activity> GetByLocation(string location)
         {
             return _context.Activities.Where(l => l.Location.Contains(location) && l.Capacity > 0).ToList();
+        }
+
+        public List<Activity> GetLatestFiveBySellerId(string sellerId)
+        {
+            return _context.Activities.Where(f => f.SellerId == sellerId).OrderByDescending(f => f.Id).Take(5).ToList();
         }
     }
 }
