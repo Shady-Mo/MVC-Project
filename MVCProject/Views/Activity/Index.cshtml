@@ -37,12 +37,12 @@
                         <i class="fas fa-search" style="color: #94a3b8; margin-right: 0.5rem; flex-shrink: 0;"></i>
                         <input type="text" form="filterForm" name="searchQuery" value="@Context.Request.Query["searchQuery"]" placeholder="Search" style="border: none; background: transparent; outline: none; width: 100%; color: #334155; font-size: 0.9rem;" />
                     </div>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                    @if (User.IsInRole("Seller"))
                     {
                         <a href="@Url.Action("Create", "Activity")" class="Add-Activity" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; flex-shrink: 0;"><i class="fas fa-plus"></i><span> Add Activity</span></a>
                     }
 
-                    @if (User.IsInRole("Admin") || User.IsInRole("Seller"))
+                    @if (User.IsInRole("Seller"))
                     {
                         <a href="@Url.Action("SellerActivities", "Activity")" class="Add-Activity" style="background:#14b8a6; color:#fff; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration:none; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; flex-shrink: 0;"><i class="fas fa-list"></i><span> My Activities</span></a>
                     }

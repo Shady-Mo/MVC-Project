@@ -10,7 +10,6 @@ using System.Security.Claims;
 
 namespace MVCProject.Controllers
 {
-    [Authorize]
     public class AccomodationController : Controller
     {
         private readonly UnitOfWork unitOfWork;
