@@ -7,11 +7,11 @@ using MVCProject.Models;
 namespace MVCProject.Services.BaseService {
     public class SeedService {
         public static async Task SeedDatabase(IServiceProvider serviceProvider,
-            int numberOfCustomers = 15,
-            int numberOfSellers = 20,
-            int numberOfAccommodations = 105,
-            int numberOfActivities = 110,
-            int numberOfFlights = 100) {
+                int numberOfCustomers = 15,
+                int numberOfSellers = 20,
+                int numberOfAccommodations = 105,
+                int numberOfActivities = 110,
+                int numberOfFlights = 100) {
             using (var scope = serviceProvider.CreateScope()) {
                 AppDbContext _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 RoleManager<IdentityRole> _roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -147,7 +147,7 @@ namespace MVCProject.Services.BaseService {
             }
 
             var random = new Random();
-            var countries = new[] { "France", "Egypt", "USA", "Italy", "Spain", "Germany", "UAE", "UK", "Turkey", "Greece", "Thailand", "Mexico", "Japan", "Australia", "Brazil" };
+            var countries = new[] { "France", "Egypt", "United States", "Italy", "Spain", "Germany", "United Arab Emirates", "United Kingdom", "Turkey", "Greece", "Thailand", "Mexico", "Japan", "Australia", "Brazil" };
             var hotelPrefixes = new[] { "Grand", "Royal", "Sunset", "Ocean", "Mountain", "City", "Plaza", "Garden", "Palace", "Beach" };
             var hotelSuffixes = new[] { "Hotel", "Resort", "Inn", "Suites", "Lodge", "Villa" };
 
@@ -202,7 +202,7 @@ namespace MVCProject.Services.BaseService {
                 "Wine Tasting", "Desert Safari", "Snorkeling", "Cultural Show", "Zip Lining",
                 "Historical Walk", "Art Workshop", "Wildlife Safari", "Helicopter Ride", "Food Tour"
             };
-            var countries = new[] { "France", "Egypt", "USA", "Italy", "Spain", "Germany", "UAE", "UK", "Turkey", "Greece", "Thailand", "Mexico", "Japan", "Australia", "Brazil" };
+            var countries = new[] { "France", "Egypt", "United States", "Italy", "Spain", "Germany", "United Arab Emirates", "United Kingdom", "Turkey", "Greece", "Thailand", "Mexico", "Japan", "Australia", "Brazil" };
 
             int added = 0;
             int attempts = 0;
@@ -250,7 +250,7 @@ namespace MVCProject.Services.BaseService {
 
             var random = new Random();
             var airlines = new[] { "EgyptAir", "Air France", "Emirates", "British Airways", "Lufthansa", "American Airlines", "Delta", "Qatar Airways", "Turkish Airlines", "Etihad", "Singapore Airlines", "Cathay Pacific" };
-            var airports = new[] { "CAI", "CDG", "JFK", "LHR", "DXB", "FRA", "IST", "AUH", "AMS", "MUC", "SIN", "HKG", "NRT", "SYD", "GRU" };
+            var airports = new[] { "France", "Egypt", "United States", "Italy", "Spain", "Germany", "United Arab Emirates", "United Kingdom", "Turkey", "Greece", "Thailand", "Mexico", "Japan", "Australia", "Brazil" };
 
             int added = 0;
             int attempts = 0;

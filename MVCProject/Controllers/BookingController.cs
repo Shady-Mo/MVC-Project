@@ -8,6 +8,8 @@ using MVCProject.ViewModels.AccomodationViewModels;
 using MVCProject.ViewModels.ActivityViewModels;
 using MVCProject.ViewModels.BookingViewModel;
 using MVCProject.ViewModels.FlightViewModels;
+using Stripe;
+using Stripe.Checkout;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -79,26 +81,20 @@ namespace MVCProject.Controllers
         [HttpPost]
         public IActionResult Book(AddBookingVM addBookingVM)
         {
-            if (ModelState.IsValid)
-            {
-                if(addBookingVM.BookingDate < DateTime.Now)
-                {
+            if (ModelState.IsValid) {
+                if (addBookingVM.BookingDate < DateTime.Now) {
                     ModelState.AddModelError("", "Booking date must be >= Now Date");
                     return View("Book", addBookingVM);
                 }
 
-                if (addBookingVM.Accomodations != null)
-                {
-                    foreach (var i in addBookingVM.Accomodations)
-                    {
-                        if (i.CheckInDate >= i.CheckOutDate)
-                        {
+                if (addBookingVM.Accomodations != null) {
+                    foreach (var i in addBookingVM.Accomodations) {
+                        if (i.CheckInDate >= i.CheckOutDate) {
                             ModelState.AddModelError("", "Check out date must be > Check in date");
                             return View("Book", addBookingVM);
                         }
 
-                        if (i.CheckInDate < addBookingVM.BookingDate)
-                        {
+                        if (i.CheckInDate < addBookingVM.BookingDate) {
                             ModelState.AddModelError("", "Check in date must be > Booking Date");
                             return View("Book", addBookingVM);
                         }
@@ -106,13 +102,10 @@ namespace MVCProject.Controllers
                 }
 
 
-                if (addBookingVM.ActivitiesId != null)
-                {
-                    foreach (var i in addBookingVM.ActivitiesId)
-                    {
+                if (addBookingVM.ActivitiesId != null) {
+                    foreach (var i in addBookingVM.ActivitiesId) {
                         var activity = unitOfWork.ActivityRepository.GetById(i);
-                        if (activity.Date < addBookingVM.BookingDate)
-                        {
+                        if (activity.Date < addBookingVM.BookingDate) {
                             ModelState.AddModelError("", "Activity date must be > Booking Date");
                             return View("Book", addBookingVM);
                         }
@@ -124,6 +117,8 @@ namespace MVCProject.Controllers
                 string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 booking.UserId = currentUserId;
+                booking.Status = Status.Pending;
+                booking.PaymentStatus = PaymentStatus.Pending;
                 booking.FlightId = addBookingVM.FlightId;
 
                 unitOfWork.BookingRepository.Add(booking);
@@ -131,59 +126,97 @@ namespace MVCProject.Controllers
 
                 decimal totalAmount = 0.0m;
 
-                if (addBookingVM.Accomodations != null)
-                {
-
-                    foreach (var i in addBookingVM.Accomodations)
-                    {
-
-                        var accomodation = unitOfWork.AccomodationRepositroy.GetById(i.Id);
-                        accomodation.AvailableRooms -= 1;
-
-                        unitOfWork.BookingAccomodationRepository.Add(new BookingAccomodation
-                        {
-                            BookingId = booking.Id,
-                            AccomodationId = i.Id,
-                            CheckInDate = i.CheckInDate,
-                            CheckOutDate = i.CheckOutDate
-                        });
-                        decimal days = (i.CheckOutDate.Date - i.CheckInDate.Date).Days;
-                        totalAmount += accomodation.PricePerNight * days;
-                    }
-
-                }
-
-
-                if (addBookingVM.ActivitiesId != null)
-                {
-                    foreach (var i in addBookingVM.ActivitiesId)
-                    {
-                        var activity = unitOfWork.ActivityRepository.GetById(i);
-                        activity.Capacity -= 1;
-
-                        unitOfWork.BookingActivityRepository.Add(new BookingActivity
-                        {
-                            BookingId = booking.Id,
-                            ActivityId = i
-                        });
-                        totalAmount += activity.Price;
-
-                    }
-                }
-
                 var flight = unitOfWork.FlightRepository.GetById(addBookingVM.FlightId);
-                flight.AvailableSeats -= 1;
+                // flight.AvailableSeats -= 1;
                 totalAmount += flight.Price;
 
 
                 booking.TotalAmount = totalAmount;
+
+                var options = new SessionCreateOptions {
+                    SuccessUrl = Url.Action("ConfirmPayment", "Payment", new { bookingId = booking.Id}, Request.Scheme),
+                    CancelUrl = Url.Action(nameof(MyBooking), "Booking", new { searchQuery = "", pageNumber = 1 }, Request.Scheme),
+                    LineItems = new List<SessionLineItemOptions>() {
+                        new SessionLineItemOptions {
+                            PriceData = new SessionLineItemPriceDataOptions {
+                                UnitAmount = (long)(flight.Price * 100),
+                                Currency = "usd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions {
+                                    Name = flight.Airline
+                                }
+                            },
+                            Quantity = 1
+                        }
+                    },
+                    Mode = "payment",
+                };
+
+                if (addBookingVM.Accomodations != null) {
+
+                    foreach (var i in addBookingVM.Accomodations) {
+
+                        var accomodation = unitOfWork.AccomodationRepositroy.GetById(i.Id);
+                        // accomodation.AvailableRooms -= 1;
+
+                        unitOfWork.BookingAccomodationRepository.Add(new BookingAccomodation {
+                            Booking = booking,
+                            AccomodationId = i.Id,
+                            CheckInDate = i.CheckInDate,
+                            CheckOutDate = i.CheckOutDate
+                        });
+                        var days = (i.CheckOutDate.Date - i.CheckInDate.Date).Days;
+                        totalAmount += accomodation.PricePerNight * days;
+
+                        var sessionLineItem = new SessionLineItemOptions {
+                            PriceData = new SessionLineItemPriceDataOptions {
+                                UnitAmount = (long)(accomodation.PricePerNight * 100),
+                                Currency = "usd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions {
+                                    Name = accomodation.Name
+                                }
+                            },
+                            Quantity = days
+                        };
+                        options.LineItems.Add(sessionLineItem);
+                    }
+
+                }
+
+
+                if (addBookingVM.ActivitiesId != null) {
+                    foreach (var i in addBookingVM.ActivitiesId) {
+                        var activity = unitOfWork.ActivityRepository.GetById(i);
+                        // activity.Capacity -= 1;
+
+                        unitOfWork.BookingActivityRepository.Add(new BookingActivity {
+                            Booking = booking,
+                            ActivityId = i
+                        });
+                        totalAmount += activity.Price;
+
+                        var sessionLineItem = new SessionLineItemOptions {
+                            PriceData = new SessionLineItemPriceDataOptions {
+                                UnitAmount = (long)(activity.Price * 100),
+                                Currency = "usd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions {
+                                    Name = activity.Name
+                                }
+                            },
+                            Quantity = 1
+                        };
+                        options.LineItems.Add(sessionLineItem);
+                    }
+                }
+
+                var service = new SessionService();
+                Session session = service.Create(options);
+                booking.SessionId = session.Id;
                 unitOfWork.Save();
 
-                return User.IsInRole("Admin") ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(MyBooking));
+                return Redirect(session.Url);
             }
             return View("Book", addBookingVM);
         }
-
 
         [HttpGet]
         public IActionResult Edit(int id)

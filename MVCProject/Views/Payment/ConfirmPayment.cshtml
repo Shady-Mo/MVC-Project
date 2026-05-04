@@ -1,0 +1,108 @@
+@model int
+@{
+    ViewData["Title"] = "Payment Confirmed";
+}
+
+<style>
+    .payment-success-card {
+        max-width: 600px;
+        margin: 50px auto;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(40, 181, 164, 0.15);
+        border: none;
+        overflow: hidden;
+    }
+
+    .payment-header {
+        background-color: #28b5a4;
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 64px;
+        margin-bottom: 15px;
+    }
+
+    .payment-body {
+        padding: 40px 30px;
+        text-align: center;
+        background-color: #fff;
+    }
+
+    .booking-ref {
+        display: inline-block;
+        background-color: #f0fbf9;
+        color: #28b5a4;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 20px 0;
+        border: 1px dashed #28b5a4;
+    }
+
+    .action-buttons {
+        margin-top: 30px;
+    }
+
+    .btn-custom {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-custom {
+        background-color: #28b5a4;
+        border-color: #28b5a4;
+        color: white;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #219688;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-custom {
+        color: #28b5a4;
+        border-color: #28b5a4;
+        background-color: transparent;
+    }
+
+    .btn-outline-custom:hover {
+        background-color: #f0fbf9;
+        color: #28b5a4;
+    }
+</style>
+
+<div class="container">
+    <div class="card payment-success-card">
+        <div class="payment-header">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2 class="fw-bold mb-0">Payment Successful!</h2>
+        </div>
+
+        <div class="payment-body">
+            <h4 class="text-dark mb-3">Thank you for your purchase</h4>
+            <p class="text-muted mb-4">Your trip has been successfully booked and confirmed.</p>
+
+            <div>
+                <span class="text-muted text-uppercase small fw-bold">Booking Reference ID</span><br/>
+                <div class="booking-ref">#TRV-@Model.ToString("D6")</div>
+            </div>
+
+            <div class="action-buttons d-flex justify-content-center gap-3">
+                <a asp-action="MyBooking" asp-controller="Booking" class="btn btn-custom btn-primary-custom">
+                    <i class="fas fa-suitcase-rolling me-2"></i> View My Trips
+                </a>
+                <a asp-action="Index" asp-controller="Home" class="btn btn-custom btn-outline-custom">
+                    <i class="fas fa-home me-2"></i> Return Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

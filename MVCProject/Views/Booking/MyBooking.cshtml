@@ -118,7 +118,15 @@
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary-custom fw-bold">
                                             Details
                                         </a>
-                                        
+                                        @if(item.Status == "Pending")
+                                        {
+                                            <a asp-action="Checkout" asp-controller="Payment" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary-custom fw-bold px-3">
+                                                Checkout
+                                            </a>
+                                            <a asp-action="Delete" asp-controller="Booking" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger fw-bold">
+                                                🗑️
+                                            </a>
+                                        }
                                     </div>
                                 </td>
                             </tr>

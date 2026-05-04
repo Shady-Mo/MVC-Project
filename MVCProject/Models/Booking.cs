@@ -11,6 +11,10 @@ namespace MVCProject.Models {
         public DateTime BookingDate { get; set; }
         public decimal TotalAmount { get; set; }
         public Status Status { get; set; }
+        public string? SessionId { get; set; }
+        public string? PaymentIntentId { get; set; }
+        public PaymentStatus? PaymentStatus { get; set; }
+        public DateTime? PaymentDate { get; set; }
 
         [ForeignKey(nameof(AppUser))]
         public string UserId { get; set; }
@@ -31,5 +35,11 @@ namespace MVCProject.Models {
         Pending,
         Confirmed,
         Cancelled,
+    }
+
+    public enum PaymentStatus {
+        Pending,
+        Approved,
+        Rejected
     }
 }
