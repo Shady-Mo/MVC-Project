@@ -31,7 +31,10 @@ namespace MVCProject.Controllers
         public async Task<IActionResult> Index(int page = 1, string searchName = "", string role = "", string status = "")
         {
             const int pageSize = 10;
-            var allUsers = unitOfWork.UserRepository.GetAll().ToList();
+            var allUsers = unitOfWork.UserRepository.GetAll()
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             // Get all user roles for dropdown
             var allRoles = await roleManager.Roles.Select(r => r.Name).ToListAsync();
@@ -73,24 +76,19 @@ namespace MVCProject.Controllers
                 }
             }
 
-            int totalUsers = allUsers.Count;
-            int activeUsers = allUsers.Count(u => !u.IsBanned);
-            int bannedUsers = allUsers.Count(u => u.IsBanned);
+            int totalUsers = unitOfWork.UserRepository.GetAll().Count();
+            int activeUsers = unitOfWork.UserRepository.GetAll().Count(u => !u.IsBanned);
+            int bannedUsers = unitOfWork.UserRepository.GetAll().Count(u => u.IsBanned);
             int totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
 
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
 
-            var paginatedUsers = allUsers
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var usersVM = paginatedUsers.Adapt<List<DisplayUserVM>>();
+            var usersVM = allUsers.Adapt<List<DisplayUserVM>>();
 
             foreach (var userVM in usersVM)
             {
-                var userEntity = paginatedUsers.First(u => u.Id == userVM.Id);
+                var userEntity = allUsers.First(u => u.Id == userVM.Id);
                 var roles = await userManager.GetRolesAsync(userEntity);
                 userVM.Role = roles.FirstOrDefault() ?? "No Role";
             }

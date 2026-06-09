@@ -27,7 +27,7 @@ namespace MVCProject.Controllers {
                 var result = await _accountService.LoginAsync(loginViewModel);
 
                 if (result.Succeeded) {
-                    if(User.IsInRole("Admin"))
+                    if (User.IsInRole("Admin"))
                         return RedirectToAction("Index", "AdminDashboard");
                     return RedirectToAction("Index", "Home");
                 }
